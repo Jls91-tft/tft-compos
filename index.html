@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TFT Compos Set 15</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold mb-4 text-center">Compos Meta TFT Set 15</h1>
+    <form id="compoForm" class="bg-white shadow-md rounded p-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label>Nombre</label><input type="text" id="nombre" required class="w-full border p-2 rounded"></div>
+        <div><label>Tier (S, A, B...)</label><input type="text" id="tier" class="w-full border p-2 rounded"></div>
+        <div><label>Sinergias (traits)</label><input type="text" id="traits" class="w-full border p-2 rounded"></div>
+        <div><label>Campeones</label><input type="text" id="campeones" class="w-full border p-2 rounded"></div>
+        <div><label>Aumentos recomendados</label><input type="text" id="aumentos" class="w-full border p-2 rounded"></div>
+        <div><label>Objetos clave</label><input id="objetos" class="w-full border p-2 rounded"></div>
+        <div><label>Posicionamiento</label><input id="posicionamiento" class="w-full border p-2 rounded"></div>
+        <div><label>Icono (URL)</label><input id="imagen" class="w-full border p-2 rounded"></div>
+        <div class="md:col-span-2"><label>Guía externa (opcional)</label><input id="guia" class="w-full border p-2 rounded" placeholder="https://..."></div>
+      </div>
+      <button type="submit" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Guardar Compo</button>
+    </form>
+
+    <div class="mb-4 flex gap-2">
+      <button onclick="exportarJSON()" class="bg-green-500 text-white px-4 py-2 rounded">Exportar JSON</button>
+      <input type="file" id="importFile" class="hidden" onchange="importarJSON(event)">
+      <button onclick="document.getElementById('importFile').click()" class="bg-yellow-500 text-white px-4 py-2 rounded">Importar JSON</button>
+      <input type="text" id="buscador" placeholder="Buscar nombre, trait o tier..." class="ml-auto w-1/3 border p-2 rounded">
+    </div>
+
+    <div id="compoList" class="space-y-4"></div>
+  </div>
+
+<script>
+let compos = JSON.parse(localStorage.getItem('compos')) || [];
+
+function guardarLocal(){ localStorage.setItem('compos', JSON.stringify(compos)); }
+
+function renderCompos(){
+  const filter = document.getElementById('buscador').value.toLowerCase();
+  const cont = document.getElementById('compoList'); cont.innerHTML='';
+  compos.filter(c => c.nombre.toLowerCase().includes(filter) || c.traits.toLowerCase().includes(filter) || (c.tier||'').toLowerCase().includes(filter))
+    .forEach((compo,i)=>{
+      const d=document.createElement('div');d.className="bg-white p-4 shadow rounded flex gap-4";
+      d.innerHTML=`
+        <div class="w-20 h-20 bg-gray-200 ${compo.imagen?'':'flex items-center justify-center'}">
+          ${compo.imagen?`<img src="${compo.imagen}" alt="" class="w-20 h-20 object-cover">`:'No img'}
+        </div>
+        <div class="flex-1">
+          <h2 class="text-xl font-bold">${compo.nombre} <span class="text-sm text-gray-600">[${compo.tier||'-'}]</span></h2>
+          <p><strong>Traits:</strong> ${compo.traits}</p>
+          <p><strong>Campeones:</strong> ${compo.campeones}</p>
+          <p><strong>Aumentos:</strong> ${compo.aumentos}</p>
+          <p><strong>Objetos:</strong> ${compo.objetos}</p>
+          ${compo.posicionamiento ? `<p><strong>Posicionamiento:</strong> ${compo.posicionamiento}</p>` : ''}
+          ${compo.guia ? `<a href="${compo.guia}" target="_blank" class="text-blue-600 underline">Ver guía</a>` : ''}
+        </div>
+        <button onclick="borrarCompo(${i})" class="bg-red-500 text-white px-3 py-1 h-fit mt-1 rounded">Eliminar</button>
+      `;
+      cont.appendChild(d);
+    });
+}
+
+function borrarCompo(i){ compos.splice(i,1); guardarLocal(); renderCompos(); }
+
+document.getElementById('compoForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  compos.push({
+    nombre: document.getElementById('nombre').value,
+    tier: document.getElementById('tier').value,
+    traits: document.getElementById('traits').value,
+    campeones: document.getElementById('campeones').value,
+    aumentos: document.getElementById('aumentos').value,
+    objetos: document.getElementById('objetos').value,
+    posicionamiento: document.getElementById('posicionamiento').value,
+    imagen: document.getElementById('imagen').value,
+    guia: document.getElementById('guia').value
+  });
+  guardarLocal(); renderCompos(); e.target.reset();
+});
+
+document.getElementById('buscador').addEventListener('input',renderCompos);
+
+function exportarJSON(){
+  const blob = new Blob([JSON.stringify(compos, null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='compos_set15.json';a.click();
+}
+function importarJSON(e){
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const arr=JSON.parse(ev.target.result);
+      if(Array.isArray(arr)){ compos = arr; guardarLocal(); renderCompos(); } else alert('JSON inválido.');
+    }catch{alert('Error lectura JSON.');}
+  };
+  r.readAsText(f);
+}
+
+renderCompos();
+</script>
+</body>
+</html>
