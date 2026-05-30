@@ -116,6 +116,21 @@ _STATS = {
             {"v": "14%", "k": "Top 1", "cls": "good", "bench": "Media: 12.5%"},
             {"v": "312", "k": "Partidas (Set)", "cls": "", "bench": "Últimos 30 días"},
         ],
+        "evol": {"label": "Colocación media por semana (menor es mejor)", "min": 1, "max": 8,
+                 "invert": True, "suffix": "", "points": [
+                     {"label": "S1", "value": 4.8}, {"label": "S2", "value": 4.6}, {"label": "S3", "value": 4.9},
+                     {"label": "S4", "value": 4.3}, {"label": "S5", "value": 4.4}, {"label": "S6", "value": 4.1},
+                     {"label": "S7", "value": 4.0}, {"label": "S8", "value": 4.2}]},
+        "dist": {"label": "Distribución de colocaciones", "bars": [
+            {"label": "1.º", "value": 44, "color": "gold"}, {"label": "2.º", "value": 38, "color": "good"},
+            {"label": "3.º", "value": 40, "color": "good"}, {"label": "4.º", "value": 59, "color": "good"},
+            {"label": "5.º", "value": 41, "color": "warn"}, {"label": "6.º", "value": 34, "color": "warn"},
+            {"label": "7.º", "value": 30, "color": "bad"}, {"label": "8.º", "value": 26, "color": "bad"}]},
+        "tableA": {"title": "Comps más jugadas", "cols": ["Comp", "Partidas", "Coloc.", "Top 4"], "rows": [
+            ["Flex Místicos", "86", "3.8", "64%"], ["Reroll Vanguardias", "64", "4.1", "58%"],
+            ["Fast 8 Francotiradores", "48", "4.6", "48%"], ["Hiperscaling Magos", "39", "4.0", "60%"]]},
+        "tableB": {"title": "Augments destacados", "cols": ["Augment", "Veces", "Coloc."], "rows": [
+            ["Corazón de Cristal", "41", "3.6"], ["Mente Táctica", "33", "3.9"], ["Botín de Guerra", "28", "4.2"]]},
         "insights": [
             {"cls": "bad", "ic": "📉", "t": "El 68% de tus Top 2 fallidos son por subir tarde a nivel 8",
              "d": "Si llegas a 8 antes de 4-2, tu colocación media es 3.1; si tarde, 4.7."},
@@ -130,6 +145,18 @@ _STATS = {
             {"v": "6.4", "k": "CS por minuto", "cls": "warn", "bench": "Objetivo: 6.5"},
             {"v": "204", "k": "Partidas", "cls": "", "bench": "Últimos 30 días"},
         ],
+        "evol": {"label": "Winrate por semana", "min": 30, "max": 70, "invert": False, "suffix": "%", "points": [
+            {"label": "S1", "value": 48}, {"label": "S2", "value": 50}, {"label": "S3", "value": 47},
+            {"label": "S4", "value": 53}, {"label": "S5", "value": 55}, {"label": "S6", "value": 52},
+            {"label": "S7", "value": 58}, {"label": "S8", "value": 54}]},
+        "dist": {"label": "Partidas por rol", "bars": [
+            {"label": "Mid", "value": 124, "color": "accent"}, {"label": "Jungla", "value": 38, "color": "good"},
+            {"label": "ADC", "value": 22, "color": "warn"}, {"label": "Top", "value": 12, "color": "bad"},
+            {"label": "Sup", "value": 8, "color": "muted"}]},
+        "tableA": {"title": "Arquetipos más jugados", "cols": ["Arquetipo", "Partidas", "Winrate"], "rows": [
+            ["Mago de control", "78", "57%"], ["Asesino", "31", "52%"], ["Tirador", "22", "50%"]]},
+        "tableB": {"title": "Rendimiento por rol", "cols": ["Rol", "Partidas", "Winrate"], "rows": [
+            ["Mid", "124", "57%"], ["Jungla", "38", "47%"], ["ADC", "22", "55%"]]},
         "insights": [
             {"cls": "bad", "ic": "📉", "t": "Tu winrate cae al 42% fuera de Mid",
              "d": "En Mid ganas el 57%. En autofill rindes peor."},

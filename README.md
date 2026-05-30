@@ -17,7 +17,7 @@ Plataforma con dos funciones:
 - [x] **Fase 0** — Andamiaje: estructura, Docker, API con datos de ejemplo (mock).
 - [x] **Fase 1** — Integración Riot API (partidas reales).
 - [x] **Fase 2** — Motor de coaching con Ollama + chat.
-- [ ] **Fase 3** — Estadísticas y meta agregadas.
+- [x] **Fase 3** — Estadísticas personales agregadas (meta global = dataset curado).
 - [ ] **Fase 4** — Conectar el frontend (reemplazar mocks por `fetch`).
 - [ ] **Fase 5** — Despliegue final.
 
