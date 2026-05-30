@@ -289,8 +289,39 @@
   }
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  /* ====== META · TIER LIST (Punto 4) ====== */
+  .meta-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+  .meta-chip{font-size:12.5px;font-weight:700;color:#C4B5FD;background:var(--accent-soft);border:1px solid rgba(139,92,246,.35);padding:6px 14px;border-radius:var(--r-pill);}
+  .meta-note{font-size:11px;color:var(--muted);opacity:.55;}
+  .meta-filters{display:flex;flex-wrap:wrap;gap:20px;margin-bottom:20px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);}
+  .filter-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .fg-label{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-right:2px;}
+  .filter-pill{border:1px solid var(--border);background:var(--bg);color:var(--muted);font:inherit;font-weight:600;font-size:13px;padding:6px 14px;border-radius:var(--r-pill);cursor:pointer;min-height:32px;transition:all .15s ease;}
+  .filter-pill:hover{color:var(--text);border-color:var(--accent);}
+  .filter-pill[aria-pressed="true"]{background:var(--accent-strong);color:#fff;border-color:transparent;}
+  .comp-list{display:flex;flex-direction:column;gap:12px;}
+  .comp-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:16px 18px;transition:border-color .15s ease,transform .15s ease;}
+  .comp-row:hover{border-color:var(--accent);transform:translateX(2px);}
+  .tier-badge{width:42px;height:42px;border-radius:var(--r-sm);display:grid;place-items:center;font-size:20px;font-weight:800;flex-shrink:0;}
+  .tier-S{color:#E3B341;background:rgba(227,179,65,.14);border:1px solid rgba(227,179,65,.4);}
+  .tier-A{color:#8B5CF6;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.4);}
+  .tier-B{color:#58A6FF;background:rgba(88,166,255,.12);border:1px solid rgba(88,166,255,.35);}
+  .tier-C{color:#8B949E;background:rgba(139,148,158,.10);border:1px solid var(--border);}
+  .comp-name{font-size:16px;font-weight:700;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .comp-style{font-size:12px;font-weight:500;color:var(--muted);}
+  .unit-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+  .unit-chip{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:6px;border:1px solid;}
+  .comp-metrics{display:flex;gap:16px;}
+  .metric{display:flex;flex-direction:column;align-items:center;min-width:46px;}
+  .metric .m-v{font-size:16px;font-weight:800;}
+  .metric .m-k{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
+
   /* ====== RESPONSIVE ====== */
   @media (max-width:880px){
+    .comp-row{grid-template-columns:auto 1fr;}
+    .comp-metrics{grid-column:1 / -1;justify-content:space-between;border-top:1px solid var(--border-soft);padding-top:12px;}
+    .comp-action{grid-column:1 / -1;}
+    .comp-action .btn{width:100%;}
     .topbar{gap:12px;padding:12px 16px;}
     nav.main-nav{order:3;width:100%;margin-left:0;overflow-x:auto;padding-bottom:2px;}
     .profile .who{display:none;}
@@ -410,25 +441,26 @@
       </div>
     </section>
 
-    <!-- ============ VISTA: META (placeholder — paso 4) ============ -->
+    <!-- ============ VISTA: META (Punto 4 — tier list de comps) ============ -->
     <section id="view-meta" class="view" aria-label="Meta del parche" hidden>
-      <p class="eyebrow">Sección complementaria</p>
+      <p class="eyebrow" id="meta-eyebrow">Sección complementaria · TFT</p>
       <h1 class="title">Meta del parche</h1>
-      <p class="subtitle">Qué está funcionando ahora mismo en la ladder, con marca propia y datos claros.</p>
-      <div class="empty">
-        <div class="em-icon" aria-hidden="true">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M7 21h10M12 17v4M5 4h14v5a7 7 0 01-14 0V4zM5 6H3v2a3 3 0 003 3M19 6h2v2a3 3 0 01-3 3" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <h2>Las tablas de meta llegarán en el paso 4</h2>
-        <p>Otro marcador para validar la navegación. Aquí irán, estilo referencia del sector pero con nuestra marca:</p>
-        <ul class="roadmap">
-          <li><span class="check">✓</span> Comps con mejor colocación media (TFT)</li>
-          <li><span class="check">✓</span> Ítems y augments top por winrate</li>
-          <li><span class="check">✓</span> Builds y arquetipos del parche (LoL)</li>
-          <li><span class="check">✓</span> Filtros por rango y región</li>
-        </ul>
-        <div><span class="step-tag">Plan ETAPA 1 · Punto 4</span></div>
+      <p class="subtitle">Las comps con mejor rendimiento ahora mismo, ordenadas por tier. Filtra y abre la guía completa de cada una.</p>
+
+      <div class="meta-head">
+        <span class="meta-chip" id="meta-patch">Parche 14.7</span>
+        <span class="meta-chip" id="meta-rank">Diamante +</span>
+        <span class="meta-note">// AQUÍ irán los datos reales de meta (API) en la Etapa 2</span>
       </div>
+
+      <!-- Filtros (estilo MetaTFT) -->
+      <div class="meta-filters">
+        <div class="filter-group" id="filter-tier" aria-label="Filtrar por tier"></div>
+        <div class="filter-group" id="filter-style" aria-label="Filtrar por estilo o rol"></div>
+      </div>
+
+      <!-- Lista de comps por tier -->
+      <div class="comp-list" id="comp-list"></div>
     </section>
 
   </main>
@@ -536,6 +568,7 @@ function setGame(game){
 
   renderMatches();
   renderStats(game);
+  renderMeta(game);
 }
 
 /* ---- Navegación entre secciones (SPA simple) ---- */
@@ -678,9 +711,98 @@ function renderStats(game){
   renderTable("tableB-host", s.tableB.cols, s.tableB.rows);
 }
 
+/* ============================================================
+   META (Punto 4) — tier list de comps · datos de ejemplo
+   // AQUÍ irán los datos reales de meta (API) en la Etapa 2.
+   Estilo MetaTFT (tiers + filtros). Arquetipos genéricos, sin Riot.
+   ============================================================ */
+const COST={1:"#9AA4B2",2:"#3FB950",3:"#58A6FF",4:"#B061FF",5:"#E3B341"};
+
+const META={
+  tft:{
+    patch:"Parche 14.7", rank:"Diamante +",
+    styles:["Todos","Standard","Reroll","Fast 8"],
+    metricCols:[{k:"avg",label:"Coloc."},{k:"top4",label:"Top 4"},{k:"win",label:"1.º"},{k:"pick",label:"Pick"}],
+    guide:true,
+    comps:[
+      {tier:"S",name:"Flex Místicos",style:"Standard",diff:"Media",avg:"3.9",top4:"64%",win:"16%",pick:"12.4%",units:[{n:"Místico",c:4},{n:"Hechicero",c:3},{n:"Curandera",c:2},{n:"Centinela",c:5}]},
+      {tier:"S",name:"Reroll Vanguardias",style:"Reroll",diff:"Fácil",avg:"4.0",top4:"62%",win:"14%",pick:"9.8%",units:[{n:"Vanguardia",c:1},{n:"Berserker",c:2},{n:"Guardián",c:2},{n:"Vidente",c:3}]},
+      {tier:"A",name:"Fast 8 Francotiradores",style:"Fast 8",diff:"Difícil",avg:"4.3",top4:"55%",win:"13%",pick:"8.1%",units:[{n:"Francotir.",c:4},{n:"Magista",c:5},{n:"Guardián",c:4},{n:"Vidente",c:3}]},
+      {tier:"A",name:"Hiperscaling Magos",style:"Standard",diff:"Media",avg:"4.2",top4:"57%",win:"15%",pick:"7.5%",units:[{n:"Mago",c:4},{n:"Hechicero",c:3},{n:"Invocador",c:5},{n:"Guardián",c:2}]},
+      {tier:"B",name:"Reroll Pistoleros",style:"Reroll",diff:"Media",avg:"4.6",top4:"49%",win:"10%",pick:"6.0%",units:[{n:"Pistolero",c:2},{n:"Berserker",c:1},{n:"Curandera",c:2},{n:"Invocador",c:3}]},
+      {tier:"B",name:"Tempo Guardianes",style:"Standard",diff:"Fácil",avg:"4.5",top4:"51%",win:"11%",pick:"5.2%",units:[{n:"Guardián",c:2},{n:"Vanguardia",c:1},{n:"Centinela",c:4},{n:"Místico",c:3}]},
+      {tier:"C",name:"Asesinos Burst",style:"Fast 8",diff:"Difícil",avg:"4.9",top4:"44%",win:"12%",pick:"3.1%",units:[{n:"Asesino",c:4},{n:"Invocador",c:5},{n:"Magista",c:3},{n:"Espectro",c:2}]}
+    ]
+  },
+  lol:{
+    patch:"Parche 14.7", rank:"Esmeralda +",
+    styles:["Todos","Top","Jungla","Mid","ADC","Support"],
+    metricCols:[{k:"win",label:"Winrate"},{k:"pick",label:"Pick"},{k:"ban",label:"Ban"},{k:"kda",label:"KDA"}],
+    guide:false,
+    comps:[
+      {tier:"S",name:"Mago de control",style:"Mid",diff:"Media",win:"53%",pick:"14%",ban:"8%",kda:"3.1",units:[]},
+      {tier:"S",name:"Luchador de línea",style:"Top",diff:"Media",win:"52%",pick:"11%",ban:"6%",kda:"2.4",units:[]},
+      {tier:"A",name:"Asesino de acceso",style:"Mid",diff:"Difícil",win:"51%",pick:"9%",ban:"12%",kda:"2.7",units:[]},
+      {tier:"A",name:"Tirador de hipercarry",style:"ADC",diff:"Media",win:"51%",pick:"16%",ban:"4%",kda:"2.9",units:[]},
+      {tier:"B",name:"Encantador de soporte",style:"Support",diff:"Fácil",win:"50%",pick:"12%",ban:"2%",kda:"3.4",units:[]},
+      {tier:"B",name:"Tanque de iniciación",style:"Top",diff:"Fácil",win:"49%",pick:"8%",ban:"3%",kda:"2.2",units:[]},
+      {tier:"C",name:"Bruiser de jungla",style:"Jungla",diff:"Difícil",win:"47%",pick:"6%",ban:"5%",kda:"2.0",units:[]}
+    ]
+  }
+};
+
+let metaTier="Todos", metaStyle="Todos";
+
+function setMetaFilter(type,val){
+  if(type==="tier") metaTier=val; else metaStyle=val;
+  renderMeta(currentGame);
+}
+
+function openGuide(name){
+  // // AQUÍ, en la Etapa 2, cada comp abrirá su guía propia generada/curada.
+  location.href="04-meta-guia-comp.html";
+}
+
+function renderMeta(game){
+  const M=META[game];
+  if(!M.styles.includes(metaStyle)) metaStyle="Todos";
+  document.getElementById("meta-eyebrow").textContent="Sección complementaria · "+(game==="tft"?"TFT":"LoL");
+  document.getElementById("meta-patch").textContent=M.patch;
+  document.getElementById("meta-rank").textContent=M.rank;
+
+  const tiers=["Todos","S","A","B","C"];
+  document.getElementById("filter-tier").innerHTML=
+    `<span class="fg-label">Tier</span>`+
+    tiers.map(t=>`<button class="filter-pill" aria-pressed="${metaTier===t}" onclick="setMetaFilter('tier','${t}')">${t}</button>`).join("");
+  document.getElementById("filter-style").innerHTML=
+    `<span class="fg-label">${game==="tft"?"Estilo":"Rol"}</span>`+
+    M.styles.map(s=>`<button class="filter-pill" aria-pressed="${metaStyle===s}" onclick="setMetaFilter('style','${s}')">${s}</button>`).join("");
+
+  const rows=M.comps.filter(c=>(metaTier==="Todos"||c.tier===metaTier)&&(metaStyle==="Todos"||c.style===metaStyle));
+  const list=document.getElementById("comp-list");
+  if(!rows.length){ list.innerHTML=`<div class="empty" style="padding:30px;margin:0;">Ninguna comp coincide con el filtro.</div>`; return; }
+
+  list.innerHTML=rows.map(c=>{
+    const chips=(c.units&&c.units.length)
+      ? `<div class="unit-chips">`+c.units.map(u=>`<span class="unit-chip" style="color:${COST[u.c]};border-color:${COST[u.c]}55;background:${COST[u.c]}1A">${u.n}</span>`).join("")+`</div>`
+      : "";
+    const metrics=M.metricCols.map(col=>`<div class="metric"><span class="m-v">${c[col.k]}</span><span class="m-k">${col.label}</span></div>`).join("");
+    const action=M.guide
+      ? `<div class="comp-action"><button class="btn btn-ghost btn-sm" onclick="openGuide('${c.name}')">Ver guía →</button></div>`
+      : `<div class="comp-action"></div>`;
+    return `<div class="comp-row">
+      <div class="tier-badge tier-${c.tier}">${c.tier}</div>
+      <div class="comp-info"><div class="comp-name">${c.name} <span class="comp-style">${c.style} · ${c.diff}</span></div>${chips}</div>
+      <div class="comp-metrics">${metrics}</div>
+      ${action}
+    </div>`;
+  }).join("");
+}
+
 /* ---- Inicialización ---- */
 renderMatches();
 renderStats(currentGame);
+renderMeta(currentGame);
 
 // Permite enlazar a una sección concreta desde otras pantallas (p. ej. 01-...html#stats)
 const _hash = location.hash.replace("#","");
