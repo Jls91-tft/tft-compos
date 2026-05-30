@@ -53,6 +53,7 @@ class ChatRequest(BaseModel):
     game: Game
     match_id: str
     question: str
+    riot_id: str = ""            # opcional: da contexto de partida al chat real
 
 
 class ChatResponse(BaseModel):
