@@ -289,6 +289,48 @@
   }
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  /* ====== Estado "Analizando" (overlay IA) ====== */
+  .analyzing{position:fixed;inset:0;z-index:90;display:none;place-items:center;background:rgba(13,17,23,.92);backdrop-filter:blur(6px);}
+  .analyzing.show{display:grid;}
+  .analyzing .box{text-align:center;max-width:400px;padding:32px;}
+  .ai-orb{width:64px;height:64px;margin:0 auto 22px;border-radius:50%;background:var(--accent-soft);border:2px solid var(--accent);display:grid;place-items:center;animation:pulse 1.2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--accent-glow);}50%{box-shadow:0 0 0 16px transparent;}}
+  .analyzing h3{font-size:18px;margin:0 0 20px;font-weight:800;}
+  .an-steps{list-style:none;margin:0;padding:0;text-align:left;display:inline-flex;flex-direction:column;gap:13px;}
+  .an-steps li{display:flex;align-items:center;gap:11px;font-size:14px;color:var(--muted);transition:color .3s ease;}
+  .an-steps li .mk{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:grid;place-items:center;font-size:11px;}
+  .an-steps li.done{color:var(--text);}
+  .an-steps li.done .mk{border-color:var(--good);background:var(--good);color:#0D1117;}
+  .an-steps li.active{color:var(--text);}
+  .an-steps li.active .mk{border-color:var(--accent);border-top-color:transparent;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ====== Plan de mejora (home coaching) ====== */
+  .plan{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:20px;margin:0 0 8px;}
+  .plan-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
+  .plan-head h2{font-size:17px;font-weight:700;margin:0;display:flex;align-items:center;gap:10px;}
+  .plan-head .tag{font-size:11.5px;color:#C4B5FD;background:var(--accent-soft);border:1px solid rgba(139,92,246,.3);padding:4px 11px;border-radius:var(--r-pill);font-weight:600;}
+  .focus-item{display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid var(--border-soft);}
+  .focus-txt{flex:1;min-width:0;}
+  .focus-txt .ft{font-size:14.5px;font-weight:600;margin-bottom:6px;}
+  .focus-txt .fb{font-size:12.5px;color:var(--muted);}
+  .prog{width:160px;flex-shrink:0;}
+  .prog .bar{height:8px;border-radius:99px;background:var(--bg);border:1px solid var(--border);overflow:hidden;}
+  .prog .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#22D3EE);}
+  .prog .lbl{font-size:11.5px;color:var(--muted);margin-top:6px;text-align:right;}
+  .prog .lbl b{color:var(--text);}
+
+  /* ====== Insights / fugas de LP (stats) ====== */
+  .insights-title{font-size:18px;font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:10px;}
+  .insights-title .tag{font-size:11px;font-weight:700;color:#C4B5FD;background:var(--accent-soft);border:1px solid rgba(139,92,246,.3);padding:3px 10px;border-radius:var(--r-pill);}
+  .insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:14px;margin:0 0 26px;}
+  .insight{display:flex;gap:13px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--r-md);padding:16px;}
+  .insight.warn{border-left-color:var(--warn);} .insight.bad{border-left-color:var(--bad);} .insight.good{border-left-color:var(--good);}
+  .insight .ic{flex-shrink:0;font-size:18px;}
+  .insight .it{font-size:13.5px;font-weight:700;margin-bottom:5px;line-height:1.4;}
+  .insight .id{font-size:12.5px;color:var(--muted);line-height:1.55;}
+  .insight .id b{color:var(--text);}
+
   /* ====== META · TIER LIST (Punto 4) ====== */
   .meta-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
   .meta-chip{font-size:12.5px;font-weight:700;color:#C4B5FD;background:var(--accent-soft);border:1px solid rgba(139,92,246,.35);padding:6px 14px;border-radius:var(--r-pill);}
@@ -400,6 +442,9 @@
         </button>
       </div>
 
+      <!-- Plan de mejora: seguimiento de focos del coach entre partidas -->
+      <div class="plan" id="plan"></div>
+
       <h2 class="section-title">
         Tus partidas recientes
         <span style="font-size:13px;font-weight:500;color:var(--muted);">— elige una para ver su coaching</span>
@@ -417,6 +462,10 @@
 
       <!-- // AQUÍ irán los datos reales de la API en la Etapa 2 (todo se renderiza desde JS) -->
       <div class="kpi-row" id="stats-kpis"></div>
+
+      <!-- Insights: la IA interpreta tus datos y detecta fugas de LP -->
+      <h2 class="insights-title">Dónde pierdes LP <span class="tag">IA</span></h2>
+      <div class="insights" id="insights"></div>
 
       <div class="stat-grid">
         <div class="panel">
@@ -469,6 +518,21 @@
     <div>Synapse — Coaching IA y estadísticas para auto-battler y MOBA · Prototipo de diseño (ETAPA 1)</div>
     <div class="legal">Marca propia genérica con fines de prototipado. No está afiliada, asociada ni respaldada por los titulares de los juegos. Datos mostrados de ejemplo.</div>
   </footer>
+
+  <!-- Estado "Analizando" — efecto IA al generar coaching -->
+  <div class="analyzing" id="analyzing" role="status" aria-live="polite">
+    <div class="box">
+      <div class="ai-orb" aria-hidden="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#8B5CF6"/></svg>
+      </div>
+      <h3>Analizando tu partida…</h3>
+      <ul class="an-steps" id="an-steps">
+        <li><span class="mk">1</span> Leyendo el desarrollo del combate</li>
+        <li><span class="mk">2</span> Detectando errores y aciertos</li>
+        <li><span class="mk">3</span> Redactando tu informe</li>
+      </ul>
+    </div>
+  </div>
 
   <div id="toast" role="status" aria-live="polite"></div>
 
@@ -567,7 +631,9 @@ function setGame(game){
   document.getElementById("last-match-label").textContent = MOCK[game].lastMatch;
 
   renderMatches();
+  renderPlan(game);
   renderStats(game);
+  renderInsights(game);
   renderMeta(game);
 }
 
@@ -587,7 +653,19 @@ function showView(view){
 /* ---- Navegación al informe de coaching (Punto 2) ---- */
 function openReport(game){
   // // AQUÍ, en la Etapa 2, se abrirá el informe de la PARTIDA concreta seleccionada.
-  location.href = (game === "lol") ? "03-coaching-informe-lol.html" : "02-coaching-informe-tft.html";
+  const dest = (game === "lol") ? "03-coaching-informe-lol.html" : "02-coaching-informe-tft.html";
+  const steps = Array.from(document.querySelectorAll("#an-steps li"));
+  document.getElementById("analyzing").classList.add("show");
+  steps.forEach(s => s.classList.remove("done","active"));
+  let i = 0;
+  steps[0].classList.add("active");
+  const timer = setInterval(() => {
+    steps[i].classList.remove("active");
+    steps[i].classList.add("done");
+    i++;
+    if (i < steps.length) steps[i].classList.add("active");
+    else { clearInterval(timer); location.href = dest; }
+  }, 700);
 }
 
 /* ============================================================
@@ -799,9 +877,55 @@ function renderMeta(game){
   }).join("");
 }
 
+/* ============================================================
+   PLAN DE MEJORA + INSIGHTS (mejoras diferenciales) — datos mock
+   // AQUÍ saldrán del histórico real + IA en la Etapa 2.
+   ============================================================ */
+const PLAN={
+  tft:{ updated:"Actualizado tras tu última partida", focuses:[
+    {t:"Subir de nivel a tiempo en la etapa 3", b:"El coach lo ha marcado en 3 de tus últimos informes.", done:4, total:6},
+    {t:"Proteger al portador del asesino", b:"Foco nuevo desde tu partida de hoy.", done:1, total:5}
+  ]},
+  lol:{ updated:"Actualizado tras tu última partida", focuses:[
+    {t:"Jugar alrededor de los timers de objetivos", b:"Foco recurrente en tus partidas de jungla.", done:3, total:6},
+    {t:"No entrar sin visión a la jungla rival", b:"Foco nuevo desde tu derrota de hoy.", done:2, total:5}
+  ]}
+};
+const INSIGHTS={
+  tft:[
+    {cls:"bad", ic:"📉", t:"El 68% de tus Top 2 fallidos son por subir tarde a nivel 8", d:"Si llegas a 8 antes de 4-2, tu colocación media es <b>3.1</b>. Si llegas tarde, sube a <b>4.7</b>."},
+    {cls:"warn", ic:"🎯", t:"Fast 8 es tu mayor fuga de LP", d:"Colocación media con Fast 8: <b>4.6</b> · con Standard: <b>3.8</b>. Júgalo solo cuando el tablero lo justifique."},
+    {cls:"good", ic:"✅", t:"Tu patrón más fiable: comps flexibles", d:"Con <b>Flex Místicos</b> consigues Top 4 el <b>64%</b> de las veces. Es tu mejor línea para escalar."}
+  ],
+  lol:[
+    {cls:"bad", ic:"📉", t:"Tu winrate cae al 42% fuera de Mid", d:"En Mid ganas el <b>57%</b>. En autofill rindes peor: prioriza tu rol cuando puedas."},
+    {cls:"warn", ic:"🐉", t:"Cedes el primer drake en el 60% de tus derrotas", d:"El control de objetivos tempranos es tu mayor diferencia entre ganar y perder."},
+    {cls:"good", ic:"✅", t:"Tu farm temprano es sólido", d:"CS/min a los 10 minutos por encima de la media de tu rango. Tu problema es de mapa, no mecánico."}
+  ]
+};
+
+function renderPlan(game){
+  const p=PLAN[game];
+  document.getElementById("plan").innerHTML=
+    `<div class="plan-head"><h2><span aria-hidden="true">🎯</span> Tu plan de mejora</h2><span class="tag">${p.updated}</span></div>`+
+    p.focuses.map(f=>{
+      const pct=Math.round(f.done/f.total*100);
+      return `<div class="focus-item"><div class="focus-txt"><div class="ft">${f.t}</div><div class="fb">${f.b}</div></div>`+
+        `<div class="prog"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><div class="lbl">Aplicado en <b>${f.done}/${f.total}</b> partidas</div></div></div>`;
+    }).join("");
+}
+
+function renderInsights(game){
+  document.getElementById("insights").innerHTML=INSIGHTS[game].map(i=>
+    `<div class="insight ${i.cls}"><span class="ic" aria-hidden="true">${i.ic}</span><div><div class="it">${i.t}</div><div class="id">${i.d}</div></div></div>`
+  ).join("");
+}
+
 /* ---- Inicialización ---- */
 renderMatches();
+renderPlan(currentGame);
 renderStats(currentGame);
+renderInsights(currentGame);
 renderMeta(currentGame);
 
 // Permite enlazar a una sección concreta desde otras pantallas (p. ej. 01-...html#stats)

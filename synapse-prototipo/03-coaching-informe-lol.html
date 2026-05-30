@@ -153,6 +153,23 @@
     nav.main-nav{order:3;width:100%;margin-left:0;overflow-x:auto;}
     .profile .who{display:none;}
   }
+
+  /* ===== Chat con el Coach IA ===== */
+  .chat-log{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;max-height:360px;overflow-y:auto;padding-right:4px;}
+  .msg{display:flex;}
+  .msg.user{justify-content:flex-end;}
+  .bubble{max-width:82%;padding:11px 15px;border-radius:14px;font-size:14px;line-height:1.55;}
+  .msg.coach .bubble{background:var(--bg);border:1px solid var(--border);border-top-left-radius:4px;}
+  .msg.user .bubble{background:var(--accent-strong);color:#fff;border-top-right-radius:4px;}
+  .msg.typing .bubble{color:var(--muted);font-style:italic;}
+  .chat-suggest{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .sug{font:inherit;font-size:12.5px;color:#C4B5FD;background:var(--accent-soft);border:1px solid rgba(139,92,246,.3);padding:7px 13px;border-radius:var(--r-pill);cursor:pointer;transition:all .15s ease;}
+  .sug:hover{border-color:var(--accent);background:rgba(139,92,246,.22);}
+  .chat-input{display:flex;gap:10px;}
+  .chat-input input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;color:var(--text);font:inherit;font-size:14px;}
+  .chat-input input:focus-visible{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent);}
+  .btn-send{flex-shrink:0;width:48px;border:0;border-radius:var(--r-sm);background:var(--accent-strong);color:#fff;font-size:16px;cursor:pointer;transition:filter .15s ease;}
+  .btn-send:hover{filter:brightness(1.12);}
 </style>
 </head>
 <body>
@@ -327,11 +344,55 @@
         </div>
       </div>
     </div>
+
+    <!-- ===== Chat con el Coach IA ===== -->
+    <section class="panel" id="chat" style="margin-top:22px;">
+      <h3><span class="ic ic-accent" aria-hidden="true">💬</span> Pregunta a tu coach</h3>
+      <div class="chat-log" id="chat-log">
+        <div class="msg coach"><div class="bubble">Partida difícil, pero de las que más enseñan. Pregúntame lo que quieras sobre ella:</div></div>
+      </div>
+      <div class="chat-suggest">
+        <button class="sug" type="button" onclick="ask('q1')">¿Por qué cedí tantos objetivos?</button>
+        <button class="sug" type="button" onclick="ask('q2')">¿Cómo evito morir en su jungla?</button>
+        <button class="sug" type="button" onclick="ask('q3')">¿Qué cambio me sube más rápido?</button>
+      </div>
+      <form class="chat-input" onsubmit="askFree(event)">
+        <input type="text" id="chat-text" placeholder="Escribe tu pregunta…" autocomplete="off" aria-label="Tu pregunta para el coach">
+        <button class="btn-send" type="submit" aria-label="Enviar pregunta">➤</button>
+      </form>
+    </section>
   </main>
 
   <footer>
     <div>Synapse — Informe de coaching (datos de ejemplo) · Prototipo ETAPA 1</div>
     <div class="legal">Análisis simulado con fines de prototipado. // En la Etapa 2 lo generará una IA local a partir de los datos reales de la partida. Marca propia no afiliada a los titulares de los juegos.</div>
   </footer>
+
+<script>
+/* ===== Chat con el Coach IA — respuestas de ejemplo =====
+   // AQUÍ, en la Etapa 2, responderá la IA local sobre tu partida REAL. */
+const QA={
+  q1:{q:"¿Por qué cedí tantos objetivos?",a:"Porque no jugaste alrededor de sus timers. A los 8' y 14' estabas en el campamento opuesto cuando salía el drake. Si llegas a la zona 30 s antes, esos dos drakes son tuyos."},
+  q2:{q:"¿Cómo evito morir en su jungla?",a:"4 de tus 7 muertes fueron en jungla enemiga sin visión y con las oleadas en contra. Regla simple: no entres sin un guardián de control puesto y sin ver al menos a 3 enemigos en el mapa."},
+  q3:{q:"¿Qué cambio me sube más rápido?",a:"Tu mecánica está bien: farmeas y ganas tus duelos. Lo que te frena es el mapa. Prioriza drake y heraldo sobre los campamentos — es el ajuste que más LP te va a dar."}
+};
+function addMsg(who,text){
+  const log=document.getElementById("chat-log");
+  const d=document.createElement("div"); d.className="msg "+who;
+  d.innerHTML='<div class="bubble"></div>'; d.querySelector(".bubble").textContent=text;
+  log.appendChild(d); log.scrollTop=log.scrollHeight; return d;
+}
+function coachReply(text){
+  const t=addMsg("coach typing","escribiendo…");
+  setTimeout(()=>{ t.classList.remove("typing"); t.querySelector(".bubble").textContent=text; document.getElementById("chat-log").scrollTop=9e9; },800);
+}
+function ask(id){ const it=QA[id]; addMsg("user",it.q); coachReply(it.a); }
+function askFree(e){
+  e.preventDefault();
+  const inp=document.getElementById("chat-text"); const v=inp.value.trim(); if(!v) return;
+  addMsg("user",v); inp.value="";
+  coachReply("Buena pregunta. En la Etapa 2 podré responderte con los datos reales de esta partida. De momento, prueba una de las preguntas sugeridas para ver cómo trabajará el coach. 🙂");
+}
+</script>
 </body>
 </html>

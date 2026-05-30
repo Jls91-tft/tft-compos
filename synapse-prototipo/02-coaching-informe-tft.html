@@ -178,6 +178,23 @@
     nav.main-nav{order:3;width:100%;margin-left:0;overflow-x:auto;}
     .profile .who{display:none;}
   }
+
+  /* ===== Chat con el Coach IA ===== */
+  .chat-log{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;max-height:360px;overflow-y:auto;padding-right:4px;}
+  .msg{display:flex;}
+  .msg.user{justify-content:flex-end;}
+  .bubble{max-width:82%;padding:11px 15px;border-radius:14px;font-size:14px;line-height:1.55;}
+  .msg.coach .bubble{background:var(--bg);border:1px solid var(--border);border-top-left-radius:4px;}
+  .msg.user .bubble{background:var(--accent-strong);color:#fff;border-top-right-radius:4px;}
+  .msg.typing .bubble{color:var(--muted);font-style:italic;}
+  .chat-suggest{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .sug{font:inherit;font-size:12.5px;color:#C4B5FD;background:var(--accent-soft);border:1px solid rgba(139,92,246,.3);padding:7px 13px;border-radius:var(--r-pill);cursor:pointer;transition:all .15s ease;}
+  .sug:hover{border-color:var(--accent);background:rgba(139,92,246,.22);}
+  .chat-input{display:flex;gap:10px;}
+  .chat-input input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;color:var(--text);font:inherit;font-size:14px;}
+  .chat-input input:focus-visible{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent);}
+  .btn-send{flex-shrink:0;width:48px;border:0;border-radius:var(--r-sm);background:var(--accent-strong);color:#fff;font-size:16px;cursor:pointer;transition:filter .15s ease;}
+  .btn-send:hover{filter:brightness(1.12);}
 </style>
 </head>
 <body>
@@ -378,6 +395,23 @@
         </div>
       </div>
     </section>
+
+    <!-- ===== Chat con el Coach IA ===== -->
+    <section class="panel" id="chat" style="margin-top:22px;">
+      <h3><span class="ic ic-accent" aria-hidden="true">💬</span> Pregunta a tu coach</h3>
+      <div class="chat-log" id="chat-log">
+        <div class="msg coach"><div class="bubble">¡Buen Top 4! Puedes preguntarme lo que quieras sobre esta partida. Aquí tienes algunas ideas para empezar:</div></div>
+      </div>
+      <div class="chat-suggest">
+        <button class="sug" type="button" onclick="ask('q1')">¿Por qué perdí la pelea del 4-1?</button>
+        <button class="sug" type="button" onclick="ask('q2')">¿Qué augment debí coger en 4-2?</button>
+        <button class="sug" type="button" onclick="ask('q3')">¿Cómo mejoro mi economía?</button>
+      </div>
+      <form class="chat-input" onsubmit="askFree(event)">
+        <input type="text" id="chat-text" placeholder="Escribe tu pregunta…" autocomplete="off" aria-label="Tu pregunta para el coach">
+        <button class="btn-send" type="submit" aria-label="Enviar pregunta">➤</button>
+      </form>
+    </section>
   </main>
 
   <footer>
@@ -486,6 +520,31 @@ function setPos(stateKey){
 
 /* Inicialización */
 renderBoard("actual");
+
+/* ===== Chat con el Coach IA — respuestas de ejemplo =====
+   // AQUÍ, en la Etapa 2, responderá la IA local sobre tu partida REAL. */
+const QA={
+  q1:{q:"¿Por qué perdí la pelea del 4-1?",a:"La perdiste por posicionamiento, no por poder de tablero. Tu Francotirador estaba en el borde, al alcance del Asesino enemigo, y cayó en los primeros 2 segundos. Con él en la esquina opuesta, ese combate era tuyo — míralo en el tablero de arriba 👆"},
+  q2:{q:"¿Qué augment debí coger en 4-2?",a:"En 4-2 ya liderabas en economía, así que el augment de oro rindió poco. Un augment de combate o de tu rasgo Místico te habría dado más tablero justo cuando peleabas por el Top 2."},
+  q3:{q:"¿Cómo mejoro mi economía?",a:"Tu problema no fue tener poco oro, sino acumular de más: te quedaste por encima de 50 sin subir a 8 a tiempo. La economía es un medio, no un fin — gástala para llegar antes a tus unidades clave."}
+};
+function addMsg(who,text){
+  const log=document.getElementById("chat-log");
+  const d=document.createElement("div"); d.className="msg "+who;
+  d.innerHTML='<div class="bubble"></div>'; d.querySelector(".bubble").textContent=text;
+  log.appendChild(d); log.scrollTop=log.scrollHeight; return d;
+}
+function coachReply(text){
+  const t=addMsg("coach typing","escribiendo…");
+  setTimeout(()=>{ t.classList.remove("typing"); t.querySelector(".bubble").textContent=text; document.getElementById("chat-log").scrollTop=9e9; },800);
+}
+function ask(id){ const it=QA[id]; addMsg("user",it.q); coachReply(it.a); }
+function askFree(e){
+  e.preventDefault();
+  const inp=document.getElementById("chat-text"); const v=inp.value.trim(); if(!v) return;
+  addMsg("user",v); inp.value="";
+  coachReply("Buena pregunta. En la Etapa 2 podré responderte con los datos reales de esta partida. De momento, prueba una de las preguntas sugeridas para ver cómo trabajará el coach. 🙂");
+}
 </script>
 </body>
 </html>
