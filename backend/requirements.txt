@@ -1,0 +1,7 @@
+# Synapse API — dependencias (ETAPA 2)
+# Se instalan en el OTRO PC con: pip install -r requirements.txt  (o vía Docker)
+fastapi==0.115.*
+uvicorn[standard]==0.32.*
+httpx==0.27.*
+pydantic==2.*
+pydantic-settings==2.*

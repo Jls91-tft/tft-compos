@@ -15,3 +15,14 @@ $RECYCLE.BIN/
 .claude/
 *.tmp
 *.log
+
+# Secretos / entorno (ETAPA 2) — NUNCA versionar el .env real (sí .env.example)
+.env
+
+# Python / backend
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.db
