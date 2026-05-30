@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Coaching IA para TFT y LoL</title>
+<!--
+  ============================================================
+  SYNAPSE · Prototipo ETAPA 1 — Pantalla 1: Estructura y navegación
+  Archivo HTML autónomo (sin build, sin dependencias).
+  Marca propia genérica. Sin logos, marcas ni personajes de Riot.
+  // AQUÍ irán los datos reales de la API/IA en la Etapa 2.
+  ============================================================
+-->
+<style>
+  /* ====== TOKENS DE DISEÑO ====== */
+  :root{
+    /* Base (tema oscuro) */
+    --bg:#0D1117;
+    --surface:#161B22;
+    --surface-2:#1C2230;
+    --border:#2A2F3A;
+    --border-soft:#222835;
+    --text:#E6EDF3;
+    --muted:#8B949E;
+
+    /* Acento: Violeta IA */
+    --accent:#8B5CF6;          /* texto, enlaces, iconos, bordes sobre fondo oscuro */
+    --accent-strong:#7C3AED;   /* fondo de botón primario (con texto blanco, AA) */
+    --accent-hover:#8B5CF6;
+    --accent-soft:rgba(139,92,246,.14);
+    --accent-glow:rgba(139,92,246,.35);
+
+    /* Semánticos */
+    --good:#3FB950;
+    --warn:#E3B341;
+    --bad:#F85149;
+    --gold:#E3B341;
+
+    /* Radios y sombras */
+    --r-lg:16px;
+    --r-md:12px;
+    --r-sm:9px;
+    --r-pill:999px;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+    --shadow-sm:0 4px 14px rgba(0,0,0,.28);
+
+    /* Tipografía */
+    --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:var(--font);
+    color:var(--text);
+    background:
+      radial-gradient(900px 500px at 80% -10%, rgba(139,92,246,.10), transparent 60%),
+      radial-gradient(700px 400px at 0% 0%, rgba(34,211,238,.05), transparent 55%),
+      var(--bg);
+    background-attachment:fixed;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);text-decoration:none;}
+  ::selection{background:var(--accent-glow);color:#fff;}
+
+  /* Foco visible (accesibilidad) */
+  :focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+    border-radius:4px;
+  }
+
+  /* Skip link */
+  .skip{
+    position:absolute;left:12px;top:-60px;
+    background:var(--accent-strong);color:#fff;
+    padding:10px 16px;border-radius:var(--r-sm);
+    z-index:100;transition:top .15s ease;font-weight:600;
+  }
+  .skip:focus{top:12px;}
+
+  /* ====== CABECERA / TOPBAR ====== */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    display:flex;align-items:center;gap:18px;
+    padding:12px 24px;
+    background:rgba(13,17,23,.82);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+
+  /* Marca */
+  .brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .brand .logo{filter:drop-shadow(0 0 8px var(--accent-glow));}
+  .brand .name{
+    font-size:20px;font-weight:800;letter-spacing:.3px;
+    background:linear-gradient(90deg,#fff,#C4B5FD);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  /* Selector de juego (segmented control) */
+  .game-switch{
+    display:inline-flex;background:var(--surface);
+    border:1px solid var(--border);border-radius:var(--r-pill);
+    padding:3px;gap:2px;flex-shrink:0;
+  }
+  .game-switch button{
+    border:0;background:transparent;color:var(--muted);
+    font:inherit;font-weight:600;font-size:13px;
+    padding:7px 16px;border-radius:var(--r-pill);cursor:pointer;
+    transition:all .15s ease;min-height:30px;
+  }
+  .game-switch button[aria-pressed="true"]{
+    background:var(--accent-strong);color:#fff;
+    box-shadow:0 2px 10px var(--accent-glow);
+  }
+  .game-switch button:hover[aria-pressed="false"]{color:var(--text);}
+
+  /* Navegación principal */
+  nav.main-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+  .navlink{
+    display:inline-flex;align-items:center;gap:8px;
+    border:0;background:transparent;color:var(--muted);
+    font:inherit;font-weight:600;font-size:14.5px;
+    padding:9px 14px;border-radius:var(--r-sm);cursor:pointer;
+    transition:all .15s ease;min-height:38px;position:relative;
+  }
+  .navlink:hover{color:var(--text);background:var(--surface);}
+  .navlink[aria-current="page"]{color:var(--text);background:var(--surface);}
+  .navlink[aria-current="page"]::after{
+    content:"";position:absolute;left:14px;right:14px;bottom:2px;height:2px;
+    background:var(--accent);border-radius:2px;
+  }
+  /* Coaching destacado: protagonista */
+  .navlink.is-primary{color:var(--text);}
+  .navlink.is-primary .pill-ia{
+    font-size:10px;font-weight:700;letter-spacing:.5px;
+    color:#C4B5FD;background:var(--accent-soft);
+    border:1px solid rgba(139,92,246,.35);
+    padding:2px 7px;border-radius:var(--r-pill);
+  }
+  .navlink.is-primary[aria-current="page"]{
+    background:var(--accent-soft);
+    box-shadow:inset 0 0 0 1px rgba(139,92,246,.35);
+  }
+
+  /* Perfil */
+  .profile{
+    display:flex;align-items:center;gap:10px;flex-shrink:0;
+    border:1px solid var(--border);background:var(--surface);
+    border-radius:var(--r-pill);padding:5px 12px 5px 5px;cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .profile:hover{border-color:var(--accent);}
+  .avatar{
+    width:30px;height:30px;border-radius:50%;flex-shrink:0;
+    display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff;
+    background:linear-gradient(135deg,var(--accent),#22D3EE);
+  }
+  .profile .who{display:flex;flex-direction:column;line-height:1.15;}
+  .profile .who b{font-size:13px;}
+  .profile .who span{font-size:11px;color:var(--muted);}
+
+  /* ====== LAYOUT PRINCIPAL ====== */
+  main{max-width:1180px;margin:0 auto;padding:34px 24px 80px;}
+  .view[hidden]{display:none;}
+
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--accent);margin:0 0 10px;
+  }
+  h1.title{font-size:30px;font-weight:800;margin:0 0 6px;letter-spacing:-.3px;}
+  .subtitle{color:var(--muted);font-size:15.5px;margin:0 0 28px;max-width:62ch;}
+  h2.section-title{font-size:18px;font-weight:700;margin:34px 0 16px;display:flex;align-items:center;gap:10px;}
+
+  /* ====== HERO CTA (Coaching protagonista) ====== */
+  .hero{
+    position:relative;overflow:hidden;
+    border:1px solid rgba(139,92,246,.35);
+    background:
+      radial-gradient(600px 200px at 100% 0%, rgba(139,92,246,.18), transparent 70%),
+      linear-gradient(180deg,var(--surface-2),var(--surface));
+    border-radius:var(--r-lg);padding:30px;
+    display:flex;align-items:center;gap:26px;flex-wrap:wrap;
+    box-shadow:var(--shadow);
+  }
+  .hero .hero-icon{
+    width:62px;height:62px;border-radius:var(--r-md);flex-shrink:0;
+    display:grid;place-items:center;
+    background:var(--accent-soft);border:1px solid rgba(139,92,246,.4);
+  }
+  .hero .hero-text{flex:1;min-width:240px;}
+  .hero h2{font-size:22px;margin:0 0 6px;font-weight:800;}
+  .hero p{margin:0;color:var(--muted);font-size:14.5px;max-width:54ch;}
+  .hero .last-match{
+    margin-top:14px;display:inline-flex;align-items:center;gap:10px;
+    font-size:13px;color:var(--text);
+    background:var(--bg);border:1px solid var(--border);
+    padding:8px 14px;border-radius:var(--r-pill);
+  }
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good);}
+
+  /* Botones */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    font:inherit;font-weight:700;font-size:15px;cursor:pointer;
+    border-radius:var(--r-sm);padding:13px 22px;min-height:46px;
+    border:1px solid transparent;transition:transform .12s ease,filter .15s ease,background .15s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--accent-strong);color:#fff;box-shadow:0 6px 20px var(--accent-glow);}
+  .btn-primary:hover{filter:brightness(1.12);}
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--border);}
+  .btn-ghost:hover{border-color:var(--accent);color:#fff;}
+  .btn-sm{padding:9px 15px;min-height:38px;font-size:13.5px;}
+
+  /* ====== TARJETAS DE PARTIDAS ====== */
+  .match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;}
+  .match-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--r-md);padding:18px;
+    display:flex;flex-direction:column;gap:14px;
+    transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+  }
+  .match-card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:var(--shadow-sm);}
+  .match-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .result-pill{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:13px;font-weight:700;padding:5px 12px;border-radius:var(--r-pill);
+    border:1px solid transparent;
+  }
+  .result-pill .ico{font-size:11px;}
+  .res-win{color:var(--good);background:rgba(63,185,80,.12);border-color:rgba(63,185,80,.3);}
+  .res-gold{color:var(--gold);background:rgba(227,179,65,.12);border-color:rgba(227,179,65,.35);}
+  .res-mid{color:var(--warn);background:rgba(227,179,65,.10);border-color:rgba(227,179,65,.25);}
+  .res-loss{color:var(--bad);background:rgba(248,81,73,.12);border-color:rgba(248,81,73,.3);}
+  .match-time{font-size:12px;color:var(--muted);}
+  .match-body h3{margin:0 0 4px;font-size:16px;font-weight:700;}
+  .match-meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);}
+  .match-meta b{color:var(--text);font-weight:600;}
+  .match-card .btn{margin-top:auto;}
+
+  /* ====== ESTADO VACÍO / PLACEHOLDER (Stats y Meta) ====== */
+  .empty{
+    text-align:center;max-width:620px;margin:18px auto;
+    border:1px dashed var(--border);border-radius:var(--r-lg);
+    padding:50px 36px;background:var(--surface);
+  }
+  .empty .em-icon{
+    width:64px;height:64px;border-radius:var(--r-md);margin:0 auto 18px;
+    display:grid;place-items:center;background:var(--accent-soft);
+    border:1px solid rgba(139,92,246,.35);
+  }
+  .empty h2{margin:0 0 8px;font-size:22px;}
+  .empty p{color:var(--muted);margin:0 auto 22px;max-width:48ch;}
+  .empty .roadmap{text-align:left;display:inline-flex;flex-direction:column;gap:10px;margin:0 auto;}
+  .empty .roadmap li{list-style:none;display:flex;align-items:center;gap:11px;color:var(--text);font-size:14px;}
+  .empty .roadmap .check{
+    width:22px;height:22px;border-radius:50%;flex-shrink:0;
+    display:grid;place-items:center;background:var(--accent-soft);
+    color:var(--accent);font-size:12px;border:1px solid rgba(139,92,246,.4);
+  }
+  .step-tag{
+    display:inline-block;margin-top:22px;font-size:12px;color:var(--muted);
+    background:var(--bg);border:1px solid var(--border);
+    padding:6px 14px;border-radius:var(--r-pill);
+  }
+
+  /* ====== FOOTER ====== */
+  footer{
+    border-top:1px solid var(--border);margin-top:40px;
+    padding:24px;text-align:center;color:var(--muted);font-size:12.5px;
+  }
+  footer .legal{margin-top:6px;opacity:.8;max-width:70ch;margin-left:auto;margin-right:auto;}
+
+  /* ====== TOAST ====== */
+  #toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
+    background:var(--surface-2);border:1px solid var(--accent);
+    color:var(--text);padding:14px 20px;border-radius:var(--r-md);
+    box-shadow:var(--shadow);font-size:14px;font-weight:500;
+    opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;
+    z-index:80;max-width:90vw;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ====== RESPONSIVE ====== */
+  @media (max-width:880px){
+    .topbar{gap:12px;padding:12px 16px;}
+    nav.main-nav{order:3;width:100%;margin-left:0;overflow-x:auto;padding-bottom:2px;}
+    .profile .who{display:none;}
+    main{padding:26px 16px 70px;}
+    h1.title{font-size:25px;}
+    .hero{padding:22px;}
+  }
+</style>
+</head>
+<body>
+  <a href="#main" class="skip">Saltar al contenido</a>
+
+  <!-- ============ CABECERA GLOBAL ============ -->
+  <header class="topbar">
+    <!-- Marca genérica (sin assets de Riot) -->
+    <div class="brand" aria-label="Synapse, inicio">
+      <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/>
+        <circle cx="23" cy="9" r="2.4" fill="#22D3EE"/>
+        <circle cx="22" cy="23" r="3" fill="#C4B5FD"/>
+        <circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
+        <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
+      </svg>
+      <span class="name">Synapse</span>
+    </div>
+
+    <!-- Selector global de juego (decisión transversal: reconfigura todas las secciones) -->
+    <div class="game-switch" role="group" aria-label="Seleccionar juego">
+      <button id="btn-tft" aria-pressed="true" onclick="setGame('tft')">TFT</button>
+      <button id="btn-lol" aria-pressed="false" onclick="setGame('lol')">LoL</button>
+    </div>
+
+    <!-- Navegación principal: Coaching va primero y resaltado -->
+    <nav class="main-nav" aria-label="Secciones">
+      <button class="navlink is-primary" data-view="coaching" aria-current="page" onclick="showView('coaching')">
+        Coaching <span class="pill-ia">IA</span>
+      </button>
+      <button class="navlink" data-view="stats" onclick="showView('stats')">Estadísticas</button>
+      <button class="navlink" data-view="meta" onclick="showView('meta')">Meta</button>
+    </nav>
+
+    <!-- Perfil (mock) -->
+    <button class="profile" aria-label="Perfil del jugador">
+      <span class="avatar" id="avatar">N</span>
+      <span class="who">
+        <b id="profile-name">NovaStrike#EUW</b>
+        <span id="profile-rank">Diamante II</span>
+      </span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="#8B949E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </header>
+
+  <main id="main">
+
+    <!-- ============ VISTA: COACHING (HOME / PROTAGONISTA) ============ -->
+    <section id="view-coaching" class="view" aria-label="Coaching">
+      <p class="eyebrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#8B5CF6"/></svg>
+        Coaching IA · lo que nos diferencia
+      </p>
+      <h1 class="title">Mejora partida a partida</h1>
+      <p class="subtitle">Analizamos cada partida terminada y te decimos qué hiciste bien, qué falló y, sobre todo, qué hacer la próxima vez. Sin teoría vacía: consejos accionables.</p>
+
+      <!-- HERO: CTA protagonista -->
+      <div class="hero">
+        <div class="hero-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#8B5CF6" stroke-width="2"/><circle cx="12" cy="12" r="4.5" stroke="#C4B5FD" stroke-width="2"/><circle cx="12" cy="12" r="1.4" fill="#8B5CF6"/></svg>
+        </div>
+        <div class="hero-text">
+          <h2>Analiza tu última partida</h2>
+          <p>Genera un informe de coaching con tus métricas clave y un análisis en lenguaje natural, personalizado para tu nivel.</p>
+          <div class="last-match">
+            <span class="dot"></span>
+            <span id="last-match-label">Última partida detectada · Clasificatoria · hace 12 min</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="openReport(currentGame)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#fff"/></svg>
+          Generar coaching
+        </button>
+      </div>
+
+      <!-- Lista de partidas recientes (mock) -->
+      <h2 class="section-title">
+        Tus partidas recientes
+        <span style="font-size:13px;font-weight:500;color:var(--muted);">— elige una para ver su coaching</span>
+      </h2>
+      <div class="match-grid" id="match-grid">
+        <!-- // AQUÍ irán los datos reales de la API/IA en la Etapa 2 (se renderizan desde JS) -->
+      </div>
+    </section>
+
+    <!-- ============ VISTA: ESTADÍSTICAS (placeholder — paso 3) ============ -->
+    <section id="view-stats" class="view" aria-label="Estadísticas personales" hidden>
+      <p class="eyebrow">Sección complementaria</p>
+      <h1 class="title">Estadísticas personales</h1>
+      <p class="subtitle">Tu rendimiento de un vistazo: tendencias, comps favoritas y dónde ganas (o pierdes) puntos.</p>
+      <div class="empty">
+        <div class="em-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M4 20V10M10 20V4M16 20v-7M22 20V8" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </div>
+        <h2>El dashboard llegará en el paso 3</h2>
+        <p>Mantengo esta sección como marcador para que veas la navegación. Cuando demos el OK al diseño general, construimos aquí:</p>
+        <ul class="roadmap">
+          <li><span class="check">✓</span> Winrate y colocación media (TFT) · ratio victorias (LoL)</li>
+          <li><span class="check">✓</span> Comps y unidades más jugadas</li>
+          <li><span class="check">✓</span> Augments e ítems con mejor rendimiento</li>
+          <li><span class="check">✓</span> Evolución temporal de tu rango</li>
+        </ul>
+        <div><span class="step-tag">Plan ETAPA 1 · Punto 3</span></div>
+      </div>
+    </section>
+
+    <!-- ============ VISTA: META (placeholder — paso 4) ============ -->
+    <section id="view-meta" class="view" aria-label="Meta del parche" hidden>
+      <p class="eyebrow">Sección complementaria</p>
+      <h1 class="title">Meta del parche</h1>
+      <p class="subtitle">Qué está funcionando ahora mismo en la ladder, con marca propia y datos claros.</p>
+      <div class="empty">
+        <div class="em-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M7 21h10M12 17v4M5 4h14v5a7 7 0 01-14 0V4zM5 6H3v2a3 3 0 003 3M19 6h2v2a3 3 0 01-3 3" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2>Las tablas de meta llegarán en el paso 4</h2>
+        <p>Otro marcador para validar la navegación. Aquí irán, estilo referencia del sector pero con nuestra marca:</p>
+        <ul class="roadmap">
+          <li><span class="check">✓</span> Comps con mejor colocación media (TFT)</li>
+          <li><span class="check">✓</span> Ítems y augments top por winrate</li>
+          <li><span class="check">✓</span> Builds y arquetipos del parche (LoL)</li>
+          <li><span class="check">✓</span> Filtros por rango y región</li>
+        </ul>
+        <div><span class="step-tag">Plan ETAPA 1 · Punto 4</span></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div>Synapse — Coaching IA y estadísticas para auto-battler y MOBA · Prototipo de diseño (ETAPA 1)</div>
+    <div class="legal">Marca propia genérica con fines de prototipado. No está afiliada, asociada ni respaldada por los titulares de los juegos. Datos mostrados de ejemplo.</div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   DATOS DE EJEMPLO (MOCK)
+   // AQUÍ irán los datos reales de la API/IA en la Etapa 2.
+   Arquetipos genéricos inventados — sin nombres de Riot.
+   ============================================================ */
+const MOCK = {
+  tft: {
+    profile:{ name:"NovaStrike#EUW", rank:"Diamante II", initial:"N" },
+    lastMatch:"Última partida detectada · Clasificatoria · hace 12 min",
+    matches:[
+      { res:1, comp:"Reroll Vanguardias",      lvl:8, dur:"38:12", note:"Eco fuerte" },
+      { res:4, comp:"Flex Místicos",           lvl:9, dur:"32:45", note:"Top 4 cómodo" },
+      { res:8, comp:"Fast 8 Francotiradores",  lvl:8, dur:"24:10", note:"Sin frontline" },
+      { res:2, comp:"Hiperscaling Magos",      lvl:9, dur:"36:00", note:"Casi 1º" },
+      { res:5, comp:"Reroll Pistoleros",       lvl:7, dur:"30:18", note:"Ítems flojos" },
+      { res:3, comp:"Tempo Guardianes",        lvl:8, dur:"33:40", note:"Buen tempo" }
+    ]
+  },
+  lol: {
+    profile:{ name:"NovaStrike#EUW", rank:"Platino I", initial:"N" },
+    lastMatch:"Última partida detectada · Grieta clasificatoria · hace 27 min",
+    matches:[
+      { res:"win",  role:"Mid",     arch:"Mago de control", kda:"8/2/11",  cs:224, dur:"31:05" },
+      { res:"loss", role:"Jungla",  arch:"Luchador",        kda:"4/7/6",   cs:168, dur:"28:40" },
+      { res:"win",  role:"ADC",     arch:"Tirador",         kda:"12/4/8",  cs:256, dur:"34:20" },
+      { res:"loss", role:"Top",     arch:"Tanque",          kda:"2/5/9",   cs:198, dur:"29:55" },
+      { res:"win",  role:"Support", arch:"Encantador",      kda:"1/3/24",  cs:42,  dur:"35:10" },
+      { res:"loss", role:"Mid",     arch:"Asesino",         kda:"6/8/4",   cs:201, dur:"26:30" }
+    ]
+  }
+};
+
+let currentGame = "tft";
+
+/* ---- Render de tarjetas de partidas ---- */
+function renderMatches(){
+  const grid = document.getElementById("match-grid");
+  const data = MOCK[currentGame];
+  grid.innerHTML = "";
+
+  data.matches.forEach((m, i) => {
+    const card = document.createElement("div");
+    card.className = "match-card";
+
+    let pillClass, pillIco, pillText, bodyHTML;
+
+    if (currentGame === "tft"){
+      // Color semántico según colocación: 1º dorado, 2-4 verde, 5-8 ámbar/rojo
+      if (m.res === 1){ pillClass="res-gold"; pillIco="★"; pillText="1.º puesto"; }
+      else if (m.res <= 4){ pillClass="res-win"; pillIco="▲"; pillText=m.res+".º puesto"; }
+      else { pillClass = m.res<=6 ? "res-mid":"res-loss"; pillIco="▼"; pillText=m.res+".º puesto"; }
+      bodyHTML = `
+        <h3>${m.comp}</h3>
+        <div class="match-meta">
+          <span>Nivel <b>${m.lvl}</b></span>
+          <span>Duración <b>${m.dur}</b></span>
+          <span>${m.note}</span>
+        </div>`;
+    } else {
+      // LoL: victoria/derrota
+      if (m.res === "win"){ pillClass="res-win"; pillIco="✔"; pillText="Victoria"; }
+      else { pillClass="res-loss"; pillIco="✕"; pillText="Derrota"; }
+      bodyHTML = `
+        <h3>${m.role} · ${m.arch}</h3>
+        <div class="match-meta">
+          <span>KDA <b>${m.kda}</b></span>
+          <span>CS <b>${m.cs}</b></span>
+          <span>Duración <b>${m.dur}</b></span>
+        </div>`;
+    }
+
+    card.innerHTML = `
+      <div class="match-top">
+        <span class="result-pill ${pillClass}"><span class="ico" aria-hidden="true">${pillIco}</span>${pillText}</span>
+        <span class="match-time">#${i+1}</span>
+      </div>
+      <div class="match-body">${bodyHTML}</div>
+      <button class="btn btn-ghost btn-sm" onclick="openReport(currentGame)">Ver coaching →</button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+/* ---- Selector de juego ---- */
+function setGame(game){
+  currentGame = game;
+  document.getElementById("btn-tft").setAttribute("aria-pressed", game==="tft");
+  document.getElementById("btn-lol").setAttribute("aria-pressed", game==="lol");
+
+  // Actualiza perfil y etiqueta de última partida según el juego
+  const p = MOCK[game].profile;
+  document.getElementById("profile-name").textContent = p.name;
+  document.getElementById("profile-rank").textContent = p.rank;
+  document.getElementById("avatar").textContent = p.initial;
+  document.getElementById("last-match-label").textContent = MOCK[game].lastMatch;
+
+  renderMatches();
+}
+
+/* ---- Navegación entre secciones (SPA simple) ---- */
+function showView(view){
+  ["coaching","stats","meta"].forEach(v=>{
+    document.getElementById("view-"+v).hidden = (v !== view);
+  });
+  document.querySelectorAll(".navlink").forEach(btn=>{
+    const active = btn.dataset.view === view;
+    if (active) btn.setAttribute("aria-current","page");
+    else btn.removeAttribute("aria-current");
+  });
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* ---- Navegación al informe de coaching (Punto 2) ---- */
+function openReport(game){
+  // // AQUÍ, en la Etapa 2, se abrirá el informe de la PARTIDA concreta seleccionada.
+  location.href = (game === "lol") ? "03-coaching-informe-lol.html" : "02-coaching-informe-tft.html";
+}
+
+/* ---- Inicialización ---- */
+renderMatches();
+
+// Permite enlazar a una sección concreta desde otras pantallas (p. ej. 01-...html#stats)
+const _hash = location.hash.replace("#","");
+if (["coaching","stats","meta"].includes(_hash)) showView(_hash);
+</script>
+</body>
+</html>

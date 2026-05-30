@@ -1,0 +1,17 @@
+# Sistema operativo
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Editores / IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Herramientas de agente / temporales
+.claude/
+*.tmp
+*.log

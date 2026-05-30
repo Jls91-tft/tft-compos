@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Informe de coaching · TFT</title>
+<!--
+  ============================================================
+  SYNAPSE · Prototipo ETAPA 1 — Pantalla 2: Informe de coaching (TFT)
+  Archivo HTML autónomo. Marca propia genérica, sin assets de Riot.
+  Arquetipos de comp inventados (no son nombres reales del juego).
+  // AQUÍ irá el informe REAL generado por la IA en la Etapa 2.
+  ============================================================
+-->
+<style>
+  :root{
+    --bg:#0D1117;--surface:#161B22;--surface-2:#1C2230;--border:#2A2F3A;
+    --text:#E6EDF3;--muted:#8B949E;
+    --accent:#8B5CF6;--accent-strong:#7C3AED;--accent-soft:rgba(139,92,246,.14);--accent-glow:rgba(139,92,246,.35);
+    --good:#3FB950;--warn:#E3B341;--bad:#F85149;--gold:#E3B341;
+    --r-lg:16px;--r-md:12px;--r-sm:9px;--r-pill:999px;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+    --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(900px 500px at 80% -10%,rgba(139,92,246,.10),transparent 60%),var(--bg);
+    background-attachment:fixed;
+  }
+  a{color:var(--accent);text-decoration:none;}
+  ::selection{background:var(--accent-glow);color:#fff;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+  .skip{position:absolute;left:12px;top:-60px;background:var(--accent-strong);color:#fff;padding:10px 16px;border-radius:var(--r-sm);z-index:100;transition:top .15s ease;font-weight:600;}
+  .skip:focus{top:12px;}
+
+  /* Topbar */
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;padding:12px 24px;background:rgba(13,17,23,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .brand .logo{filter:drop-shadow(0 0 8px var(--accent-glow));}
+  .brand .name{font-size:20px;font-weight:800;letter-spacing:.3px;background:linear-gradient(90deg,#fff,#C4B5FD);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .game-switch{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;gap:2px;flex-shrink:0;}
+  .game-switch button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;font-size:13px;padding:7px 16px;border-radius:var(--r-pill);cursor:pointer;transition:all .15s ease;min-height:30px;}
+  .game-switch button[aria-pressed="true"]{background:var(--accent-strong);color:#fff;box-shadow:0 2px 10px var(--accent-glow);}
+  .game-switch button:hover[aria-pressed="false"]{color:var(--text);}
+  nav.main-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+  .navlink{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;font-size:14.5px;padding:9px 14px;border-radius:var(--r-sm);cursor:pointer;transition:all .15s ease;min-height:38px;position:relative;}
+  .navlink:hover{color:var(--text);background:var(--surface);}
+  .navlink.is-primary .pill-ia{font-size:10px;font-weight:700;letter-spacing:.5px;color:#C4B5FD;background:var(--accent-soft);border:1px solid rgba(139,92,246,.35);padding:2px 7px;border-radius:var(--r-pill);}
+  .navlink[aria-current="page"]{color:var(--text);background:var(--accent-soft);box-shadow:inset 0 0 0 1px rgba(139,92,246,.35);}
+  .profile{display:flex;align-items:center;gap:10px;flex-shrink:0;border:1px solid var(--border);background:var(--surface);border-radius:var(--r-pill);padding:5px 12px 5px 5px;cursor:pointer;}
+  .avatar{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff;background:linear-gradient(135deg,var(--accent),#22D3EE);}
+  .profile .who{display:flex;flex-direction:column;line-height:1.15;}
+  .profile .who b{font-size:13px;}
+  .profile .who span{font-size:11px;color:var(--muted);}
+
+  main{max-width:1180px;margin:0 auto;padding:26px 24px 80px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;border-radius:var(--r-sm);padding:13px 22px;min-height:46px;border:1px solid transparent;transition:transform .12s ease,filter .15s ease;text-decoration:none;}
+  .btn:active{transform:translateY(1px);}
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--border);}
+  .btn-ghost:hover{border-color:var(--accent);color:#fff;}
+
+  /* Breadcrumb + volver */
+  .crumbs{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+  .crumbs .path{font-size:13px;color:var(--muted);}
+  .crumbs .path b{color:var(--text);}
+  .back-link{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:8px 14px;border-radius:var(--r-pill);}
+  .back-link:hover{border-color:var(--accent);color:#fff;}
+
+  /* Selector de partida (simulado) */
+  .match-strip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 16px;margin-bottom:22px;font-size:13.5px;}
+  .match-strip .label{color:var(--muted);}
+  .match-strip .val{font-weight:700;}
+  .match-strip .sep{color:var(--border);}
+  .match-strip .change{margin-left:auto;font-weight:600;}
+
+  /* Hero del informe */
+  .report-hero{display:grid;grid-template-columns:auto 1fr;gap:26px;border:1px solid rgba(139,92,246,.35);border-radius:var(--r-lg);padding:26px;background:radial-gradient(600px 240px at 100% 0%,rgba(139,92,246,.16),transparent 70%),linear-gradient(180deg,var(--surface-2),var(--surface));box-shadow:var(--shadow);margin-bottom:22px;}
+  .placement{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:160px;padding:22px 26px;border-radius:var(--r-md);background:var(--bg);border:1px solid var(--border);}
+  .placement .big{font-size:54px;font-weight:800;line-height:1;}
+  .placement .lbl{font-size:13px;color:var(--muted);margin-top:8px;text-align:center;}
+  .placement .tag{margin-top:14px;font-size:12px;font-weight:700;padding:5px 13px;border-radius:var(--r-pill);}
+  .tag-good{color:var(--good);background:rgba(63,185,80,.13);border:1px solid rgba(63,185,80,.3);}
+  .tag-bad{color:var(--bad);background:rgba(248,81,73,.13);border:1px solid rgba(248,81,73,.3);}
+  .tag-gold{color:var(--gold);background:rgba(227,179,65,.13);border:1px solid rgba(227,179,65,.35);}
+
+  .verdict-wrap{display:flex;flex-direction:column;gap:14px;min-width:0;}
+  .ai-badge{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.4px;color:#C4B5FD;background:var(--accent-soft);border:1px solid rgba(139,92,246,.4);padding:5px 12px;border-radius:var(--r-pill);align-self:flex-start;}
+  .verdict{font-size:19px;font-weight:700;line-height:1.45;margin:0;}
+  .verdict .hl{color:var(--accent);}
+  .match-facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted);}
+  .match-facts b{color:var(--text);}
+  .focus-callout{display:flex;align-items:flex-start;gap:14px;margin-top:6px;background:var(--accent-soft);border:1px solid rgba(139,92,246,.4);border-radius:var(--r-md);padding:14px 16px;}
+  .focus-callout .ico{flex-shrink:0;margin-top:1px;}
+  .focus-callout .t{font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#C4B5FD;margin-bottom:3px;}
+  .focus-callout .d{font-size:14.5px;font-weight:600;line-height:1.45;}
+
+  /* KPIs */
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:24px;}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:16px;border-left:3px solid var(--border);}
+  .kpi.good{border-left-color:var(--good);} .kpi.warn{border-left-color:var(--warn);} .kpi.bad{border-left-color:var(--bad);}
+  .kpi .v{font-size:23px;font-weight:800;}
+  .kpi .k{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .kpi .bench{font-size:11.5px;color:var(--muted);margin-top:9px;padding-top:8px;border-top:1px solid var(--border);}
+  .kpi .bench b{color:var(--text);}
+
+  /* Dos columnas */
+  .report-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:22px;align-items:start;}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:22px;margin-bottom:22px;}
+  .panel:last-child{margin-bottom:0;}
+  .panel h3{margin:0 0 16px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:11px;}
+  .panel h3 .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;}
+  .ic-good{background:rgba(63,185,80,.14);} .ic-bad{background:rgba(248,81,73,.14);} .ic-accent{background:var(--accent-soft);} .ic-warn{background:rgba(227,179,65,.14);}
+  .summary-text{font-size:15px;line-height:1.7;margin:0;}
+
+  .good-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;}
+  .good-list li{display:flex;gap:12px;font-size:14.5px;line-height:1.55;}
+  .good-list .mk{color:var(--good);flex-shrink:0;font-weight:700;}
+
+  .err{border:1px solid var(--border);border-radius:var(--r-md);padding:16px;margin-bottom:14px;background:var(--bg);}
+  .err:last-child{margin-bottom:0;}
+  .err-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  .err-head h4{margin:0;font-size:15px;font-weight:700;}
+  .sev{font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--r-pill);text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;}
+  .sev-major{color:var(--bad);background:rgba(248,81,73,.13);border:1px solid rgba(248,81,73,.3);}
+  .sev-minor{color:var(--warn);background:rgba(227,179,65,.12);border:1px solid rgba(227,179,65,.3);}
+  .err dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:13.5px;line-height:1.55;}
+  .err dt{color:var(--muted);font-weight:600;white-space:nowrap;}
+  .err dd{margin:0;}
+
+  .corrective{border:1px solid rgba(139,92,246,.4);background:var(--accent-soft);border-radius:var(--r-md);padding:16px;font-size:14.5px;line-height:1.6;}
+  .corrective .lead{font-weight:700;color:#C4B5FD;display:block;margin-bottom:6px;}
+
+  .action-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;}
+  .action-list li{display:flex;gap:13px;font-size:14.5px;line-height:1.55;align-items:flex-start;}
+  .action-list .num{flex-shrink:0;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:var(--accent-strong);color:#fff;font-size:12.5px;font-weight:700;}
+
+  .timeline{list-style:none;margin:0;padding:0;position:relative;}
+  .timeline::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--border);}
+  .timeline li{position:relative;padding:0 0 18px 28px;}
+  .timeline li:last-child{padding-bottom:0;}
+  .timeline .pt{position:absolute;left:0;top:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);border:2px solid var(--muted);}
+  .timeline li.is-good .pt{border-color:var(--good);background:var(--good);}
+  .timeline li.is-bad .pt{border-color:var(--bad);background:var(--bad);}
+  .timeline li.is-warn .pt{border-color:var(--warn);background:var(--warn);}
+  .timeline .tm{font-size:12px;font-weight:700;color:var(--muted);}
+  .timeline .ev{font-size:13.5px;line-height:1.5;margin-top:2px;}
+
+  footer{border-top:1px solid var(--border);margin-top:40px;padding:24px;text-align:center;color:var(--muted);font-size:12.5px;}
+  footer .legal{margin-top:6px;opacity:.8;max-width:70ch;margin-left:auto;margin-right:auto;}
+
+  @media (max-width:920px){
+    .report-grid{grid-template-columns:1fr;}
+    .report-hero{grid-template-columns:1fr;}
+    .placement{min-width:0;}
+    nav.main-nav{order:3;width:100%;margin-left:0;overflow-x:auto;}
+    .profile .who{display:none;}
+  }
+</style>
+</head>
+<body>
+  <a href="#main" class="skip">Saltar al contenido</a>
+
+  <header class="topbar">
+    <a class="brand" href="01-estructura-navegacion.html" aria-label="Synapse, inicio">
+      <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/><circle cx="23" cy="9" r="2.4" fill="#22D3EE"/>
+        <circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
+        <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
+      </svg>
+      <span class="name">Synapse</span>
+    </a>
+
+    <!-- En un informe, el selector cambia entre los dos ejemplos de informe -->
+    <div class="game-switch" role="group" aria-label="Seleccionar juego">
+      <button aria-pressed="true">TFT</button>
+      <button aria-pressed="false" onclick="location.href='03-coaching-informe-lol.html'">LoL</button>
+    </div>
+
+    <nav class="main-nav" aria-label="Secciones">
+      <a class="navlink is-primary" href="01-estructura-navegacion.html#coaching" aria-current="page">Coaching <span class="pill-ia">IA</span></a>
+      <a class="navlink" href="01-estructura-navegacion.html#stats">Estadísticas</a>
+      <a class="navlink" href="01-estructura-navegacion.html#meta">Meta</a>
+    </nav>
+
+    <button class="profile" aria-label="Perfil del jugador">
+      <span class="avatar">N</span>
+      <span class="who"><b>NovaStrike#EUW</b><span>Diamante II</span></span>
+    </button>
+  </header>
+
+  <main id="main">
+    <div class="crumbs">
+      <span class="path"><a href="01-estructura-navegacion.html#coaching">Coaching</a> ▸ <b>Informe de partida</b></span>
+      <a class="back-link" href="01-estructura-navegacion.html#coaching">← Volver a mis partidas</a>
+    </div>
+
+    <!-- Selección de partida (simulada). // En Etapa 2 listará tus partidas reales. -->
+    <div class="match-strip">
+      <span class="label">Analizando:</span>
+      <span class="val">Partida #2</span><span class="sep">·</span>
+      <span>Flex Místicos</span><span class="sep">·</span>
+      <span>Nivel 9</span><span class="sep">·</span>
+      <span>4.º puesto</span><span class="sep">·</span>
+      <span>Clasificatoria · hace 12 min</span>
+      <a class="change" href="01-estructura-navegacion.html#coaching">▼ Elegir otra partida</a>
+    </div>
+
+    <!-- ===== HERO: veredicto de la IA ===== -->
+    <section class="report-hero">
+      <div class="placement">
+        <span class="big" style="color:var(--good)">4.º</span>
+        <span class="lbl">de 8 jugadores</span>
+        <span class="tag tag-good">Top 4</span>
+      </div>
+      <div class="verdict-wrap">
+        <span class="ai-badge">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#C4B5FD"/></svg>
+          Análisis generado por Synapse IA
+        </span>
+        <p class="verdict">Buen pilotaje, pero perdiste el Top 2 por una <span class="hl">economía demasiado conservadora en la etapa media</span>. El retraso en tu power spike pesó más que cualquier error de combate.</p>
+        <div class="match-facts">
+          <span>Comp: <b>Flex Místicos</b></span>
+          <span>Nivel <b>9</b></span>
+          <span>Oro final: <b>4</b></span>
+          <span>Duración <b>32:45</b></span>
+          <span>LP: <b style="color:var(--good)">+18</b></span>
+        </div>
+        <div class="focus-callout">
+          <span class="ico" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#8B5CF6" stroke-width="2"/><circle cx="12" cy="12" r="4.3" stroke="#C4B5FD" stroke-width="2"/><circle cx="12" cy="12" r="1.3" fill="#8B5CF6"/></svg>
+          </span>
+          <div>
+            <div class="t">Foco para tu próxima partida</div>
+            <div class="d">Sube de nivel más agresivamente en la etapa 3 cuando tu vida te lo permita.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== KPIs ===== -->
+    <div class="kpi-row">
+      <div class="kpi good"><div class="v">4.º</div><div class="k">Colocación final</div><div class="bench">Top 4 conseguido · racha <b>3</b></div></div>
+      <div class="kpi good"><div class="v">142</div><div class="k">Daño infligido</div><div class="bench">Media Diamante: <b>128</b></div></div>
+      <div class="kpi warn"><div class="v">18</div><div class="k">Oro de interés perdido</div><div class="bench">Objetivo: <b>&lt; 8</b></div></div>
+      <div class="kpi warn"><div class="v">4-1</div><div class="k">Llegada a Nivel 8</div><div class="bench">Media top: <b>3-5</b></div></div>
+      <div class="kpi warn"><div class="v">2/3</div><div class="k">Augments con valor</div><div class="bench">El 3.º no encajó</div></div>
+    </div>
+
+    <!-- ===== Análisis (dos columnas) ===== -->
+    <div class="report-grid">
+      <div class="col-main">
+        <div class="panel">
+          <h3><span class="ic ic-accent" aria-hidden="true">📋</span> Resumen del análisis</h3>
+          <p class="summary-text">Partida sólida que se quedó a las puertas del Top 2. Pilotaste bien <b>Flex Místicos</b> y aseguraste el Top 4 sin sobresaltos, pero una economía demasiado conservadora en la etapa 3 te hizo llegar tarde a tu power spike. Mantuviste oro de sobra mientras tu vida bajaba, y ese retraso —más que cualquier error de combate— es lo que te separó del podio.</p>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic ic-good" aria-hidden="true">✓</span> Lo que hiciste bien</h3>
+          <ul class="good-list">
+            <li><span class="mk">✓</span> Transición limpia a tu composición final, sin forzar unidades que no tenías.</li>
+            <li><span class="mk">✓</span> Posicionamiento acertado frente a las comps de daño en área del lobby.</li>
+            <li><span class="mk">✓</span> Priorizaste los ítems correctos en tu portador principal desde la etapa 2.</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic ic-bad" aria-hidden="true">⚠</span> Errores clave</h3>
+
+          <div class="err">
+            <div class="err-head"><h4>Subida de nivel tardía en la etapa 3</h4><span class="sev sev-major">Mayor</span></div>
+            <dl>
+              <dt>Qué pasó</dt><dd>Mantuviste el oro por encima de 50 entre 3-2 y 3-5 sin subir a nivel 8.</dd>
+              <dt>Por qué te costó</dt><dd>Llegaste tarde a tus unidades clave y perdiste 3 rondas seguidas, cayendo de 78 a 41 de vida.</dd>
+              <dt>El momento</dt><dd>Etapa 3-2 → 3-5</dd>
+            </dl>
+          </div>
+
+          <div class="err">
+            <div class="err-head"><h4>Augment económico con la ventaja ya consolidada</h4><span class="sev sev-minor">Menor</span></div>
+            <dl>
+              <dt>Qué pasó</dt><dd>Elegiste un augment de oro en 4-2 cuando ya liderabas en economía.</dd>
+              <dt>Por qué te costó</dt><dd>No maximizó valor; un augment de combate te habría dado más tablero en el momento decisivo.</dd>
+              <dt>El momento</dt><dd>Selección 4-2</dd>
+            </dl>
+          </div>
+
+          <div class="err">
+            <div class="err-head"><h4>Roll sin objetivo claro</h4><span class="sev sev-minor">Menor</span></div>
+            <dl>
+              <dt>Qué pasó</dt><dd>Gastaste 30 de oro rolleando a nivel 8 buscando una unidad de 4 costes concreta.</dd>
+              <dt>Por qué te costó</dt><dd>Bajaste tu tempo de subida sin asegurar la unidad que buscabas.</dd>
+              <dt>El momento</dt><dd>Etapa 4-1</dd>
+            </dl>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic ic-accent" aria-hidden="true">🧭</span> Qué deberías haber hecho</h3>
+          <div class="corrective">
+            <span class="lead">El ajuste clave</span>
+            Con 78 de vida en 3-2, tu prioridad era subir a nivel 8 cuanto antes, estabilizar el tablero con tus unidades de mayor coste y reservar el oro para rollear con <b>propósito</b> en 4-1, no antes. La vida alta era tu recurso para "comprar" tempo, y lo dejaste sin usar.
+          </div>
+        </div>
+      </div>
+
+      <div class="col-side">
+        <div class="panel">
+          <h3><span class="ic ic-accent" aria-hidden="true">⚡</span> Plan de acción</h3>
+          <ol class="action-list">
+            <li><span class="num">1</span> Con vida &gt; 50 en la etapa 3, prioriza subir de nivel sobre acumular oro.</li>
+            <li><span class="num">2</span> Elige augments que refuercen tu línea de juego, no solo valor económico genérico.</li>
+            <li><span class="num">3</span> Rollea en ventanas: a nivel estable y con 2-3 unidades concretas como objetivo.</li>
+            <li><span class="num">4</span> Revisa tu vida antes de cada decisión de economía: es tu mejor termómetro de riesgo.</li>
+          </ol>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic ic-warn" aria-hidden="true">🕑</span> Momentos clave</h3>
+          <ul class="timeline">
+            <li class="is-warn"><div class="pt"></div><div class="tm">Etapa 2-1</div><div class="ev">Augment económico "Reserva": buen inicio, pero ya marca tu tendencia conservadora.</div></li>
+            <li class="is-bad"><div class="pt"></div><div class="tm">Etapa 3-2</div><div class="ev">Oro 54 a nivel 7: decides no subir. Aquí empieza el retraso.</div></li>
+            <li class="is-bad"><div class="pt"></div><div class="tm">Etapa 3-5</div><div class="ev">Caes a 41 de vida tras tres derrotas seguidas.</div></li>
+            <li class="is-warn"><div class="pt"></div><div class="tm">Etapa 4-1</div><div class="ev">Roll de 30 de oro sin objetivo claro.</div></li>
+            <li class="is-good"><div class="pt"></div><div class="tm">Etapa 4-6</div><div class="ev">Estabilizas el tablero y aseguras el Top 4.</div></li>
+            <li class="is-good"><div class="pt"></div><div class="tm">Etapa 5-3</div><div class="ev">Eliminado en 4.º puesto.</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div>Synapse — Informe de coaching (datos de ejemplo) · Prototipo ETAPA 1</div>
+    <div class="legal">Análisis simulado con fines de prototipado. // En la Etapa 2 lo generará una IA local a partir de los datos reales de la partida. Marca propia no afiliada a los titulares de los juegos.</div>
+  </footer>
+</body>
+</html>
