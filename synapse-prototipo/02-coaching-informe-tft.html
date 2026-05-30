@@ -8,8 +8,9 @@
   ============================================================
   SYNAPSE · Prototipo ETAPA 1 — Pantalla 2: Informe de coaching (TFT)
   Archivo HTML autónomo. Marca propia genérica, sin assets de Riot.
-  Arquetipos de comp inventados (no son nombres reales del juego).
+  Arquetipos de comp y fichas inventados (no son nombres reales del juego).
   // AQUÍ irá el informe REAL generado por la IA en la Etapa 2.
+  // AQUÍ el tablero se reconstruirá con las posiciones REALES de la partida.
   ============================================================
 -->
 <style>
@@ -35,7 +36,6 @@
   .skip{position:absolute;left:12px;top:-60px;background:var(--accent-strong);color:#fff;padding:10px 16px;border-radius:var(--r-sm);z-index:100;transition:top .15s ease;font-weight:600;}
   .skip:focus{top:12px;}
 
-  /* Topbar */
   .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;padding:12px 24px;background:rgba(13,17,23,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);flex-wrap:wrap;}
   .brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
   .brand .logo{filter:drop-shadow(0 0 8px var(--accent-glow));}
@@ -61,29 +61,24 @@
   .btn-ghost{background:transparent;color:var(--text);border-color:var(--border);}
   .btn-ghost:hover{border-color:var(--accent);color:#fff;}
 
-  /* Breadcrumb + volver */
   .crumbs{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
   .crumbs .path{font-size:13px;color:var(--muted);}
   .crumbs .path b{color:var(--text);}
   .back-link{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:8px 14px;border-radius:var(--r-pill);}
   .back-link:hover{border-color:var(--accent);color:#fff;}
 
-  /* Selector de partida (simulado) */
   .match-strip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 16px;margin-bottom:22px;font-size:13.5px;}
   .match-strip .label{color:var(--muted);}
   .match-strip .val{font-weight:700;}
   .match-strip .sep{color:var(--border);}
   .match-strip .change{margin-left:auto;font-weight:600;}
 
-  /* Hero del informe */
   .report-hero{display:grid;grid-template-columns:auto 1fr;gap:26px;border:1px solid rgba(139,92,246,.35);border-radius:var(--r-lg);padding:26px;background:radial-gradient(600px 240px at 100% 0%,rgba(139,92,246,.16),transparent 70%),linear-gradient(180deg,var(--surface-2),var(--surface));box-shadow:var(--shadow);margin-bottom:22px;}
   .placement{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:160px;padding:22px 26px;border-radius:var(--r-md);background:var(--bg);border:1px solid var(--border);}
   .placement .big{font-size:54px;font-weight:800;line-height:1;}
   .placement .lbl{font-size:13px;color:var(--muted);margin-top:8px;text-align:center;}
   .placement .tag{margin-top:14px;font-size:12px;font-weight:700;padding:5px 13px;border-radius:var(--r-pill);}
   .tag-good{color:var(--good);background:rgba(63,185,80,.13);border:1px solid rgba(63,185,80,.3);}
-  .tag-bad{color:var(--bad);background:rgba(248,81,73,.13);border:1px solid rgba(248,81,73,.3);}
-  .tag-gold{color:var(--gold);background:rgba(227,179,65,.13);border:1px solid rgba(227,179,65,.35);}
 
   .verdict-wrap{display:flex;flex-direction:column;gap:14px;min-width:0;}
   .ai-badge{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.4px;color:#C4B5FD;background:var(--accent-soft);border:1px solid rgba(139,92,246,.4);padding:5px 12px;border-radius:var(--r-pill);align-self:flex-start;}
@@ -96,7 +91,6 @@
   .focus-callout .t{font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#C4B5FD;margin-bottom:3px;}
   .focus-callout .d{font-size:14.5px;font-weight:600;line-height:1.45;}
 
-  /* KPIs */
   .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:24px;}
   .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:16px;border-left:3px solid var(--border);}
   .kpi.good{border-left-color:var(--good);} .kpi.warn{border-left-color:var(--warn);} .kpi.bad{border-left-color:var(--bad);}
@@ -105,7 +99,6 @@
   .kpi .bench{font-size:11.5px;color:var(--muted);margin-top:9px;padding-top:8px;border-top:1px solid var(--border);}
   .kpi .bench b{color:var(--text);}
 
-  /* Dos columnas */
   .report-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:22px;align-items:start;}
   .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:22px;margin-bottom:22px;}
   .panel:last-child{margin-bottom:0;}
@@ -125,9 +118,11 @@
   .sev{font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--r-pill);text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;}
   .sev-major{color:var(--bad);background:rgba(248,81,73,.13);border:1px solid rgba(248,81,73,.3);}
   .sev-minor{color:var(--warn);background:rgba(227,179,65,.12);border:1px solid rgba(227,179,65,.3);}
-  .err dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:13.5px;line-height:1.55;}
+  .err dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:9px 14px;font-size:13.5px;line-height:1.55;}
   .err dt{color:var(--muted);font-weight:600;white-space:nowrap;}
   .err dd{margin:0;}
+  .err dd.fix{color:#C4B5FD;font-weight:600;}
+  .err dt.fix{color:var(--accent);}
 
   .corrective{border:1px solid rgba(139,92,246,.4);background:var(--accent-soft);border-radius:var(--r-md);padding:16px;font-size:14.5px;line-height:1.6;}
   .corrective .lead{font-weight:700;color:#C4B5FD;display:block;margin-bottom:6px;}
@@ -147,6 +142,30 @@
   .timeline .tm{font-size:12px;font-weight:700;color:var(--muted);}
   .timeline .ev{font-size:13.5px;line-height:1.5;margin-top:2px;}
 
+  /* ===== Tablero de posicionamiento ===== */
+  .board-toggle{display:inline-flex;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;gap:2px;margin-bottom:18px;}
+  .board-toggle button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;font-size:13px;padding:8px 18px;border-radius:var(--r-pill);cursor:pointer;min-height:34px;transition:all .15s ease;}
+  .board-toggle button[aria-pressed="true"]{background:var(--accent-strong);color:#fff;box-shadow:0 2px 10px var(--accent-glow);}
+  .board-toggle button:hover[aria-pressed="false"]{color:var(--text);}
+  .board-layout{display:grid;grid-template-columns:auto 1fr;gap:26px;align-items:start;}
+  .board-host{width:330px;max-width:100%;background:linear-gradient(180deg,rgba(248,81,73,.04),rgba(139,92,246,.05));border:1px solid var(--border);border-radius:var(--r-md);padding:10px;}
+  .board-host svg{width:100%;height:auto;display:block;}
+  .board-legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px;font-size:12px;color:var(--muted);}
+  .board-legend .lg{display:inline-flex;align-items:center;gap:7px;}
+  .board-legend .sw{width:13px;height:13px;border-radius:4px;border:2px solid;background:transparent;flex-shrink:0;}
+  .u-lbl{font-size:9.5px;font-weight:700;fill:#E6EDF3;font-family:var(--font);}
+  .u-star{font-size:8.5px;fill:#E3B341;font-family:var(--font);}
+  .b-side{font-size:9px;font-weight:700;fill:#6E7681;letter-spacing:1.5px;font-family:var(--font);}
+  .exp-list{list-style:none;margin:0 0 18px;padding:0;}
+  .exp-list li{padding:2px 0 2px 14px;border-left:3px solid var(--border);margin-bottom:13px;font-size:14px;line-height:1.55;}
+  .exp-list li:last-child{margin-bottom:0;}
+  .exp-list li.good{border-left-color:var(--good);}
+  .exp-list li.bad{border-left-color:var(--bad);}
+  .exp-list li.warn{border-left-color:var(--warn);}
+  .exp-list b{color:var(--text);}
+  .board-tip{font-size:13px;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;line-height:1.55;}
+  .board-tip b{color:#C4B5FD;}
+
   footer{border-top:1px solid var(--border);margin-top:40px;padding:24px;text-align:center;color:var(--muted);font-size:12.5px;}
   footer .legal{margin-top:6px;opacity:.8;max-width:70ch;margin-left:auto;margin-right:auto;}
 
@@ -154,6 +173,8 @@
     .report-grid{grid-template-columns:1fr;}
     .report-hero{grid-template-columns:1fr;}
     .placement{min-width:0;}
+    .board-layout{grid-template-columns:1fr;}
+    .board-host{width:100%;max-width:360px;margin:0 auto;}
     nav.main-nav{order:3;width:100%;margin-left:0;overflow-x:auto;}
     .profile .who{display:none;}
   }
@@ -172,7 +193,6 @@
       <span class="name">Synapse</span>
     </a>
 
-    <!-- En un informe, el selector cambia entre los dos ejemplos de informe -->
     <div class="game-switch" role="group" aria-label="Seleccionar juego">
       <button aria-pressed="true">TFT</button>
       <button aria-pressed="false" onclick="location.href='03-coaching-informe-lol.html'">LoL</button>
@@ -196,7 +216,6 @@
       <a class="back-link" href="01-estructura-navegacion.html#coaching">← Volver a mis partidas</a>
     </div>
 
-    <!-- Selección de partida (simulada). // En Etapa 2 listará tus partidas reales. -->
     <div class="match-strip">
       <span class="label">Analizando:</span>
       <span class="val">Partida #2</span><span class="sep">·</span>
@@ -207,7 +226,7 @@
       <a class="change" href="01-estructura-navegacion.html#coaching">▼ Elegir otra partida</a>
     </div>
 
-    <!-- ===== HERO: veredicto de la IA ===== -->
+    <!-- ===== HERO ===== -->
     <section class="report-hero">
       <div class="placement">
         <span class="big" style="color:var(--good)">4.º</span>
@@ -219,7 +238,7 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#C4B5FD"/></svg>
           Análisis generado por Synapse IA
         </span>
-        <p class="verdict">Buen pilotaje, pero perdiste el Top 2 por una <span class="hl">economía demasiado conservadora en la etapa media</span>. El retraso en tu power spike pesó más que cualquier error de combate.</p>
+        <p class="verdict">Buen pilotaje, pero perdiste el Top 2 por una <span class="hl">economía conservadora en la etapa media</span> y un <span class="hl">error de posicionamiento</span> que te costó tu mejor combate.</p>
         <div class="match-facts">
           <span>Comp: <b>Flex Místicos</b></span>
           <span>Nivel <b>9</b></span>
@@ -233,7 +252,7 @@
           </span>
           <div>
             <div class="t">Foco para tu próxima partida</div>
-            <div class="d">Sube de nivel más agresivamente en la etapa 3 cuando tu vida te lo permita.</div>
+            <div class="d">Antes de cada combate, revisa dónde está la amenaza enemiga y protege a tu portador.</div>
           </div>
         </div>
       </div>
@@ -245,7 +264,7 @@
       <div class="kpi good"><div class="v">142</div><div class="k">Daño infligido</div><div class="bench">Media Diamante: <b>128</b></div></div>
       <div class="kpi warn"><div class="v">18</div><div class="k">Oro de interés perdido</div><div class="bench">Objetivo: <b>&lt; 8</b></div></div>
       <div class="kpi warn"><div class="v">4-1</div><div class="k">Llegada a Nivel 8</div><div class="bench">Media top: <b>3-5</b></div></div>
-      <div class="kpi warn"><div class="v">2/3</div><div class="k">Augments con valor</div><div class="bench">El 3.º no encajó</div></div>
+      <div class="kpi bad"><div class="v">1</div><div class="k">Combate perdido por posición</div><div class="bench">Portador sin cubrir</div></div>
     </div>
 
     <!-- ===== Análisis (dos columnas) ===== -->
@@ -253,15 +272,15 @@
       <div class="col-main">
         <div class="panel">
           <h3><span class="ic ic-accent" aria-hidden="true">📋</span> Resumen del análisis</h3>
-          <p class="summary-text">Partida sólida que se quedó a las puertas del Top 2. Pilotaste bien <b>Flex Místicos</b> y aseguraste el Top 4 sin sobresaltos, pero una economía demasiado conservadora en la etapa 3 te hizo llegar tarde a tu power spike. Mantuviste oro de sobra mientras tu vida bajaba, y ese retraso —más que cualquier error de combate— es lo que te separó del podio.</p>
+          <p class="summary-text">Partida sólida que se quedó a las puertas del Top 2. Pilotaste bien <b>Flex Místicos</b> y aseguraste el Top 4 sin sobresaltos, pero dos cosas te separaron del podio: una economía demasiado conservadora en la etapa 3 (llegaste tarde a tu power spike) y, sobre todo, un <b>error de posicionamiento en la ronda 4-1</b> que dejó a tu portador a merced del Asesino enemigo. Lo bueno: ambos son ajustes de criterio, no de mecánica — se corrigen rápido.</p>
         </div>
 
         <div class="panel">
           <h3><span class="ic ic-good" aria-hidden="true">✓</span> Lo que hiciste bien</h3>
           <ul class="good-list">
             <li><span class="mk">✓</span> Transición limpia a tu composición final, sin forzar unidades que no tenías.</li>
-            <li><span class="mk">✓</span> Posicionamiento acertado frente a las comps de daño en área del lobby.</li>
             <li><span class="mk">✓</span> Priorizaste los ítems correctos en tu portador principal desde la etapa 2.</li>
+            <li><span class="mk">✓</span> Buen manejo de las rachas: cortaste la perdedora antes de desangrarte.</li>
           </ul>
         </div>
 
@@ -271,27 +290,30 @@
           <div class="err">
             <div class="err-head"><h4>Subida de nivel tardía en la etapa 3</h4><span class="sev sev-major">Mayor</span></div>
             <dl>
-              <dt>Qué pasó</dt><dd>Mantuviste el oro por encima de 50 entre 3-2 y 3-5 sin subir a nivel 8.</dd>
-              <dt>Por qué te costó</dt><dd>Llegaste tarde a tus unidades clave y perdiste 3 rondas seguidas, cayendo de 78 a 41 de vida.</dd>
+              <dt>Qué pasó</dt><dd>Entre 3-2 y 3-5 mantuviste el oro por encima de 50 sin subir a nivel 8, esperando "la ronda perfecta" que no llegó.</dd>
+              <dt>Por qué te costó</dt><dd>Los rivales que sí subieron desplegaron una unidad y un rasgo más; perdiste 3 rondas seguidas y caíste de 78 a 41 de vida.</dd>
+              <dt class="fix">Cómo subsanarlo</dt><dd class="fix">Fija un disparador claro: si en 3-2 tienes ≥ 50 de oro y &gt; 50 de vida, sube a 8 esa misma ronda y rollea después. La vida es un recurso — gástala para comprar tempo.</dd>
               <dt>El momento</dt><dd>Etapa 3-2 → 3-5</dd>
             </dl>
           </div>
 
           <div class="err">
-            <div class="err-head"><h4>Augment económico con la ventaja ya consolidada</h4><span class="sev sev-minor">Menor</span></div>
+            <div class="err-head"><h4>Portador expuesto al Asesino enemigo</h4><span class="sev sev-major">Mayor</span></div>
             <dl>
-              <dt>Qué pasó</dt><dd>Elegiste un augment de oro en 4-2 cuando ya liderabas en economía.</dd>
-              <dt>Por qué te costó</dt><dd>No maximizó valor; un augment de combate te habría dado más tablero en el momento decisivo.</dd>
-              <dt>El momento</dt><dd>Selección 4-2</dd>
+              <dt>Qué pasó</dt><dd>En 4-1 dejaste a tu Francotirador en el borde de la 2.ª fila, en el lado del Asesino rival y sin nadie que lo cubriera.</dd>
+              <dt>Por qué te costó</dt><dd>El Asesino saltó directo sobre él y lo eliminó en los primeros 2 segundos; tu mayor fuente de daño apenas disparó y perdiste un combate que ganabas.</dd>
+              <dt class="fix">Cómo subsanarlo</dt><dd class="fix">Coloca al portador en la esquina más alejada de la amenaza y déjalo detrás de tu frontline. Mira el tablero rival antes de cada ronda. <a href="#board">Ver tablero abajo ↓</a></dd>
+              <dt>El momento</dt><dd>Etapa 4-1</dd>
             </dl>
           </div>
 
           <div class="err">
-            <div class="err-head"><h4>Roll sin objetivo claro</h4><span class="sev sev-minor">Menor</span></div>
+            <div class="err-head"><h4>Augment económico con la ventaja consolidada</h4><span class="sev sev-minor">Menor</span></div>
             <dl>
-              <dt>Qué pasó</dt><dd>Gastaste 30 de oro rolleando a nivel 8 buscando una unidad de 4 costes concreta.</dd>
-              <dt>Por qué te costó</dt><dd>Bajaste tu tempo de subida sin asegurar la unidad que buscabas.</dd>
-              <dt>El momento</dt><dd>Etapa 4-1</dd>
+              <dt>Qué pasó</dt><dd>Elegiste un augment de oro en 4-2 cuando ya liderabas en economía.</dd>
+              <dt>Por qué te costó</dt><dd>No maximizó valor; un augment de combate te habría dado más tablero en el momento decisivo.</dd>
+              <dt class="fix">Cómo subsanarlo</dt><dd class="fix">Con ventaja de oro, prioriza augments de combate o de tu rasgo principal. El valor económico rinde más cuando vas por detrás, no por delante.</dd>
+              <dt>El momento</dt><dd>Selección 4-2</dd>
             </dl>
           </div>
         </div>
@@ -300,7 +322,7 @@
           <h3><span class="ic ic-accent" aria-hidden="true">🧭</span> Qué deberías haber hecho</h3>
           <div class="corrective">
             <span class="lead">El ajuste clave</span>
-            Con 78 de vida en 3-2, tu prioridad era subir a nivel 8 cuanto antes, estabilizar el tablero con tus unidades de mayor coste y reservar el oro para rollear con <b>propósito</b> en 4-1, no antes. La vida alta era tu recurso para "comprar" tempo, y lo dejaste sin usar.
+            Con 78 de vida en 3-2, tu prioridad era subir a nivel 8 cuanto antes, estabilizar el tablero y, antes de cada combate, <b>colocar a tu portador a salvo de la amenaza</b>. Ganabas las peleas por estadísticas; las perdías por dos decisiones de criterio. Corrige esas dos y este 4.º se convierte en Top 2.
           </div>
         </div>
       </div>
@@ -309,31 +331,161 @@
         <div class="panel">
           <h3><span class="ic ic-accent" aria-hidden="true">⚡</span> Plan de acción</h3>
           <ol class="action-list">
-            <li><span class="num">1</span> Con vida &gt; 50 en la etapa 3, prioriza subir de nivel sobre acumular oro.</li>
-            <li><span class="num">2</span> Elige augments que refuercen tu línea de juego, no solo valor económico genérico.</li>
-            <li><span class="num">3</span> Rollea en ventanas: a nivel estable y con 2-3 unidades concretas como objetivo.</li>
-            <li><span class="num">4</span> Revisa tu vida antes de cada decisión de economía: es tu mejor termómetro de riesgo.</li>
+            <li><span class="num">1</span> Revisa el board rival y reposiciona a tu portador <b>antes de cada ronda</b>.</li>
+            <li><span class="num">2</span> Con vida &gt; 50 en la etapa 3, prioriza subir de nivel sobre acumular oro.</li>
+            <li><span class="num">3</span> Elige augments que refuercen tu línea de juego, no solo valor económico.</li>
+            <li><span class="num">4</span> Rollea en ventanas: a nivel estable y con 2-3 unidades concretas como objetivo.</li>
           </ol>
         </div>
 
         <div class="panel">
           <h3><span class="ic ic-warn" aria-hidden="true">🕑</span> Momentos clave</h3>
           <ul class="timeline">
-            <li class="is-warn"><div class="pt"></div><div class="tm">Etapa 2-1</div><div class="ev">Augment económico "Reserva": buen inicio, pero ya marca tu tendencia conservadora.</div></li>
-            <li class="is-bad"><div class="pt"></div><div class="tm">Etapa 3-2</div><div class="ev">Oro 54 a nivel 7: decides no subir. Aquí empieza el retraso.</div></li>
+            <li class="is-warn"><div class="pt"></div><div class="tm">Etapa 3-2</div><div class="ev">Oro 54 a nivel 7: decides no subir. Empieza el retraso.</div></li>
             <li class="is-bad"><div class="pt"></div><div class="tm">Etapa 3-5</div><div class="ev">Caes a 41 de vida tras tres derrotas seguidas.</div></li>
-            <li class="is-warn"><div class="pt"></div><div class="tm">Etapa 4-1</div><div class="ev">Roll de 30 de oro sin objetivo claro.</div></li>
-            <li class="is-good"><div class="pt"></div><div class="tm">Etapa 4-6</div><div class="ev">Estabilizas el tablero y aseguras el Top 4.</div></li>
+            <li class="is-bad"><div class="pt"></div><div class="tm">Etapa 4-1</div><div class="ev">Combate perdido: el Asesino elimina a tu portador mal colocado.</div></li>
+            <li class="is-good"><div class="pt"></div><div class="tm">Etapa 4-6</div><div class="ev">Reposicionas, estabilizas y aseguras el Top 4.</div></li>
             <li class="is-good"><div class="pt"></div><div class="tm">Etapa 5-3</div><div class="ev">Eliminado en 4.º puesto.</div></li>
           </ul>
         </div>
       </div>
     </div>
+
+    <!-- ===== TABLERO DE POSICIONAMIENTO ===== -->
+    <section class="panel" id="board" style="margin-top:22px;">
+      <h3><span class="ic ic-accent" aria-hidden="true">🎯</span> Análisis de posicionamiento · Ronda 4-1</h3>
+      <p class="summary-text" style="margin-bottom:18px;">Tu portador quedó al alcance del Asesino enemigo. Compara <b>tu colocación</b> con la <b>recomendada</b> y verás la diferencia de un combate:</p>
+
+      <div class="board-toggle" role="group" aria-label="Ver colocación">
+        <button id="bt-actual" aria-pressed="true" onclick="setPos('actual')">Tu colocación</button>
+        <button id="bt-reco" aria-pressed="false" onclick="setPos('recomendada')">Recomendada</button>
+      </div>
+
+      <div class="board-layout">
+        <div>
+          <div class="board-legend">
+            <span class="lg"><span class="sw" style="border-color:#8B5CF6"></span> Tus unidades</span>
+            <span class="lg"><span class="sw" style="border-color:#F85149"></span> Enemigas</span>
+            <span class="lg"><span class="sw" style="border-color:#E3B341"></span> Portador a corregir</span>
+            <span class="lg"><span class="sw" style="border-color:#3FB950"></span> Posición correcta</span>
+          </div>
+          <!-- // AQUÍ el tablero se reconstruirá con las posiciones REALES de la partida (Etapa 2). -->
+          <div class="board-host" id="board-host" role="img" aria-label="Tablero hexagonal de TFT con la colocación de las unidades"></div>
+        </div>
+        <div class="board-explain">
+          <ul class="exp-list" id="board-explain"></ul>
+          <div class="board-tip" id="board-tip"></div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
     <div>Synapse — Informe de coaching (datos de ejemplo) · Prototipo ETAPA 1</div>
-    <div class="legal">Análisis simulado con fines de prototipado. // En la Etapa 2 lo generará una IA local a partir de los datos reales de la partida. Marca propia no afiliada a los titulares de los juegos.</div>
+    <div class="legal">Análisis y tablero simulados con fines de prototipado. // En la Etapa 2 los generará una IA local a partir de los datos reales de la partida. Marca propia no afiliada a los titulares de los juegos.</div>
   </footer>
+
+<script>
+/* ============================================================
+   TABLERO DE POSICIONAMIENTO (TFT) — datos de ejemplo (mock)
+   // AQUÍ irán las posiciones REALES de la partida en la Etapa 2.
+   Fichas con arquetipos genéricos inventados (sin nombres de Riot).
+   Geometría: hexágonos pointy-top, 7 columnas x 8 filas
+   (4 filas enemigas arriba, 4 tuyas abajo).
+   ============================================================ */
+const SIZE=22, HW=Math.sqrt(3)*SIZE, VS=1.5*SIZE, MX=16, MY=16, GAP=16;
+const COSTC={1:"#9AA4B2",2:"#3FB950",3:"#58A6FF",4:"#B061FF",5:"#E3B341"};
+const VB_W=320, VB_H=322, CENTER_Y=160;
+
+function hexCenter(r,c){
+  const x = MX + HW/2 + c*HW + (r%2)*(HW/2);
+  const y = MY + SIZE + r*VS + (r>=4 ? GAP : 0);
+  return {x,y};
+}
+function hexPoints(cx,cy){
+  const w=HW/2;
+  return `${cx},${cy-SIZE} ${cx+w},${cy-SIZE/2} ${cx+w},${cy+SIZE/2} ${cx},${cy+SIZE} ${cx-w},${cy+SIZE/2} ${cx-w},${cy-SIZE/2}`;
+}
+
+/* Unidades compartidas (no cambian entre las dos vistas) */
+const MINE_BASE=[
+  {r:4,c:2,name:"Guar",cost:2,star:2},
+  {r:4,c:3,name:"Vang",cost:1,star:3},
+  {r:4,c:4,name:"Bers",cost:2,star:2},
+  {r:6,c:1,name:"Mist",cost:3,star:2},
+  {r:7,c:2,name:"Cura",cost:1,star:2}
+];
+const ENEMY=[
+  {r:3,c:5,name:"Ases",cost:4,star:2,threat:true},
+  {r:0,c:3,name:"Muro",cost:2,star:2},
+  {r:1,c:2,name:"Mago",cost:3,star:2},
+  {r:0,c:4,name:"Tira",cost:4,star:1}
+];
+
+const POS_STATES={
+  actual:{
+    carry:{r:5,c:5,name:"Fran",cost:4,star:2,warn:true},
+    explain:`
+      <li class="bad"><b>Portador en el borde:</b> tu Francotirador (4 costes) está en la 2.ª fila, lado derecho, sin nada que lo cubra.</li>
+      <li class="bad"><b>Amenaza directa:</b> el Asesino enemigo está alineado para saltar sobre él al empezar el combate.</li>
+      <li class="warn"><b>Resultado:</b> cae en los primeros 2 segundos y pierdes tu principal fuente de daño.</li>`,
+    tip:`El Asesino siempre salta a la unidad más alejada... pero solo si puede alcanzarla. <b>Colócate fuera de su línea de salto.</b>`
+  },
+  recomendada:{
+    carry:{r:7,c:0,name:"Fran",cost:4,star:2,good:true},
+    explain:`
+      <li class="good"><b>Esquina segura:</b> el portador pasa a la esquina trasera izquierda, lo más lejos posible del Asesino.</li>
+      <li class="good"><b>Muro de cuerpos:</b> tus tanques quedan entre la amenaza y el portador.</li>
+      <li class="good"><b>Ganancia:</b> 2-3 segundos extra de disparo, suficientes para girar el combate.</li>`,
+    tip:`Regla práctica: <b>portador en la esquina opuesta a la amenaza principal</b>, y nunca en una casilla del borde sin protección.`
+  }
+};
+
+function drawUnit(u, team){
+  const {x,y}=hexCenter(u.r,u.c);
+  const ring = u.warn ? "#E3B341" : (u.good ? "#3FB950" : (u.threat ? "#F85149" : (team==="mine" ? "#8B5CF6" : "#F85149")));
+  const ringW = (u.warn||u.good||u.threat) ? 3.5 : 2;
+  const cost = COSTC[u.cost]||"#9AA4B2";
+  let g = `<polygon points="${hexPoints(x,y)}" fill="${cost}" fill-opacity="0.18" stroke="${ring}" stroke-width="${ringW}"/>`;
+  if(u.star){ g += `<text x="${x}" y="${y-SIZE+9}" class="u-star" text-anchor="middle">${"★".repeat(u.star)}</text>`; }
+  g += `<text x="${x}" y="${y+4}" class="u-lbl" text-anchor="middle">${u.name}</text>`;
+  return g;
+}
+
+function renderBoard(stateKey){
+  const st = POS_STATES[stateKey];
+  let s = `<svg viewBox="0 0 ${VB_W} ${VB_H}" xmlns="http://www.w3.org/2000/svg">`;
+  // Casillas vacías
+  for(let r=0;r<8;r++){
+    for(let c=0;c<7;c++){
+      const {x,y}=hexCenter(r,c);
+      const tint = r<4 ? "#F85149" : "#8B5CF6";
+      s += `<polygon points="${hexPoints(x,y)}" fill="${tint}" fill-opacity="0.05" stroke="#2A2F3A" stroke-width="1"/>`;
+    }
+  }
+  // Línea de centro y etiquetas de lado
+  s += `<line x1="6" y1="${CENTER_Y}" x2="${VB_W-6}" y2="${CENTER_Y}" stroke="#2A2F3A" stroke-dasharray="4 4"/>`;
+  s += `<text x="8" y="12" class="b-side">ENEMIGO</text>`;
+  s += `<text x="8" y="${VB_H-5}" class="b-side">TÚ</text>`;
+  // Unidades
+  ENEMY.forEach(u=> s += drawUnit(u,"enemy"));
+  MINE_BASE.forEach(u=> s += drawUnit(u,"mine"));
+  s += drawUnit(st.carry,"mine");
+  s += `</svg>`;
+
+  document.getElementById("board-host").innerHTML = s;
+  document.getElementById("board-explain").innerHTML = st.explain;
+  document.getElementById("board-tip").innerHTML = st.tip;
+}
+
+function setPos(stateKey){
+  document.getElementById("bt-actual").setAttribute("aria-pressed", stateKey==="actual");
+  document.getElementById("bt-reco").setAttribute("aria-pressed", stateKey==="recomendada");
+  renderBoard(stateKey);
+}
+
+/* Inicialización */
+renderBoard("actual");
+</script>
 </body>
 </html>
