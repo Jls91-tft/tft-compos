@@ -6,7 +6,7 @@
 <title>Synapse — Coaching IA para TFT y LoL</title>
 <!--
   ============================================================
-  SYNAPSE · Prototipo ETAPA 1 — Pantalla 1: Estructura y navegación
+  SYNAPSE · Prototipo ETAPA 1 — Pantalla 1: Estructura, navegación y Estadísticas
   Archivo HTML autónomo (sin build, sin dependencias).
   Marca propia genérica. Sin logos, marcas ni personajes de Riot.
   // AQUÍ irán los datos reales de la API/IA en la Etapa 2.
@@ -15,7 +15,6 @@
 <style>
   /* ====== TOKENS DE DISEÑO ====== */
   :root{
-    /* Base (tema oscuro) */
     --bg:#0D1117;
     --surface:#161B22;
     --surface-2:#1C2230;
@@ -24,20 +23,17 @@
     --text:#E6EDF3;
     --muted:#8B949E;
 
-    /* Acento: Violeta IA */
-    --accent:#8B5CF6;          /* texto, enlaces, iconos, bordes sobre fondo oscuro */
-    --accent-strong:#7C3AED;   /* fondo de botón primario (con texto blanco, AA) */
+    --accent:#8B5CF6;
+    --accent-strong:#7C3AED;
     --accent-hover:#8B5CF6;
     --accent-soft:rgba(139,92,246,.14);
     --accent-glow:rgba(139,92,246,.35);
 
-    /* Semánticos */
     --good:#3FB950;
     --warn:#E3B341;
     --bad:#F85149;
     --gold:#E3B341;
 
-    /* Radios y sombras */
     --r-lg:16px;
     --r-md:12px;
     --r-sm:9px;
@@ -45,7 +41,6 @@
     --shadow:0 10px 30px rgba(0,0,0,.35);
     --shadow-sm:0 4px 14px rgba(0,0,0,.28);
 
-    /* Tipografía */
     --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
 
@@ -66,20 +61,9 @@
   a{color:var(--accent);text-decoration:none;}
   ::selection{background:var(--accent-glow);color:#fff;}
 
-  /* Foco visible (accesibilidad) */
-  :focus-visible{
-    outline:2px solid var(--accent);
-    outline-offset:2px;
-    border-radius:4px;
-  }
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
 
-  /* Skip link */
-  .skip{
-    position:absolute;left:12px;top:-60px;
-    background:var(--accent-strong);color:#fff;
-    padding:10px 16px;border-radius:var(--r-sm);
-    z-index:100;transition:top .15s ease;font-weight:600;
-  }
+  .skip{position:absolute;left:12px;top:-60px;background:var(--accent-strong);color:#fff;padding:10px 16px;border-radius:var(--r-sm);z-index:100;transition:top .15s ease;font-weight:600;}
   .skip:focus{top:12px;}
 
   /* ====== CABECERA / TOPBAR ====== */
@@ -92,8 +76,6 @@
     border-bottom:1px solid var(--border);
     flex-wrap:wrap;
   }
-
-  /* Marca */
   .brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
   .brand .logo{filter:drop-shadow(0 0 8px var(--accent-glow));}
   .brand .name{
@@ -102,7 +84,6 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
 
-  /* Selector de juego (segmented control) */
   .game-switch{
     display:inline-flex;background:var(--surface);
     border:1px solid var(--border);border-radius:var(--r-pill);
@@ -120,7 +101,6 @@
   }
   .game-switch button:hover[aria-pressed="false"]{color:var(--text);}
 
-  /* Navegación principal */
   nav.main-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
   .navlink{
     display:inline-flex;align-items:center;gap:8px;
@@ -135,7 +115,6 @@
     content:"";position:absolute;left:14px;right:14px;bottom:2px;height:2px;
     background:var(--accent);border-radius:2px;
   }
-  /* Coaching destacado: protagonista */
   .navlink.is-primary{color:var(--text);}
   .navlink.is-primary .pill-ia{
     font-size:10px;font-weight:700;letter-spacing:.5px;
@@ -147,8 +126,8 @@
     background:var(--accent-soft);
     box-shadow:inset 0 0 0 1px rgba(139,92,246,.35);
   }
+  .navlink.is-primary[aria-current="page"]::after{display:none;}
 
-  /* Perfil */
   .profile{
     display:flex;align-items:center;gap:10px;flex-shrink:0;
     border:1px solid var(--border);background:var(--surface);
@@ -245,7 +224,28 @@
   .match-meta b{color:var(--text);font-weight:600;}
   .match-card .btn{margin-top:auto;}
 
-  /* ====== ESTADO VACÍO / PLACEHOLDER (Stats y Meta) ====== */
+  /* ====== ESTADÍSTICAS (Punto 3) ====== */
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:20px;margin-bottom:18px;}
+  .panel h3{margin:0 0 14px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;}
+  .panel h3 .ic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;flex-shrink:0;font-size:14px;background:var(--accent-soft);}
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:0 0 22px;}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:15px;border-left:3px solid var(--border);}
+  .kpi.good{border-left-color:var(--good);} .kpi.warn{border-left-color:var(--warn);} .kpi.bad{border-left-color:var(--bad);}
+  .kpi .v{font-size:22px;font-weight:800;}
+  .kpi .k{font-size:12px;color:var(--muted);margin-top:2px;}
+  .kpi .bench{font-size:11px;color:var(--muted);margin-top:8px;padding-top:7px;border-top:1px solid var(--border);}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .chart-host svg{width:100%;height:auto;display:block;}
+  .ax-lbl{font-size:10px;fill:#8B949E;font-family:var(--font);}
+  .bar-val{font-size:10px;font-weight:700;fill:#E6EDF3;font-family:var(--font);}
+  .stat-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .stat-table th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;padding:0 0 10px;border-bottom:1px solid var(--border);}
+  .stat-table td{padding:11px 0;border-bottom:1px solid var(--border-soft);}
+  .stat-table tr:last-child td{border-bottom:0;}
+  .stat-table .num{text-align:right;}
+  .stat-table tbody tr:hover td{color:#fff;}
+
+  /* ====== ESTADO VACÍO / PLACEHOLDER (Meta) ====== */
   .empty{
     text-align:center;max-width:620px;margin:18px auto;
     border:1px dashed var(--border);border-radius:var(--r-lg);
@@ -297,6 +297,7 @@
     main{padding:26px 16px 70px;}
     h1.title{font-size:25px;}
     .hero{padding:22px;}
+    .stat-grid{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -305,7 +306,6 @@
 
   <!-- ============ CABECERA GLOBAL ============ -->
   <header class="topbar">
-    <!-- Marca genérica (sin assets de Riot) -->
     <div class="brand" aria-label="Synapse, inicio">
       <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
         <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/>
@@ -317,13 +317,11 @@
       <span class="name">Synapse</span>
     </div>
 
-    <!-- Selector global de juego (decisión transversal: reconfigura todas las secciones) -->
     <div class="game-switch" role="group" aria-label="Seleccionar juego">
       <button id="btn-tft" aria-pressed="true" onclick="setGame('tft')">TFT</button>
       <button id="btn-lol" aria-pressed="false" onclick="setGame('lol')">LoL</button>
     </div>
 
-    <!-- Navegación principal: Coaching va primero y resaltado -->
     <nav class="main-nav" aria-label="Secciones">
       <button class="navlink is-primary" data-view="coaching" aria-current="page" onclick="showView('coaching')">
         Coaching <span class="pill-ia">IA</span>
@@ -332,7 +330,6 @@
       <button class="navlink" data-view="meta" onclick="showView('meta')">Meta</button>
     </nav>
 
-    <!-- Perfil (mock) -->
     <button class="profile" aria-label="Perfil del jugador">
       <span class="avatar" id="avatar">N</span>
       <span class="who">
@@ -354,7 +351,6 @@
       <h1 class="title">Mejora partida a partida</h1>
       <p class="subtitle">Analizamos cada partida terminada y te decimos qué hiciste bien, qué falló y, sobre todo, qué hacer la próxima vez. Sin teoría vacía: consejos accionables.</p>
 
-      <!-- HERO: CTA protagonista -->
       <div class="hero">
         <div class="hero-icon" aria-hidden="true">
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#8B5CF6" stroke-width="2"/><circle cx="12" cy="12" r="4.5" stroke="#C4B5FD" stroke-width="2"/><circle cx="12" cy="12" r="1.4" fill="#8B5CF6"/></svg>
@@ -373,7 +369,6 @@
         </button>
       </div>
 
-      <!-- Lista de partidas recientes (mock) -->
       <h2 class="section-title">
         Tus partidas recientes
         <span style="font-size:13px;font-weight:500;color:var(--muted);">— elige una para ver su coaching</span>
@@ -383,24 +378,35 @@
       </div>
     </section>
 
-    <!-- ============ VISTA: ESTADÍSTICAS (placeholder — paso 3) ============ -->
+    <!-- ============ VISTA: ESTADÍSTICAS (Punto 3 — dashboard real) ============ -->
     <section id="view-stats" class="view" aria-label="Estadísticas personales" hidden>
-      <p class="eyebrow">Sección complementaria</p>
+      <p class="eyebrow" id="stats-eyebrow">Sección complementaria · TFT</p>
       <h1 class="title">Estadísticas personales</h1>
-      <p class="subtitle">Tu rendimiento de un vistazo: tendencias, comps favoritas y dónde ganas (o pierdes) puntos.</p>
-      <div class="empty">
-        <div class="em-icon" aria-hidden="true">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M4 20V10M10 20V4M16 20v-7M22 20V8" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <p class="subtitle">Tu rendimiento de un vistazo: tendencias, comps favoritas y dónde ganas (o pierdes) puntos. Cambia entre TFT y LoL con el selector de arriba.</p>
+
+      <!-- // AQUÍ irán los datos reales de la API en la Etapa 2 (todo se renderiza desde JS) -->
+      <div class="kpi-row" id="stats-kpis"></div>
+
+      <div class="stat-grid">
+        <div class="panel">
+          <h3><span class="ic" aria-hidden="true">📈</span> <span id="evol-title">Evolución</span></h3>
+          <div class="chart-host" id="evol-chart" role="img" aria-label="Gráfica de evolución temporal"></div>
         </div>
-        <h2>El dashboard llegará en el paso 3</h2>
-        <p>Mantengo esta sección como marcador para que veas la navegación. Cuando demos el OK al diseño general, construimos aquí:</p>
-        <ul class="roadmap">
-          <li><span class="check">✓</span> Winrate y colocación media (TFT) · ratio victorias (LoL)</li>
-          <li><span class="check">✓</span> Comps y unidades más jugadas</li>
-          <li><span class="check">✓</span> Augments e ítems con mejor rendimiento</li>
-          <li><span class="check">✓</span> Evolución temporal de tu rango</li>
-        </ul>
-        <div><span class="step-tag">Plan ETAPA 1 · Punto 3</span></div>
+        <div class="panel">
+          <h3><span class="ic" aria-hidden="true">📊</span> <span id="dist-title">Distribución</span></h3>
+          <div class="chart-host" id="dist-chart" role="img" aria-label="Gráfica de distribución"></div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="panel">
+          <h3><span class="ic" aria-hidden="true">🏆</span> <span id="tableA-title"></span></h3>
+          <div id="tableA-host"></div>
+        </div>
+        <div class="panel">
+          <h3><span class="ic" aria-hidden="true">✨</span> <span id="tableB-title"></span></h3>
+          <div id="tableB-host"></div>
+        </div>
       </div>
     </section>
 
@@ -482,7 +488,6 @@ function renderMatches(){
     let pillClass, pillIco, pillText, bodyHTML;
 
     if (currentGame === "tft"){
-      // Color semántico según colocación: 1º dorado, 2-4 verde, 5-8 ámbar/rojo
       if (m.res === 1){ pillClass="res-gold"; pillIco="★"; pillText="1.º puesto"; }
       else if (m.res <= 4){ pillClass="res-win"; pillIco="▲"; pillText=m.res+".º puesto"; }
       else { pillClass = m.res<=6 ? "res-mid":"res-loss"; pillIco="▼"; pillText=m.res+".º puesto"; }
@@ -494,7 +499,6 @@ function renderMatches(){
           <span>${m.note}</span>
         </div>`;
     } else {
-      // LoL: victoria/derrota
       if (m.res === "win"){ pillClass="res-win"; pillIco="✔"; pillText="Victoria"; }
       else { pillClass="res-loss"; pillIco="✕"; pillText="Derrota"; }
       bodyHTML = `
@@ -524,7 +528,6 @@ function setGame(game){
   document.getElementById("btn-tft").setAttribute("aria-pressed", game==="tft");
   document.getElementById("btn-lol").setAttribute("aria-pressed", game==="lol");
 
-  // Actualiza perfil y etiqueta de última partida según el juego
   const p = MOCK[game].profile;
   document.getElementById("profile-name").textContent = p.name;
   document.getElementById("profile-rank").textContent = p.rank;
@@ -532,6 +535,7 @@ function setGame(game){
   document.getElementById("last-match-label").textContent = MOCK[game].lastMatch;
 
   renderMatches();
+  renderStats(game);
 }
 
 /* ---- Navegación entre secciones (SPA simple) ---- */
@@ -553,8 +557,130 @@ function openReport(game){
   location.href = (game === "lol") ? "03-coaching-informe-lol.html" : "02-coaching-informe-tft.html";
 }
 
+/* ============================================================
+   ESTADÍSTICAS (Punto 3) — datos de ejemplo + render
+   // AQUÍ irán los datos reales de la API en la Etapa 2.
+   ============================================================ */
+const COLORS = {good:"#3FB950",warn:"#E3B341",bad:"#F85149",gold:"#E3B341",accent:"#8B5CF6",muted:"#8B949E"};
+
+const STATS = {
+  tft:{
+    kpis:[
+      {v:"4.2", k:"Colocación media", cls:"good", bench:"Top 200 EUW"},
+      {v:"58%", k:"Top 4", cls:"good", bench:"Media: 50%"},
+      {v:"14%", k:"Top 1", cls:"good", bench:"Media: 12.5%"},
+      {v:"312", k:"Partidas (Set actual)", cls:"", bench:"Últimos 30 días"},
+      {v:"7", k:"Mejor racha Top 4", cls:"good", bench:""},
+      {v:"+48", k:"LP esta semana", cls:"good", bench:"Diamante II"}
+    ],
+    evolLabel:"Colocación media por semana (menor es mejor)",
+    evol:[{label:"S1",value:4.8},{label:"S2",value:4.6},{label:"S3",value:4.9},{label:"S4",value:4.3},{label:"S5",value:4.4},{label:"S6",value:4.1},{label:"S7",value:4.0},{label:"S8",value:4.2}],
+    evolMin:1, evolMax:8, evolInvert:true, evolSuffix:"",
+    distLabel:"Distribución de colocaciones",
+    dist:[{label:"1.º",value:44,color:"gold"},{label:"2.º",value:38,color:"good"},{label:"3.º",value:40,color:"good"},{label:"4.º",value:59,color:"good"},{label:"5.º",value:41,color:"warn"},{label:"6.º",value:34,color:"warn"},{label:"7.º",value:30,color:"bad"},{label:"8.º",value:26,color:"bad"}],
+    tableA:{title:"Comps más jugadas", cols:["Comp","Partidas","Coloc.","Top 4"], rows:[
+      ["Flex Místicos","86","3.8","64%"],
+      ["Reroll Vanguardias","64","4.1","58%"],
+      ["Fast 8 Francotiradores","48","4.6","48%"],
+      ["Hiperscaling Magos","39","4.0","60%"]
+    ]},
+    tableB:{title:"Augments destacados", cols:["Augment","Veces","Coloc."], rows:[
+      ["Corazón de Cristal","41","3.6"],
+      ["Mente Táctica","33","3.9"],
+      ["Botín de Guerra","28","4.2"],
+      ["Eco Resonante","22","4.4"]
+    ]}
+  },
+  lol:{
+    kpis:[
+      {v:"54%", k:"Winrate", cls:"good", bench:"Media: 50%"},
+      {v:"2.8", k:"KDA medio", cls:"good", bench:"Objetivo: 2.5"},
+      {v:"6.4", k:"CS por minuto", cls:"warn", bench:"Objetivo: 6.5"},
+      {v:"204", k:"Partidas (temporada)", cls:"", bench:"Últimos 30 días"},
+      {v:"6", k:"Mejor racha victorias", cls:"good", bench:""},
+      {v:"Mid", k:"Rol principal", cls:"", bench:"61% de partidas"}
+    ],
+    evolLabel:"Winrate por semana",
+    evol:[{label:"S1",value:48},{label:"S2",value:50},{label:"S3",value:47},{label:"S4",value:53},{label:"S5",value:55},{label:"S6",value:52},{label:"S7",value:58},{label:"S8",value:54}],
+    evolMin:30, evolMax:70, evolInvert:false, evolSuffix:"%",
+    distLabel:"Partidas por rol",
+    dist:[{label:"Mid",value:124,color:"accent"},{label:"Jungla",value:38,color:"good"},{label:"ADC",value:22,color:"warn"},{label:"Top",value:12,color:"bad"},{label:"Sup",value:8,color:"muted"}],
+    tableA:{title:"Arquetipos más jugados", cols:["Arquetipo","Partidas","Winrate","KDA"], rows:[
+      ["Mago de control","78","57%","3.1"],
+      ["Asesino","31","52%","2.6"],
+      ["Tirador","22","50%","2.9"],
+      ["Luchador","18","44%","2.1"]
+    ]},
+    tableB:{title:"Rendimiento por rol", cols:["Rol","Partidas","Winrate"], rows:[
+      ["Mid","124","57%"],
+      ["Jungla","38","47%"],
+      ["ADC","22","55%"],
+      ["Top","12","42%"]
+    ]}
+  }
+};
+
+function renderLineChart(hostId, data, opts){
+  const W=480,H=200,padL=40,padR=14,padT=16,padB=30;
+  const min=opts.min,max=opts.max,invert=opts.invert,suf=opts.suffix||"";
+  const n=data.length;
+  const px=(i)=> padL + (i*(W-padL-padR)/(n-1));
+  const py=(v)=>{ let t=(v-min)/(max-min); if(!invert) t=1-t; return padT + t*(H-padT-padB); };
+  let g="";
+  [min,(min+max)/2,max].forEach(t=>{
+    const y=py(t);
+    g+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#2A2F3A" stroke-width="1"/>`;
+    g+=`<text x="${padL-7}" y="${y+3}" class="ax-lbl" text-anchor="end">${Math.round(t*10)/10}${suf}</text>`;
+  });
+  const line=data.map((d,i)=>`${px(i)},${py(d.value)}`).join(" ");
+  g+=`<polygon points="${padL},${H-padB} ${line} ${W-padR},${H-padB}" fill="#8B5CF6" fill-opacity="0.10"/>`;
+  g+=`<polyline points="${line}" fill="none" stroke="#8B5CF6" stroke-width="2.5" stroke-linejoin="round"/>`;
+  data.forEach((d,i)=>{
+    g+=`<circle cx="${px(i)}" cy="${py(d.value)}" r="3.5" fill="#0D1117" stroke="#8B5CF6" stroke-width="2"/>`;
+    g+=`<text x="${px(i)}" y="${H-padB+16}" class="ax-lbl" text-anchor="middle">${d.label}</text>`;
+  });
+  document.getElementById(hostId).innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
+}
+
+function renderBarChart(hostId, bars){
+  const W=480,H=200,padL=30,padR=10,padT=18,padB=30;
+  const n=bars.length, maxV=Math.max(...bars.map(b=>b.value));
+  const bw=(W-padL-padR)/n, barW=bw*0.58;
+  let g="";
+  bars.forEach((b,i)=>{
+    const h=(b.value/maxV)*(H-padT-padB);
+    const x=padL + i*bw + (bw-barW)/2, y=H-padB-h;
+    const col=COLORS[b.color]||"#8B5CF6";
+    g+=`<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="3" fill="${col}" fill-opacity="0.85"/>`;
+    g+=`<text x="${x+barW/2}" y="${y-5}" class="bar-val" text-anchor="middle">${b.value}</text>`;
+    g+=`<text x="${x+barW/2}" y="${H-padB+16}" class="ax-lbl" text-anchor="middle">${b.label}</text>`;
+  });
+  document.getElementById(hostId).innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
+}
+
+function renderTable(hostId, cols, rows){
+  let h=`<table class="stat-table"><thead><tr>`+cols.map((c,i)=>`<th${i>0?' class="num"':''}>${c}</th>`).join("")+`</tr></thead><tbody>`;
+  rows.forEach(r=>{ h+=`<tr>`+r.map((cell,i)=>`<td${i>0?' class="num"':''}>${cell}</td>`).join("")+`</tr>`; });
+  document.getElementById(hostId).innerHTML=h+`</tbody></table>`;
+}
+
+function renderStats(game){
+  const s=STATS[game];
+  document.getElementById("stats-eyebrow").textContent="Sección complementaria · "+(game==="tft"?"TFT":"LoL");
+  document.getElementById("stats-kpis").innerHTML=s.kpis.map(k=>`<div class="kpi ${k.cls}"><div class="v">${k.v}</div><div class="k">${k.k}</div>${k.bench?`<div class="bench">${k.bench}</div>`:""}</div>`).join("");
+  document.getElementById("evol-title").textContent=s.evolLabel;
+  document.getElementById("dist-title").textContent=s.distLabel;
+  renderLineChart("evol-chart", s.evol, {min:s.evolMin,max:s.evolMax,invert:s.evolInvert,suffix:s.evolSuffix});
+  renderBarChart("dist-chart", s.dist);
+  document.getElementById("tableA-title").textContent=s.tableA.title;
+  document.getElementById("tableB-title").textContent=s.tableB.title;
+  renderTable("tableA-host", s.tableA.cols, s.tableA.rows);
+  renderTable("tableB-host", s.tableB.cols, s.tableB.rows);
+}
+
 /* ---- Inicialización ---- */
 renderMatches();
+renderStats(currentGame);
 
 // Permite enlazar a una sección concreta desde otras pantallas (p. ej. 01-...html#stats)
 const _hash = location.hash.replace("#","");
