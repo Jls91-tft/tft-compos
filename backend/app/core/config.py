@@ -14,8 +14,11 @@ class Settings(BaseSettings):
     # --- Riot API ---
     # AQUÍ va tu clave de https://developer.riotgames.com (en el .env del otro PC).
     riot_api_key: str = "RGAPI-PON-TU-CLAVE-AQUI"
-    riot_region: str = "europe"      # routing regional: americas | asia | europe
-    riot_platform: str = "euw1"      # plataforma: euw1 | na1 | kr | ...
+    riot_region: str = "europe"          # routing regional: americas | asia | europe
+    riot_platform: str = "euw1"          # plataforma: euw1 | na1 | kr | ...
+    default_riot_id: str = ""            # opcional: "Nombre#TAG" para pruebas rápidas
+    http_timeout: float = 15.0
+    riot_max_concurrency: int = 5
 
     # --- IA local (Ollama) ---
     ollama_host: str = "http://ollama:11434"

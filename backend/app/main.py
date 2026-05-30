@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import health, coaching, stats, meta, chat
+from app.routers import health, riot, coaching, stats, meta, chat
 
 app = FastAPI(
     title="Synapse API",
@@ -28,6 +28,7 @@ app.add_middleware(
 
 # Routers de la API
 app.include_router(health.router)
+app.include_router(riot.router)
 app.include_router(coaching.router)
 app.include_router(stats.router)
 app.include_router(meta.router)
