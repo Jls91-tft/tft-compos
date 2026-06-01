@@ -159,6 +159,22 @@
   .sim-stat{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 14px;font-size:13px;color:var(--muted);}
   .sim-stat b{font-size:16px;color:var(--text);}
 
+  /* Herramientas para creadores */
+  .tools{display:flex;gap:6px;flex-shrink:0;}
+  .tool{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:.15s;display:grid;place-items:center;}
+  .tool:hover{border-color:var(--accent);color:#fff;}
+  .tool.on{background:var(--accent-soft);border-color:var(--accent);color:#C9B6FF;}
+  body.present #content{zoom:1.18;}
+  body.clean .topbar,body.clean #filters,body.clean footer{display:none;}
+  body.clean main{padding-top:22px;}
+  .clean-exit{display:none;position:fixed;top:14px;right:14px;z-index:99;border:1px solid var(--accent);background:var(--surface-2);color:#fff;font:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:var(--r-pill);cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45);}
+  body.clean .clean-exit{display:block;}
+  @media print{
+    .topbar,#filters,#tabs,footer,.tools,.clean-exit{display:none!important;}
+    body{background:#0B0E14;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    main{padding:0;max-width:none;}
+  }
+
   /* Cheat sheet de recetas */
   .recipe-grid{display:grid;gap:5px;min-width:660px;}
   .rc-cell{border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px 4px;font-size:10.5px;min-height:48px;}
@@ -206,6 +222,11 @@
       <a class="navlink" href="01-estructura-navegacion.html#meta">Meta</a>
       <button class="navlink" aria-current="page">Lab</button>
     </nav>
+    <div class="tools">
+      <button class="tool" onclick="togglePresent(this)" title="Modo presentación (texto grande para vídeo)">Aa</button>
+      <button class="tool" onclick="toggleClean()" title="Modo captura limpia (oculta la interfaz para grabar)">🎬</button>
+      <button class="tool" onclick="window.print()" title="Exportar / imprimir (guardar como PDF o imagen)">⬇</button>
+    </div>
     <span class="avatar" title="Perfil">N</span>
   </header>
 
@@ -223,6 +244,7 @@
     <div class="modal-card" id="detail-card"></div>
   </div>
 
+  <button class="clean-exit" onclick="toggleClean()">✕ Salir de captura</button>
   <footer>Synapse — Lab (maqueta de rediseño · datos de ejemplo). Marca propia, no afiliada a los titulares de los juegos.</footer>
 
 <script>
@@ -520,6 +542,10 @@ function stagesHTML(){
       return `<div class="stage-col"><div class="stage-h">Etapa ${st}</div><div class="d-list">${rows}</div></div>`;
     }).join("") + `</div>`;
 }
+
+/* ===== Herramientas para creadores de contenido ===== */
+function togglePresent(btn){ document.body.classList.toggle("present"); btn.classList.toggle("on"); }
+function toggleClean(){ document.body.classList.toggle("clean"); }
 
 renderTabs();
 render();
