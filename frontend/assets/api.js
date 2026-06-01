@@ -7,6 +7,11 @@ const API = {
 
   riotId() { return localStorage.getItem("synapse_riot_id") || ""; },
   setRiotId(v) { localStorage.setItem("synapse_riot_id", (v || "").trim()); },
+  lang() {
+    const saved = localStorage.getItem("synapse_lang");
+    if (saved) return saved;
+    return (navigator.language || "es").toLowerCase().indexOf("en") === 0 ? "en" : "es";
+  },
 
   _q(params) {
     const p = new URLSearchParams(params);
@@ -36,11 +41,11 @@ const API = {
   },
 
   matches(game) { return this._get(`/coaching/matches?${this._q({ game })}`); },
-  report(game, id) { return this._get(`/coaching/report/${game}/${encodeURIComponent(id)}?${this._q({})}`); },
+  report(game, id) { return this._get(`/coaching/report/${game}/${encodeURIComponent(id)}?${this._q({ lang: this.lang() })}`); },
   stats(game) { return this._get(`/stats?${this._q({ game })}`); },
   meta(game) { return this._get(`/meta?game=${game}`); },
   chat(game, id, question) {
-    return this._post(`/chat`, { game, match_id: id, question, riot_id: this.riotId() });
+    return this._post(`/chat`, { game, match_id: id, question, riot_id: this.riotId(), lang: this.lang() });
   },
   labExplorer(game, kind) { return this._get(`/lab/explorer?game=${game}&kind=${kind}`); },
   labRecipes() { return this._get(`/lab/recipes`); },

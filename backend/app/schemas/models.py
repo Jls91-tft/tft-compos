@@ -54,6 +54,7 @@ class ChatRequest(BaseModel):
     match_id: str
     question: str
     riot_id: str = ""            # opcional: da contexto de partida al chat real
+    lang: str = "es"             # idioma de la respuesta del coach (es | en)
 
 
 class ChatResponse(BaseModel):

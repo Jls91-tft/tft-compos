@@ -53,10 +53,11 @@ async def list_matches(game: Game = "tft", riot_id: str = Query(default="", desc
 
 
 @router.get("/report/{game}/{match_id}", response_model=CoachingReport)
-async def get_report(game: Game, match_id: str, riot_id: str = Query(default="", description="Nombre#TAG")):
+async def get_report(game: Game, match_id: str, riot_id: str = Query(default="", description="Nombre#TAG"),
+                     lang: str = Query(default="es", description="Idioma del informe: es | en")):
     """Informe de coaching de una partida (mock o IA local según USE_MOCK)."""
     try:
-        report = await coaching_engine.generate_report(game, match_id, riot_id or settings.default_riot_id)
+        report = await coaching_engine.generate_report(game, match_id, riot_id or settings.default_riot_id, lang)
     except RiotApiError as e:
         raise _riot_error(e)
     except OllamaError as e:

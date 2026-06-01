@@ -14,7 +14,7 @@ async def chat(req: ChatRequest):
     """Responde una pregunta sobre la partida (mock o IA local según USE_MOCK)."""
     try:
         answer = await coaching_engine.answer_question(
-            req.game, req.match_id, req.question, req.riot_id
+            req.game, req.match_id, req.question, req.riot_id, req.lang
         )
     except RiotApiError as e:
         raise HTTPException(status_code=502 if e.status >= 500 else e.status, detail=e.message)

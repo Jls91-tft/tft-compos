@@ -15,6 +15,18 @@ COACH_SYSTEM = (
     "NUNCA inventes datos que no estén en la información de la partida; si un dato no "
     "aparece, no lo menciones. Evita la jerga vacía: ve al grano."
 )
+COACH_SYSTEM_EN = (
+    "You are Synapse, an expert TFT and League of Legends coach. You speak English, "
+    "with a direct, friendly and motivating tone, for Platinum-Diamond level players. "
+    "Your goal is to help the player improve with concrete, actionable advice. "
+    "NEVER make up data that isn't in the match information; if a value is missing, "
+    "don't mention it. Avoid empty jargon: get to the point."
+)
+
+
+def system_for(lang: str = "es") -> str:
+    """Devuelve el system prompt del coach según idioma (es por defecto)."""
+    return COACH_SYSTEM_EN if lang == "en" else COACH_SYSTEM
 
 _ROLE_ES = {"TOP": "Top", "JUNGLE": "Jungla", "MIDDLE": "Mid", "BOTTOM": "ADC", "UTILITY": "Support"}
 
@@ -81,29 +93,46 @@ def _tft_summary(match: dict, puuid: str) -> dict:
 
 
 # ----------------------------- Construcción de prompts -----------------------------
-def build_report_prompt(game: str, summary: dict) -> str:
+def build_report_prompt(game: str, summary: dict, lang: str = "es") -> str:
     datos = json.dumps(summary, ensure_ascii=False, indent=2)
+    structure = """{
+  "verdict": "1-2 frases: qué definió la partida",
+  "focus": "1 frase: el consejo prioritario para la próxima partida",
+  "metrics": [{"value": "valor", "label": "qué mide", "status": "good|warn|bad", "benchmark": "referencia"}],
+  "did_well": ["2 o 3 aciertos concretos"],
+  "errors": [{"title": "título", "severity": "major|minor", "what": "qué pasó", "why": "por qué te costó", "fix": "cómo subsanarlo", "when": "el momento"}],
+  "corrective": "un párrafo con el ajuste clave",
+  "action_plan": ["3 o 4 pasos accionables para la próxima partida"]
+}"""
+    if lang == "en":
+        return f"""Analyze this match and produce a coaching report.
+
+MATCH DATA:
+{datos}
+
+Return ONLY valid JSON with this EXACT structure. Keep the keys exactly as shown, but write ALL text values in English:
+{structure}
+
+Use ONLY the data present above. Between 3 and 5 metrics and between 1 and 3 errors."""
     return f"""Analiza esta partida y genera un informe de coaching.
 
 DATOS DE LA PARTIDA:
 {datos}
 
-Devuelve EXCLUSIVAMENTE un JSON válido con esta estructura exacta (todo en español):
-{{
-  "verdict": "1-2 frases: qué definió la partida",
-  "focus": "1 frase: el consejo prioritario para la próxima partida",
-  "metrics": [{{"value": "valor", "label": "qué mide", "status": "good|warn|bad", "benchmark": "referencia"}}],
-  "did_well": ["2 o 3 aciertos concretos"],
-  "errors": [{{"title": "título", "severity": "major|minor", "what": "qué pasó", "why": "por qué te costó", "fix": "cómo subsanarlo", "when": "el momento"}}],
-  "corrective": "un párrafo con el ajuste clave",
-  "action_plan": ["3 o 4 pasos accionables para la próxima partida"]
-}}
+Devuelve EXCLUSIVAMENTE un JSON válido con esta estructura exacta (todos los textos en español):
+{structure}
 
 Usa SOLO los datos presentes arriba. Entre 3 y 5 métricas y entre 1 y 3 errores."""
 
 
-def build_chat_prompt(game: str, summary: dict, question: str) -> str:
+def build_chat_prompt(game: str, summary: dict, question: str, lang: str = "es") -> str:
     datos = json.dumps(summary, ensure_ascii=False)
+    if lang == "en":
+        return (
+            f"Match context ({game.upper()}): {datos}\n\n"
+            f"Player question: {question}\n\n"
+            "Answer in 2-4 sentences, concrete and actionable, using only the context. Reply in English."
+        )
     return (
         f"Contexto de la partida ({game.upper()}): {datos}\n\n"
         f"Pregunta del jugador: {question}\n\n"
