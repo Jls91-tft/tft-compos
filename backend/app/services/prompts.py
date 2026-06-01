@@ -88,6 +88,43 @@ def _clean_id(raw: str) -> str:
     return (raw or "").split("_")[-1]
 
 
+# Clasificación de ítems para detectar al carry REAL (no la unidad con más ítems).
+# Nombres ya "limpios" (sin TFT_Item_) y en minúscula. Los ítems completos base son
+# bastante estables entre sets; puede necesitar un repaso al cambiar de set.
+_DAMAGE_ITEMS = frozenset({
+    "infinityedge", "deathblade", "giantslayer", "lastwhisper", "runaanshurricane",
+    "rapidfirecannon", "statikkshiv", "guinsoosrageblade", "rabadonsdeathcap",
+    "jeweledgauntlet", "hextechgunblade", "spearofshojin", "archangelsstaff",
+    "bluebuff", "nashorstooth", "bloodthirster", "morellonomicon", "redbuff",
+    "titansresolve", "handofjustice", "voidstaff", "deathfiregrasp", "kraken",
+})
+_TANK_ITEMS = frozenset({
+    "warmogsarmor", "bramblevest", "dragonsclaw", "gargoylestoneplate",
+    "frozenheart", "crownguard", "sunfirecape", "redemption", "protectorsvow",
+    "steadfastheart", "spectralgauntlet", "evenshroud", "adaptivehelm",
+    "ionicspark", "guardianangel", "edgeofnight", "quicksilver",
+})
+
+
+def _damage_items(items: list) -> int:
+    return sum(1 for it in items if (it or "").lower() in _DAMAGE_ITEMS)
+
+
+def _pick_carry(units: list) -> dict | None:
+    """El carry es la unidad con más ítems de DAÑO (desempate: estrellas, nº ítems).
+
+    Si ninguna unidad lleva ítems de daño no afirmamos un carry (devolvemos None):
+    eso es en sí un hallazgo (ítems repartidos o sin carry de daño claro), no un
+    pretexto para etiquetar a un tanque como carry por llevar muchos ítems.
+    """
+    best = max(
+        units,
+        key=lambda u: (_damage_items(u["items"]), u["estrellas"] or 0, len(u["items"])),
+        default=None,
+    )
+    return best if best and _damage_items(best["items"]) > 0 else None
+
+
 def _tft_summary(match: dict, puuid: str) -> dict:
     info = match["info"]
     me = next(p for p in info["participants"] if p.get("puuid") == puuid)
@@ -107,8 +144,8 @@ def _tft_summary(match: dict, puuid: str) -> dict:
         }
         for u in me.get("units", [])
     ]
-    # Carry probable: la que más ítems lleva (desempate por estrellas).
-    carry = max(units, key=lambda x: (len(x["items"]), x["estrellas"] or 0), default=None)
+    # Carry real: la unidad con ítems de daño (ver _pick_carry). Puede ser None.
+    carry = _pick_carry(units)
     return {
         "juego": "TFT",
         "colocacion": me.get("placement"),
@@ -120,7 +157,7 @@ def _tft_summary(match: dict, puuid: str) -> dict:
         "aumentos": [_clean_id(a) for a in me.get("augments", [])],
         "rasgos_activos": traits,
         "unidades": units,
-        "carry_principal": carry["unidad"] if carry else None,
+        "carry_principal": carry,
         "duracion_min": round((info.get("game_length", 0) or 0) / 60, 1),
     }
 
@@ -128,21 +165,63 @@ def _tft_summary(match: dict, puuid: str) -> dict:
 # ----------------------------- Construcción de prompts -----------------------------
 # Rúbrica de qué mirar en cada juego: empuja al modelo a un análisis específico.
 _RUBRIC_TFT_ES = (
-    "EVALÚA específicamente (cita los datos): la itemización de tu carry_principal (¿ítems "
-    "completos y correctos para esa unidad?, ¿ítems repartidos en unidades equivocadas?); las "
-    "estrellas de las unidades clave frente a su rareza; el nivel del jugador para la última_ronda "
-    "alcanzada (tempo de subida/economía); el encaje de los aumentos con la comp final; la fuerza y "
-    "nivel de los rasgos_activos (¿breakpoints desperdiciados?); y el oro_sobrante al final."
+    "EVALÚA específicamente (cita los datos): la itemización de tu carry_principal (¿lleva sus 3 "
+    "ítems de daño completos?, ¿hay ítems de daño repartidos en unidades equivocadas?). Si "
+    "carry_principal es null, NINGUNA unidad tenía ítems de daño: eso ya es un error grave (ítems "
+    "desperdiciados o en tanques), dilo. NO trates a un tanque (ítems de resistencia) como carry. "
+    "Evalúa también las estrellas de las unidades clave frente a su rareza; el nivel del jugador para "
+    "la última_ronda alcanzada según el arquetipo (no asumas que subir de nivel siempre es bueno); el "
+    "encaje de los aumentos con la comp final; la fuerza y nivel de los rasgos_activos (¿breakpoints "
+    "desperdiciados?); y el oro_sobrante al final frente al umbral de interés de 50."
 )
 _RUBRIC_LOL_ES = (
     "EVALÚA específicamente (cita los datos): cs_por_min frente al estándar del rol, el KDA y el "
     "daño_a_campeones, el vision_score, y la participación en objetivos_equipo."
 )
 _RUBRIC_TFT_EN = (
-    "ASSESS specifically (cite the data): your carry_principal's itemization (complete/correct items "
-    "for that unit?, items wasted on the wrong units?); key units' star levels vs their rarity; the "
-    "player level for the last_round reached (econ/leveling tempo); how the augments fit the final "
-    "comp; the strength and tier of active traits (wasted breakpoints?); and leftover gold."
+    "ASSESS specifically (cite the data): your carry_principal's itemization (does it hold its 3 "
+    "complete damage items?, are damage items spread on the wrong units?). If carry_principal is null, "
+    "NO unit had damage items: that itself is a major error (wasted items or items on tanks), say so. "
+    "Do NOT treat a tank (resist items) as a carry. Also assess key units' star levels vs rarity; the "
+    "player level for the last_round reached given the archetype (don't assume leveling up is always "
+    "good); how augments fit the final comp; trait strength/tier (wasted breakpoints?); and leftover "
+    "gold vs the 50-gold interest threshold."
+)
+
+# Fundamentos duraderos del juego: conceptos que casi no cambian entre parches.
+# Sin nombres de campeones/rasgos concretos (eso cambia por set y no es fiable).
+_FUNDAMENTOS_TFT_ES = (
+    "FUNDAMENTOS DE TFT (aplícalos al juzgar; no los recites literalmente):\n"
+    "- ECONOMÍA: ganas interés por cada 10 de oro guardado, hasta un máximo de 50 (5 de interés). "
+    "Mantener 50 maximiza el ingreso; bajar de 50 solo se justifica para estabilizar la vida o cerrar.\n"
+    "- NIVEL Y TEMPO: subir de nivel NO es bueno por sí mismo, depende del arquetipo. 'Fast 8' sube "
+    "rápido a nivel 8 para acceder a unidades de 4 coste; las comps 'reroll' se quedan en nivel 6-7 "
+    "farmeando estrellas de 1-2 costes. El nivel 9 es para 5 costes y el 10 es raro y casi nunca "
+    "decisivo. No recomiendes 'subir más nivel' sin justificarlo con el arquetipo.\n"
+    "- ÍTEMS: concentra los ítems de DAÑO en UNA sola carry; repartirlos es un error grave. Los "
+    "tanques llevan ítems de resistencia/utilidad. Una carry sin sus 3 ítems completos rinde muy poco. "
+    "El rol de una unidad lo definen sus ÍTEMS, no cuántos lleva: un tanque con 3 ítems defensivos "
+    "sigue siendo tanque.\n"
+    "- RASGOS: un breakpoint alto activo vale más que muchos rasgos a nivel bajo; activar un rasgo "
+    "flojo 'porque sí' rara vez aporta.\n"
+    "- POSICIONAMIENTO Y VIDA: la carry va protegida detrás y los tanques delante; perder rondas a "
+    "propósito (lose streak) para guardar oro e interés es una jugada válida, no siempre un error."
+)
+_FUNDAMENTOS_TFT_EN = (
+    "TFT FUNDAMENTALS (apply them when judging; don't recite verbatim):\n"
+    "- ECONOMY: you earn interest per 10 gold banked, capped at 50 (5 interest). Holding 50 maximizes "
+    "income; dropping below 50 is only justified to stabilize health or to close out the game.\n"
+    "- LEVEL & TEMPO: leveling up is NOT good per se, it depends on the archetype. 'Fast 8' levels "
+    "quickly to 8 for 4-cost units; 'reroll' comps stay at level 6-7 farming 1-2 cost star-ups. Level "
+    "9 is for 5-costs and level 10 is rare and almost never decisive. Don't recommend 'level more' "
+    "without justifying it by archetype.\n"
+    "- ITEMS: stack DAMAGE items on ONE carry; spreading them is a major error. Tanks carry "
+    "resist/utility items. A carry without its 3 complete items underperforms badly. A unit's role is "
+    "defined by its ITEMS, not how many it holds: a tank with 3 defensive items is still a tank.\n"
+    "- TRAITS: one high active breakpoint beats many low-tier traits; activating a weak trait 'just "
+    "because' rarely helps.\n"
+    "- POSITIONING & HEALTH: the carry stays protected at the back, tanks at the front; intentionally "
+    "losing rounds (lose streak) to bank gold and interest is a valid play, not always a mistake."
 )
 _RUBRIC_LOL_EN = (
     "ASSESS specifically (cite the data): cs per minute vs the role standard, the KDA and damage to "
@@ -163,10 +242,12 @@ def build_report_prompt(game: str, summary: dict, lang: str = "es") -> str:
 }"""
     rubric = _RUBRIC_TFT_ES if game == "tft" else _RUBRIC_LOL_ES
     rubric_en = _RUBRIC_TFT_EN if game == "tft" else _RUBRIC_LOL_EN
+    fundamentos = (_FUNDAMENTOS_TFT_ES + "\n\n") if game == "tft" else ""
+    fundamentals_en = (_FUNDAMENTOS_TFT_EN + "\n\n") if game == "tft" else ""
     if lang == "en":
         return f"""Analyze this match like a Challenger coach and produce a demanding coaching report.
 
-MATCH DATA:
+{fundamentals_en}MATCH DATA:
 {datos}
 
 {rubric_en}
@@ -177,7 +258,7 @@ Return ONLY valid JSON with this EXACT structure. Keep the keys exactly as shown
 RULES: Use ONLY the data above; never invent. Every point must quote a concrete data value. NO generic filler. 3 to 5 metrics and 1 to 3 errors. If the placement was good, still name what separated it from 1st."""
     return f"""Analiza esta partida como un coach de Challenger y genera un informe de coaching exigente.
 
-DATOS DE LA PARTIDA:
+{fundamentos}DATOS DE LA PARTIDA:
 {datos}
 
 {rubric}
