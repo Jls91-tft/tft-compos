@@ -163,29 +163,38 @@ def _tft_summary(match: dict, puuid: str) -> dict:
 
 
 # ----------------------------- Construcción de prompts -----------------------------
-# Rúbrica de qué mirar en cada juego: empuja al modelo a un análisis específico.
+# Dimensiones que el modelo PUEDE mirar: no es un checklist obligatorio, es un mapa
+# para que el análisis sea específico sin forzar hallazgos donde no los hay.
 _RUBRIC_TFT_ES = (
-    "EVALÚA específicamente (cita los datos): la itemización de tu carry_principal (¿lleva sus 3 "
-    "ítems de daño completos?, ¿hay ítems de daño repartidos en unidades equivocadas?). Si "
-    "carry_principal es null, NINGUNA unidad tenía ítems de daño: eso ya es un error grave (ítems "
-    "desperdiciados o en tanques), dilo. NO trates a un tanque (ítems de resistencia) como carry. "
-    "Evalúa también las estrellas de las unidades clave frente a su rareza; el nivel del jugador para "
-    "la última_ronda alcanzada según el arquetipo (no asumas que subir de nivel siempre es bueno); el "
-    "encaje de los aumentos con la comp final; la fuerza y nivel de los rasgos_activos (¿breakpoints "
-    "desperdiciados?); y el oro_sobrante al final frente al umbral de interés de 50."
+    "Tu trabajo es encontrar el motivo REAL de esta colocación, no rellenar una plantilla. Examina "
+    "los datos y comenta SOLO las dimensiones donde haya un problema o un acierto de verdad; ignora "
+    "las demás y NUNCA fabriques un error para cumplir una cuota. Dimensiones que puedes considerar: "
+    "itemización de la carry_principal (¿sus 3 ítems de daño completos?, ¿ítems de daño desperdiciados "
+    "en la unidad equivocada?; si carry_principal es null, ninguna unidad llevaba ítems de daño, eso sí "
+    "es un fallo real); el rol de cada unidad lo definen sus ÍTEMS, jamás trates a un tanque como "
+    "carry; estrellas de las unidades clave frente a su rareza; el nivel alcanzado según el arquetipo "
+    "(fast 8 vs reroll); el encaje de los aumentos con la comp; los breakpoints de los rasgos. "
+    "LÍMITES DE LOS DATOS (respétalos): el oro_sobrante es el del FINAL de la partida; terminar con "
+    "poco oro es NORMAL y correcto (al cerrar o al morir se gasta todo rolando o subiendo nivel) y NO "
+    "es un fallo de economía. No tienes el oro ni el tablero ronda a ronda, así que NO juzgues la "
+    "gestión de economía intra-partida ni el posicionamiento exacto a partir del estado final."
 )
 _RUBRIC_LOL_ES = (
     "EVALÚA específicamente (cita los datos): cs_por_min frente al estándar del rol, el KDA y el "
     "daño_a_campeones, el vision_score, y la participación en objetivos_equipo."
 )
 _RUBRIC_TFT_EN = (
-    "ASSESS specifically (cite the data): your carry_principal's itemization (does it hold its 3 "
-    "complete damage items?, are damage items spread on the wrong units?). If carry_principal is null, "
-    "NO unit had damage items: that itself is a major error (wasted items or items on tanks), say so. "
-    "Do NOT treat a tank (resist items) as a carry. Also assess key units' star levels vs rarity; the "
-    "player level for the last_round reached given the archetype (don't assume leveling up is always "
-    "good); how augments fit the final comp; trait strength/tier (wasted breakpoints?); and leftover "
-    "gold vs the 50-gold interest threshold."
+    "Your job is to find the REAL reason for this placement, not to fill a template. Look at the data "
+    "and comment ONLY on the dimensions where there is a genuine problem or strength; ignore the rest "
+    "and NEVER fabricate an error to meet a quota. Dimensions you may consider: carry_principal's "
+    "itemization (3 complete damage items?, damage items wasted on the wrong unit?; if carry_principal "
+    "is null, no unit had damage items, that is a real flaw); a unit's role is defined by its ITEMS, "
+    "never treat a tank as a carry; key units' star levels vs rarity; the level reached given the "
+    "archetype (fast 8 vs reroll); how augments fit the comp; trait breakpoints. DATA LIMITS (respect "
+    "them): leftover gold is the FINAL value; finishing with little gold is NORMAL and correct (when "
+    "closing or dying you spend it all rolling or leveling) and is NOT an economy mistake. You do not "
+    "have per-round gold or board state, so do NOT judge in-game economy management or exact "
+    "positioning from the final state."
 )
 
 # Fundamentos duraderos del juego: conceptos que casi no cambian entre parches.
@@ -193,7 +202,9 @@ _RUBRIC_TFT_EN = (
 _FUNDAMENTOS_TFT_ES = (
     "FUNDAMENTOS DE TFT (aplícalos al juzgar; no los recites literalmente):\n"
     "- ECONOMÍA: ganas interés por cada 10 de oro guardado, hasta un máximo de 50 (5 de interés). "
-    "Mantener 50 maximiza el ingreso; bajar de 50 solo se justifica para estabilizar la vida o cerrar.\n"
+    "Mantener 50 maximiza el ingreso; bajar de 50 solo se justifica para estabilizar la vida o cerrar. "
+    "OJO: el oro que ves es el del FINAL de la partida, no refleja la economía intra-partida; acabar "
+    "con poco oro es normal (al cerrar o morir se gasta todo) y NO es un error.\n"
     "- NIVEL Y TEMPO: subir de nivel NO es bueno por sí mismo, depende del arquetipo. 'Fast 8' sube "
     "rápido a nivel 8 para acceder a unidades de 4 coste; las comps 'reroll' se quedan en nivel 6-7 "
     "farmeando estrellas de 1-2 costes. El nivel 9 es para 5 costes y el 10 es raro y casi nunca "
@@ -210,7 +221,9 @@ _FUNDAMENTOS_TFT_ES = (
 _FUNDAMENTOS_TFT_EN = (
     "TFT FUNDAMENTALS (apply them when judging; don't recite verbatim):\n"
     "- ECONOMY: you earn interest per 10 gold banked, capped at 50 (5 interest). Holding 50 maximizes "
-    "income; dropping below 50 is only justified to stabilize health or to close out the game.\n"
+    "income; dropping below 50 is only justified to stabilize health or to close out the game. NOTE: "
+    "the gold you see is the FINAL value, it does not reflect in-game economy; finishing with little "
+    "gold is normal (when closing or dying you spend it all) and is NOT a mistake.\n"
     "- LEVEL & TEMPO: leveling up is NOT good per se, it depends on the archetype. 'Fast 8' levels "
     "quickly to 8 for 4-cost units; 'reroll' comps stay at level 6-7 farming 1-2 cost star-ups. Level "
     "9 is for 5-costs and level 10 is rare and almost never decisive. Don't recommend 'level more' "
@@ -255,7 +268,7 @@ def build_report_prompt(game: str, summary: dict, lang: str = "es") -> str:
 Return ONLY valid JSON with this EXACT structure. Keep the keys exactly as shown, write ALL text values in English:
 {structure}
 
-RULES: Use ONLY the data above; never invent. Every point must quote a concrete data value. NO generic filler. 3 to 5 metrics and 1 to 3 errors. If the placement was good, still name what separated it from 1st."""
+RULES: Use ONLY the data above; never invent or pad. Every claim must quote a concrete data value. NO generic filler. Quality over quantity: include 2 to 5 metrics that actually matter and 0 to 3 REAL errors; if the game was clean it is correct to list no major errors and instead name the fine detail that separated it from 1st. Never fabricate a problem to fill a slot."""
     return f"""Analiza esta partida como un coach de Challenger y genera un informe de coaching exigente.
 
 {fundamentos}DATOS DE LA PARTIDA:
@@ -266,7 +279,7 @@ RULES: Use ONLY the data above; never invent. Every point must quote a concrete 
 Devuelve EXCLUSIVAMENTE un JSON válido con esta estructura exacta (todos los textos en español):
 {structure}
 
-REGLAS: Usa SOLO los datos de arriba; nunca inventes. Cada punto debe citar un dato concreto. NADA de relleno genérico. Entre 3 y 5 métricas y entre 1 y 3 errores. Si la colocación fue buena, di igualmente qué la separó del puesto 1."""
+REGLAS: Usa SOLO los datos de arriba; nunca inventes ni rellenes. Cada afirmación debe citar un dato concreto. PROHIBIDO el relleno genérico. Calidad sobre cantidad: incluye 2 a 5 métricas que de verdad importen y entre 0 y 3 errores REALES; si la partida fue limpia es correcto no listar errores mayores y centrarte en el matiz fino que la separó del puesto 1. No fabriques un problema para rellenar un hueco."""
 
 
 def build_chat_prompt(game: str, summary: dict, question: str, lang: str = "es") -> str:
