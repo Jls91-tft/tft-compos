@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Lab (centro de entrenamiento)</title>
+<!--
+  MAQUETA de rediseño (ETAPA 2) — look "vibrante con profundidad" + sección Lab.
+  Autónoma (doble clic). Datos de ejemplo. Marca propia, sin assets de Riot.
+  // En producción, las tablas saldrán de /api (stats agregadas de meta).
+-->
+<style>
+  :root{
+    --bg:#090B11;--surface:#141925;--surface-2:#1A2030;--border:#262D3D;--border-soft:#1E2433;
+    --text:#EAF0F7;--muted:#8C97A8;
+    --accent:#8B5CF6;--accent-2:#22D3EE;--accent-strong:#7C3AED;
+    --accent-soft:rgba(139,92,246,.16);--glow:rgba(139,92,246,.45);
+    --good:#3FD17A;--warn:#E3B341;--bad:#F85B6B;--gold:#E9C16B;
+    --r-lg:18px;--r-md:13px;--r-sm:9px;--r-pill:999px;
+    --grad:linear-gradient(100deg,var(--accent),var(--accent-2));
+    --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(820px 480px at 88% -8%,rgba(139,92,246,.20),transparent 60%),
+      radial-gradient(760px 460px at 2% 4%,rgba(34,211,238,.12),transparent 58%),
+      radial-gradient(600px 600px at 50% 120%,rgba(139,92,246,.10),transparent 60%),
+      var(--bg);
+    background-attachment:fixed;}
+  ::selection{background:var(--glow);color:#fff;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+  a{color:var(--accent);text-decoration:none;}
+
+  /* Topbar */
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;padding:13px 24px;flex-wrap:wrap;
+    background:rgba(9,11,17,.72);backdrop-filter:blur(16px) saturate(140%);border-bottom:1px solid transparent;
+    border-image:linear-gradient(90deg,transparent,rgba(139,92,246,.5),rgba(34,211,238,.4),transparent) 1;
+    box-shadow:0 8px 30px rgba(0,0,0,.35);}
+  .brand{display:flex;align-items:center;gap:11px;flex-shrink:0;}
+  .brand .logo{filter:drop-shadow(0 0 10px var(--glow));}
+  .brand .name{font-size:21px;font-weight:850;letter-spacing:.3px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .game-switch{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;gap:2px;flex-shrink:0;}
+  .game-switch button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:7px 16px;border-radius:var(--r-pill);cursor:pointer;transition:.18s;min-height:30px;}
+  .game-switch button[aria-pressed="true"]{background:var(--grad);color:#0A0C12;box-shadow:0 2px 14px var(--glow);}
+  .game-switch button:hover[aria-pressed="false"]{color:var(--text);}
+
+  /* Buscador rápido */
+  .search{position:relative;flex:1;min-width:200px;max-width:420px;}
+  .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.6;}
+  .search input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);color:var(--text);font:inherit;font-size:14px;padding:11px 16px 11px 40px;transition:.18s;}
+  .search input:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
+  .search .hint{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:2px 7px;}
+
+  nav.main-nav{display:flex;align-items:center;gap:4px;}
+  .navlink{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:9px 13px;border-radius:var(--r-sm);cursor:pointer;transition:.18s;}
+  .navlink:hover{color:var(--text);background:var(--surface);}
+  .navlink[aria-current="page"]{color:var(--text);background:var(--accent-soft);box-shadow:inset 0 0 0 1px rgba(139,92,246,.4);}
+  .navlink .pill-ia{font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#0A0C12;background:var(--grad);padding:2px 6px;border-radius:var(--r-pill);}
+  .avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-weight:800;font-size:13px;color:#0A0C12;background:var(--grad);box-shadow:0 0 12px var(--glow);}
+
+  main{max-width:1200px;margin:0 auto;padding:30px 24px 90px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin:0 0 10px;}
+  h1.title{font-size:32px;font-weight:850;margin:0 0 6px;letter-spacing:-.4px;}
+  .subtitle{color:var(--muted);font-size:15.5px;margin:0 0 26px;max-width:64ch;}
+
+  /* Tabs del Lab */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+  .tab{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:var(--r-pill);cursor:pointer;transition:.18s;}
+  .tab .ti{width:20px;height:20px;display:grid;place-items:center;}
+  .tab:hover{color:var(--text);border-color:var(--accent);transform:translateY(-1px);}
+  .tab[aria-selected="true"]{color:#0A0C12;background:var(--grad);border-color:transparent;box-shadow:0 6px 20px var(--glow);}
+
+  .panel{background:linear-gradient(180deg,var(--surface),rgba(20,25,37,.6));border:1px solid var(--border);border-radius:var(--r-lg);padding:8px;box-shadow:0 10px 30px rgba(0,0,0,.28);}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px 12px;}
+  .panel-head h2{font-size:16px;font-weight:800;margin:0;}
+  .count{font-size:12px;color:var(--muted);}
+  .sort{display:inline-flex;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;}
+  .sort button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:12px;padding:6px 12px;border-radius:var(--r-pill);cursor:pointer;}
+  .sort button[aria-pressed="true"]{background:var(--accent-soft);color:#C9B6FF;}
+
+  /* Filas del explorador */
+  .rows{display:flex;flex-direction:column;}
+  .row{display:grid;grid-template-columns:46px 1.4fr 150px 90px 1.3fr;gap:14px;align-items:center;padding:13px 16px;border-radius:var(--r-md);transition:.16s;}
+  .row:hover{background:var(--surface-2);box-shadow:inset 0 0 0 1px rgba(139,92,246,.25);}
+  .row + .row{border-top:1px solid var(--border-soft);}
+  .row.head{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:6px 16px;}
+  .row.head:hover{background:transparent;box-shadow:none;}
+  .xico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-weight:850;font-size:14px;color:#fff;position:relative;flex-shrink:0;box-shadow:0 3px 10px rgba(0,0,0,.3);}
+  .xico.unit{border:1.5px solid var(--c);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 45%,#10141f),#10141f);}
+  .xico.item{border:1.5px solid rgba(139,92,246,.55);background:linear-gradient(160deg,rgba(139,92,246,.35),rgba(34,211,238,.18));}
+  .xico.aug{border:1.5px solid var(--c);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 40%,#10141f),#10141f);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);border-radius:0;}
+  .r-name{font-size:14.5px;font-weight:700;} .r-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .wr{display:flex;align-items:center;gap:9px;}
+  .wr-bar{flex:1;height:7px;border-radius:99px;background:var(--bg);border:1px solid var(--border);overflow:hidden;}
+  .wr-fill{height:100%;width:0;border-radius:99px;transition:width .7s cubic-bezier(.2,.7,.2,1);}
+  .wr-num{font-size:13px;font-weight:800;min-width:42px;text-align:right;}
+  .pct{font-size:13.5px;font-weight:800;text-align:center;}
+  .pct small{display:block;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;}
+  .chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);}
+  .chip.c{border-color:var(--c);color:color-mix(in srgb,var(--c) 80%,#fff);}
+
+  .empty{padding:40px;text-align:center;color:var(--muted);}
+
+  /* Simulador (placeholder atractivo) */
+  .sim-wrap{display:grid;grid-template-columns:1fr 280px;gap:18px;}
+  .sim-board{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;}
+  .hexcell{aspect-ratio:1/.9;border-radius:10px;background:linear-gradient(160deg,rgba(139,92,246,.08),transparent);border:1px dashed var(--border);}
+  .sim-side .traits{display:flex;flex-direction:column;gap:9px;}
+  .trait{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 13px;font-size:13px;}
+  .trait b{font-weight:800;} .trait .lv{font-size:11px;color:#0A0C12;background:var(--grad);padding:2px 8px;border-radius:var(--r-pill);font-weight:800;}
+  .soon{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#C9B6FF;background:var(--accent-soft);border:1px solid rgba(139,92,246,.4);padding:6px 13px;border-radius:var(--r-pill);}
+
+  footer{border-top:1px solid var(--border);margin-top:42px;padding:24px;text-align:center;color:var(--muted);font-size:12.5px;}
+
+  /* Filtros globales */
+  .filters{display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;margin-bottom:20px;padding:12px 15px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);}
+  .fgroup{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .fl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-right:2px;}
+  .fpill{border:1px solid var(--border);background:var(--bg);color:var(--muted);font:inherit;font-weight:700;font-size:12px;padding:5px 11px;border-radius:var(--r-pill);cursor:pointer;transition:.15s;}
+  .fpill:hover{color:var(--text);border-color:var(--accent);}
+  .fpill[aria-pressed="true"]{background:var(--accent-soft);color:#C9B6FF;border-color:var(--accent);}
+
+  /* Modal drill-down */
+  .modal{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(6,8,12,.72);backdrop-filter:blur(7px);padding:20px;}
+  .modal[hidden]{display:none;}
+  .modal-card{position:relative;width:min(540px,100%);max-height:88vh;overflow:auto;background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid rgba(139,92,246,.4);border-radius:var(--r-lg);padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.55);}
+  .modal-x{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--muted);font-size:18px;cursor:pointer;}
+  .modal-x:hover{color:#fff;border-color:var(--accent);}
+  .d-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+  .d-name{font-size:20px;font-weight:850;} .d-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+  .d-stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .d-stat{flex:1;min-width:90px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);padding:12px;text-align:center;}
+  .d-stat .dv{font-size:22px;font-weight:850;} .d-stat .dk{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:3px;}
+  .d-sec{margin-top:16px;} .d-sec-t{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:9px;}
+  .d-list{display:flex;flex-direction:column;gap:7px;}
+  .d-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 13px;font-size:13.5px;}
+  .d-mut{color:var(--muted);}
+  .d-foot{margin-top:18px;font-size:11px;color:var(--muted);opacity:.6;}
+
+  /* Simulador interactivo */
+  .hexcell.filled{border-style:solid;cursor:pointer;}
+  .cell-unit{width:84%;height:84%;border-radius:9px;display:grid;place-items:center;font-weight:850;font-size:12px;color:#fff;border:1.5px solid var(--c);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 50%,#10141f),#10141f);position:relative;}
+  .cell-unit .rm{position:absolute;top:-7px;right:-7px;width:17px;height:17px;border-radius:50%;background:var(--bad);color:#fff;font-size:11px;display:none;place-items:center;}
+  .hexcell.filled:hover .cell-unit .rm{display:grid;}
+  .palette{display:flex;flex-wrap:wrap;gap:8px;}
+  .pal-unit{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--surface);border-radius:var(--r-pill);padding:5px 13px 5px 6px;cursor:pointer;font:inherit;font-size:13px;font-weight:700;color:var(--text);transition:.15s;}
+  .pal-unit:hover{border-color:var(--accent);transform:translateY(-1px);}
+  .pal-unit[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;}
+  .pal-dot{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;font-weight:850;color:#fff;border:1.5px solid var(--c);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 50%,#10141f),#10141f);}
+  .syn{display:flex;flex-direction:column;gap:8px;}
+  .syn-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 13px;font-size:13px;transition:.18s;}
+  .syn-item.on{border-color:rgba(139,92,246,.5);box-shadow:0 0 16px rgba(139,92,246,.12);}
+  .syn-item.off{opacity:.45;}
+  .syn-lv{font-size:11px;font-weight:800;padding:2px 9px;border-radius:var(--r-pill);}
+  .sim-stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .sim-stat{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 14px;font-size:13px;color:var(--muted);}
+  .sim-stat b{font-size:16px;color:var(--text);}
+
+  /* Herramientas para creadores */
+  .tools{display:flex;gap:6px;flex-shrink:0;}
+  .tool{width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-weight:800;font-size:14px;cursor:pointer;transition:.15s;display:grid;place-items:center;}
+  .tool:hover{border-color:var(--accent);color:#fff;}
+  .tool.on{background:var(--accent-soft);border-color:var(--accent);color:#C9B6FF;}
+  body.present #content{zoom:1.18;}
+  body.clean .topbar,body.clean #filters,body.clean footer{display:none;}
+  body.clean main{padding-top:22px;}
+  .clean-exit{display:none;position:fixed;top:14px;right:14px;z-index:99;border:1px solid var(--accent);background:var(--surface-2);color:#fff;font:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:var(--r-pill);cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45);}
+  body.clean .clean-exit{display:block;}
+  @media print{
+    .topbar,#filters,#tabs,footer,.tools,.clean-exit{display:none!important;}
+    body{background:#0B0E14;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    main{padding:0;max-width:none;}
+  }
+
+  /* Simulador pro: ítems y compartir */
+  .islots{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);display:flex;gap:2px;}
+  .islot{width:7px;height:7px;border-radius:2px;border:1px solid var(--border);background:var(--bg);}
+  .islot.f{background:linear-gradient(160deg,var(--accent),var(--accent-2));border-color:var(--accent);}
+  .hexcell.filled .cell-unit{cursor:grab;}
+  .itempick .modal-card{width:min(420px,100%);}
+  .pick-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .pick-it{border:1px solid var(--border);background:var(--bg);color:var(--text);font:inherit;font-size:12.5px;font-weight:700;padding:7px 12px;border-radius:var(--r-pill);cursor:pointer;transition:.15s;}
+  .pick-it:hover{border-color:var(--accent);}
+  .pick-it.on{background:var(--accent-soft);border-color:var(--accent);color:#C9B6FF;}
+  #sim-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);background:var(--surface-2);border:1px solid var(--accent);color:var(--text);padding:12px 18px;border-radius:var(--r-md);font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.2s;z-index:95;box-shadow:0 10px 30px rgba(0,0,0,.45);}
+  #sim-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* Cheat sheet de recetas */
+  .recipe-grid{display:grid;gap:5px;min-width:660px;}
+  .rc-cell{border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px 4px;font-size:10.5px;min-height:48px;}
+  .rc-corner{color:var(--muted);font-size:17px;}
+  .rc-comp{background:var(--surface-2);border:1px solid var(--border);font-size:16px;font-weight:800;}
+  .rc-comp small{display:block;font-size:8.5px;color:var(--muted);font-weight:600;margin-top:1px;}
+  .rc-item{background:var(--bg);border:1px solid var(--border-soft);color:var(--text);font-weight:600;line-height:1.15;transition:.15s;}
+  .rc-item:hover{border-color:var(--accent);background:var(--accent-soft);}
+  .rc-item.hit{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent);}
+  /* Augments por etapa */
+  .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 16px 14px;}
+  .stage-col .stage-h{font-size:12px;font-weight:800;color:#C9B6FF;margin-bottom:8px;}
+  @media(max-width:680px){ .stages{grid-template-columns:1fr;} }
+
+  @media(max-width:860px){
+    .row{grid-template-columns:42px 1fr 90px;gap:10px;}
+    .row .wr,.row.head .h-wr{display:none;} .row .chips{grid-column:1/-1;} .row.head .h-chips{display:none;}
+    .sim-wrap{grid-template-columns:1fr;}
+    .search{order:5;max-width:none;width:100%;}
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/><circle cx="23" cy="9" r="2.4" fill="#22D3EE"/>
+        <circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
+        <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
+      </svg>
+      <span class="name">Synapse</span>
+    </div>
+    <div class="game-switch" role="group" aria-label="Juego">
+      <button id="g-tft" aria-pressed="true" onclick="setGame('tft')">TFT</button>
+      <button id="g-lol" aria-pressed="false" onclick="setGame('lol')">LoL</button>
+    </div>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="#8C97A8" stroke-width="2"/><path d="M20 20l-3.2-3.2" stroke="#8C97A8" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="q" placeholder="Busca un ítem, unidad o augment…" autocomplete="off" oninput="render()">
+      <span class="hint">rápido</span>
+    </div>
+    <nav class="main-nav" aria-label="Secciones">
+      <a class="navlink" href="index.html#coaching">Coaching <span class="pill-ia">IA</span></a>
+      <a class="navlink" href="index.html#stats">Perfil</a>
+      <a class="navlink" href="index.html#meta">Meta</a>
+      <button class="navlink" aria-current="page">Lab</button>
+    </nav>
+    <div class="tools">
+      <button class="tool" onclick="togglePresent(this)" title="Modo presentación (texto grande para vídeo)">Aa</button>
+      <button class="tool" onclick="toggleClean()" title="Modo captura limpia (oculta la interfaz para grabar)">🎬</button>
+      <button class="tool" onclick="window.print()" title="Exportar / imprimir (guardar como PDF o imagen)">⬇</button>
+    </div>
+    <span class="avatar" title="Perfil">N</span>
+  </header>
+
+  <main>
+    <p class="eyebrow">⚡ Centro de entrenamiento</p>
+    <h1 class="title">Lab</h1>
+    <p class="subtitle">Estudia el juego: simula comps, y consulta winrates de unidades, ítems y augments. Pensado para mirar rápido, incluso en mitad de una partida.</p>
+
+    <div class="tabs" id="tabs"></div>
+    <div id="filters"></div>
+    <div id="content"></div>
+  </main>
+
+  <div class="modal" id="detail" hidden onclick="if(event.target===this)closeDetail()">
+    <div class="modal-card" id="detail-card"></div>
+  </div>
+
+  <div class="modal itempick" id="itempick" hidden onclick="if(event.target===this)closePicker()">
+    <div class="modal-card">
+      <button class="modal-x" onclick="closePicker()" aria-label="Cerrar">×</button>
+      <div class="d-name" id="pick-title">Ítems</div>
+      <div class="pick-grid" id="pick-grid"></div>
+      <div class="d-foot">Máximo 3 ítems por unidad. Toca para añadir o quitar.</div>
+    </div>
+  </div>
+
+  <button class="clean-exit" onclick="toggleClean()">✕ Salir de captura</button>
+  <footer>Synapse — Lab (maqueta de rediseño · datos de ejemplo). Marca propia, no afiliada a los titulares de los juegos.</footer>
+
+<script>
+/* ============ DATOS DE EJEMPLO (mock) — sin nombres de Riot ============
+   // En producción salen de /api (stats agregadas de meta). */
+/* Set de iconos propios (SVG genérico, sin assets de Riot).
+   // PUNTO ÚNICO DE SUSTITUCIÓN: en producción, si las políticas de Riot lo permiten,
+   // svgIcon() puede devolver <img> de Data Dragon / Community Dragon (iconos oficiales). */
+const ICONS={
+  star:'<path d="M12 3l2.2 6.3 6.8.2-5.4 4 2 6.5L12 16.8 6.4 20l2-6.5-5.4-4 6.8-.2z" fill="currentColor"/>',
+  shield:'<path d="M12 3l7 2.5V11c0 4-3 7-7 8-4-1-7-4-7-8V5.5z" fill="currentColor"/>',
+  sword:'<path d="M18.5 5.5l-8 8M14 5.5h4.5V10M4.5 19.5l3-3M8.5 15l1.5 1.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  bow:'<path d="M5 19C12 17.5 17.5 12 19 5M5 19l4.5-1.2M5 19l1.2-4.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  wand:'<path d="M5 19l9-9M14.5 6.5l3-3M17.5 3.5l1.5 1.5M14.5 6.5l1.5 1.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  bolt:'<path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/>',
+  eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/>',
+  crown:'<path d="M4 8l3.2 3.6L12 5l4.8 6.6L20 8v9H4z" fill="currentColor"/>',
+  heart:'<path d="M12 20s-6.5-4.2-6.5-9A3.7 3.7 0 0112 8a3.7 3.7 0 016.5 3c0 4.8-6.5 9-6.5 9z" fill="currentColor"/>',
+  gem:'<path d="M6 4h12l3 5-9 11L3 9z" fill="currentColor"/>'
+};
+function svgIcon(key,color,size){ size=size||22; return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="color:${color};display:block" aria-hidden="true">${ICONS[key]||ICONS.gem}</svg>`; }
+const GLYPH={"Místico":"star","Centinela":"shield","Guardián":"shield","Vanguardia":"shield","Berserker":"sword","Hechicero":"wand","Mago":"wand","Invocador":"crown","Vidente":"eye","Francotirador":"bow","Pistolero":"bow","Curandera":"heart","Asesino":"bolt","Mago de control":"wand","Tirador hipercarry":"bow","Luchador de línea":"sword","Encantador":"heart","Tanque iniciador":"shield","Asesino de acceso":"bolt","Bruiser de jungla":"sword","Maga de poke":"wand","Soporte de enganche":"shield"};
+const glyphUnit=(n)=>GLYPH[n]||"sword";
+const COST = {1:"#9AA4B2",2:"#3FD17A",3:"#58A6FF",4:"#B061FF",5:"#E9C16B"};
+const TIER = {S:"#E9C16B",A:"#B061FF",B:"#58A6FF",C:"#8C97A8"};
+const wrColor = (w)=> w>=53?"var(--good)":w>=49?"var(--warn)":"var(--bad)";
+
+const DATA = {
+  tft:{
+    tabs:[{k:"units",label:"Unidades",ico:"♟"},{k:"items",label:"Ítems",ico:"◈"},{k:"augments",label:"Augments",ico:"❖"},{k:"recipes",label:"Recetas",ico:"⚗"},{k:"sim",label:"Simulador",ico:"⊞"}],
+    units:[
+      {n:"Místico",cost:4,wr:58,use:24,sub:"Portador mágico",chips:["Báculo Arcano","Velo Espectral","Reloj de Arena"]},
+      {n:"Centinela",cost:5,wr:56,use:18,sub:"Tanque",chips:["Égida del Guardián","Manto Rúnico"]},
+      {n:"Francotirador",cost:4,wr:54,use:21,sub:"Carry físico",chips:["Filo Voraz","Guante Letal"]},
+      {n:"Vanguardia",cost:1,wr:52,use:40,sub:"Frontline reroll",chips:["Cota Reforzada"]},
+      {n:"Invocador",cost:5,wr:51,use:12,sub:"Escalado tardío",chips:["Tomo Arcano"]},
+      {n:"Pistolero",cost:2,wr:48,use:27,sub:"Carry reroll",chips:["Filo Voraz","Guante Letal"]},
+      {n:"Hechicero",cost:3,wr:55,use:19,sub:"Daño mágico",chips:["Vara Letal","Reloj de Arena"]},
+      {n:"Guardián",cost:2,wr:53,use:22,sub:"Tanque reroll",chips:["Égida del Guardián"]},
+      {n:"Berserker",cost:2,wr:50,use:17,sub:"Luchador",chips:["Filo Voraz"]},
+      {n:"Vidente",cost:3,wr:49,use:15,sub:"Control",chips:["Reloj de Arena"]},
+      {n:"Curandera",cost:1,wr:47,use:20,sub:"Sostén",chips:["Lágrima Eterna"]},
+      {n:"Mago",cost:4,wr:53,use:14,sub:"Portador mágico",chips:["Báculo Arcano"]},
+    ],
+    items:[
+      {n:"Báculo Arcano",wr:60,use:19,sub:"Poder mágico",chips:["Místico","Hechicero"]},
+      {n:"Filo Voraz",wr:57,use:23,sub:"Robo de vida",chips:["Francotirador","Pistolero"]},
+      {n:"Égida del Guardián",wr:55,use:15,sub:"Aguante",chips:["Centinela","Guardián"]},
+      {n:"Reloj de Arena",wr:53,use:11,sub:"Utilidad",chips:["Místico"]},
+      {n:"Guante Letal",wr:50,use:21,sub:"Crítico",chips:["Francotirador"]},
+      {n:"Manto Rúnico",wr:47,use:14,sub:"Resist. mágica",chips:["Centinela"]},
+      {n:"Velo Espectral",wr:54,use:12,sub:"Anti-mágico",chips:["Centinela","Guardián"]},
+      {n:"Reloj de Arena",wr:52,use:13,sub:"Utilidad",chips:["Místico","Vidente"]},
+      {n:"Lágrima Eterna",wr:49,use:18,sub:"Maná",chips:["Hechicero","Mago"]},
+      {n:"Corona Solar",wr:46,use:9,sub:"Daño en área",chips:["Mago"]},
+    ],
+    augments:[
+      {n:"Convergencia Mística",tier:"S",wr:61,use:9,sub:"Refuerza Místicos",chips:["Flex Místicos"]},
+      {n:"Corazón de Cristal",tier:"S",wr:58,use:14,sub:"Económico-poder",chips:["Flex Místicos","Hiperscaling Magos"]},
+      {n:"Mente Táctica",tier:"A",wr:55,use:12,sub:"Tempo",chips:["Reroll Vanguardias"]},
+      {n:"Botín de Guerra",tier:"A",wr:53,use:10,sub:"Oro por combate",chips:["Fast 8 Francotiradores"]},
+      {n:"Eco Resonante",tier:"B",wr:49,use:8,sub:"Situacional",chips:["Hiperscaling Magos"]},
+      {n:"Tempo Perfecto",tier:"A",wr:54,use:11,sub:"Tempo de nivel",chips:["Reroll Vanguardias"]},
+      {n:"Reserva de Oro",tier:"B",wr:50,use:13,sub:"Económico",chips:["Hiperscaling Magos"]},
+      {n:"Doble Problema",tier:"C",wr:47,use:7,sub:"Reroll agresivo",chips:["Reroll Pistoleros"]},
+    ],
+  },
+  lol:{
+    tabs:[{k:"units",label:"Campeones",ico:"♟"},{k:"items",label:"Ítems",ico:"◈"},{k:"augments",label:"Runas",ico:"❖"},{k:"sim",label:"Builds",ico:"⊞"}],
+    units:[
+      {n:"Mago de control",cost:4,wr:54,use:14,sub:"Mid",chips:["Tomo Arcano","Cetro Abisal"]},
+      {n:"Tirador hipercarry",cost:4,wr:52,use:16,sub:"ADC",chips:["Filo Voraz","Botas Veloces"]},
+      {n:"Luchador de línea",cost:3,wr:52,use:11,sub:"Top",chips:["Égida de Hierro"]},
+      {n:"Encantador",cost:2,wr:51,use:12,sub:"Support",chips:["Cetro Abisal"]},
+      {n:"Asesino",cost:4,wr:50,use:9,sub:"Mid",chips:["Filo Voraz"]},
+      {n:"Tanque iniciador",cost:3,wr:49,use:8,sub:"Top",chips:["Égida de Hierro"]},
+      {n:"Asesino de acceso",cost:4,wr:50,use:9,sub:"Mid/Jungla",chips:["Filo Voraz"]},
+      {n:"Bruiser de jungla",cost:3,wr:51,use:13,sub:"Jungla",chips:["Lanza Crepuscular"]},
+      {n:"Maga de poke",cost:3,wr:52,use:10,sub:"Mid",chips:["Grimorio Prohibido"]},
+      {n:"Soporte de enganche",cost:2,wr:49,use:11,sub:"Support",chips:["Coraza Vital"]},
+    ],
+    items:[
+      {n:"Filo Voraz",wr:55,use:22,sub:"Crítico + robo vida",chips:["Tirador hipercarry","Asesino"]},
+      {n:"Tomo Arcano",wr:54,use:18,sub:"Poder de habilidad",chips:["Mago de control"]},
+      {n:"Égida de Hierro",wr:53,use:15,sub:"Aguante",chips:["Luchador de línea","Tanque iniciador"]},
+      {n:"Cetro Abisal",wr:51,use:13,sub:"Penetración mágica",chips:["Mago de control","Encantador"]},
+      {n:"Botas Veloces",wr:50,use:31,sub:"Movilidad",chips:["Todos los roles"]},
+      {n:"Lanza Crepuscular",wr:52,use:14,sub:"Bruiser",chips:["Bruiser de jungla","Luchador de línea"]},
+      {n:"Grimorio Prohibido",wr:51,use:12,sub:"Poder mágico",chips:["Maga de poke","Mago de control"]},
+      {n:"Coraza Vital",wr:50,use:16,sub:"Tanque",chips:["Tanque iniciador"]},
+      {n:"Daga Veloz",wr:48,use:19,sub:"Vel. ataque",chips:["Tirador hipercarry"]},
+    ],
+    augments:[
+      {n:"Conquistador",tier:"S",wr:54,use:17,sub:"Combate prolongado",chips:["Luchador de línea"]},
+      {n:"Cometa Arcano",tier:"A",wr:52,use:14,sub:"Daño a distancia",chips:["Mago de control"]},
+      {n:"Golpe Letal",tier:"A",wr:51,use:12,sub:"Burst",chips:["Asesino"]},
+      {n:"Aro de Hielo",tier:"B",wr:49,use:9,sub:"Tanque/utilidad",chips:["Tanque iniciador"]},
+      {n:"Tormenta Veloz",tier:"A",wr:52,use:13,sub:"Vel. ataque",chips:["Tirador hipercarry"]},
+      {n:"Muro de Hueso",tier:"B",wr:49,use:10,sub:"Defensa",chips:["Tanque iniciador"]},
+      {n:"Sed de Sangre",tier:"B",wr:50,use:11,sub:"Sustain",chips:["Bruiser de jungla"]},
+    ],
+  },
+};
+
+let currentGame="tft", currentTab="units", sortBy="wr";
+/* Conexión a la API (con fallback a los datos de ejemplo si no hay backend disponible) */
+const LABCACHE={tft:{},lol:{}};
+async function labFetch(p){ const r=await fetch("/api"+p); if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); }
+async function loadExplorer(game,kind){
+  if(LABCACHE[game][kind]) return LABCACHE[game][kind];
+  try{ const d=await labFetch(`/lab/explorer?game=${game}&kind=${kind}`); LABCACHE[game][kind]=d.items||[]; return LABCACHE[game][kind]; }
+  catch(e){ return DATA[game][kind]; }
+}
+
+function renderTabs(){
+  document.getElementById("tabs").innerHTML = DATA[currentGame].tabs.map(t=>
+    `<button class="tab" role="tab" aria-selected="${currentTab===t.k}" onclick="setTab('${t.k}')"><span class="ti">${t.ico}</span> ${t.label}</button>`
+  ).join("");
+}
+function setTab(k){ currentTab=k; renderTabs(); render(); }
+function setGame(g){
+  currentGame=g;
+  document.getElementById("g-tft").setAttribute("aria-pressed",g==="tft");
+  document.getElementById("g-lol").setAttribute("aria-pressed",g==="lol");
+  if(!DATA[g].tabs.find(t=>t.k===currentTab)) currentTab="units";
+  renderTabs(); render();
+}
+function setSort(s){ sortBy=s; render(); }
+
+function iconHTML(item){
+  if(currentTab==="units") return `<div class="xico unit" style="--c:${COST[item.cost]}">${svgIcon(glyphUnit(item.n),COST[item.cost],22)}</div>`;
+  if(currentTab==="augments") return `<div class="xico aug" style="--c:${TIER[item.tier]}">${svgIcon('star',TIER[item.tier],16)}</div>`;
+  return `<div class="xico item">${svgIcon('gem','#C4B5FD',20)}</div>`;
+}
+function rowHTML(item){
+  const sub = currentTab==="units" ? `${item.sub} · ${item.cost}🪙` : item.sub;
+  const chipCls = currentTab==="units" ? "" : "";
+  const chips = (item.chips||[]).map(c=>`<span class="chip">${c}</span>`).join("");
+  const m2label = currentTab==="augments" ? "Pick" : "Uso";
+  return `<div class="row" data-n="${item.n}" onclick="openDetail('${currentTab}', this.dataset.n)" style="cursor:pointer">
+    ${iconHTML(item)}
+    <div><div class="r-name">${item.n}</div><div class="r-sub">${sub}</div></div>
+    <div class="wr"><div class="wr-bar"><div class="wr-fill" data-w="${item.wr}" style="background:${wrColor(item.wr)}"></div></div><span class="wr-num">${item.wr}%</span></div>
+    <div class="pct">${item.use}%<small>${m2label}</small></div>
+    <div class="chips">${chips}</div>
+  </div>`;
+}
+
+async function render(){
+  renderFilters();
+  const c = document.getElementById("content");
+  if(currentTab==="sim"){ renderSim(); return; }
+  if(currentTab==="recipes"){ renderRecipes(); return; }
+  const q = (document.getElementById("q").value||"").toLowerCase();
+  const base = await loadExplorer(currentGame, currentTab);
+  let rows = base.map(r => ({...r, wr: varWr(r.wr)}));
+  rows = rows.filter(r => r.n.toLowerCase().includes(q) || (r.sub||"").toLowerCase().includes(q) || (r.chips||[]).some(ch=>ch.toLowerCase().includes(q)));
+  rows.sort((a,b)=> sortBy==="wr" ? b.wr-a.wr : b.use-a.use);
+  const label = DATA[currentGame].tabs.find(t=>t.k===currentTab).label;
+  const colName = currentTab==="units" ? (currentGame==="tft"?"Unidad":"Campeón") : (currentTab==="items"?"Ítem":(currentGame==="tft"?"Augment":"Runa"));
+  const m2 = currentTab==="augments" ? "Pick" : "Uso";
+  const body = rows.length ? `
+    <div class="row head"><span></span><span>${colName}</span><span class="h-wr">Winrate</span><span>${m2}</span><span class="h-chips">${currentTab==="items"?"Mejor en":"Mejores con"}</span></div>
+    <div class="rows">${rows.map(rowHTML).join("")}</div>` : `<div class="empty">Sin resultados para “${q}”.</div>`;
+  c.innerHTML = `<div class="panel">
+    <div class="panel-head">
+      <h2>${label} <span class="count">· ${rows.length}</span></h2>
+      <div class="sort"><button aria-pressed="${sortBy==='wr'}" onclick="setSort('wr')">Winrate</button><button aria-pressed="${sortBy==='use'}" onclick="setSort('use')">${m2}</button></div>
+    </div>${(currentTab==="augments"&&currentGame==="tft")?stagesHTML():""}${body}</div>`;
+  requestAnimationFrame(()=> document.querySelectorAll(".wr-fill").forEach(f=> f.style.width=f.dataset.w+"%"));
+}
+
+/* ============ Simulador de comps (TFT) — datos de ejemplo ============ */
+const SIM_TFT = {
+  traits: { "Místicos":[2,4,6], "Guardianes":[2,4], "Hechiceros":[2,3,4], "Tiradores":[2,4], "Berserkers":[2,3], "Vanguardia":[2,4] },
+  units: [
+    {n:"Vanguardia",cost:1,front:true,traits:["Vanguardia","Guardianes"]},
+    {n:"Guardián",cost:2,front:true,traits:["Guardianes"]},
+    {n:"Berserker",cost:2,front:true,traits:["Berserkers"]},
+    {n:"Pistolero",cost:2,traits:["Tiradores"]},
+    {n:"Hechicero",cost:3,traits:["Hechiceros","Místicos"]},
+    {n:"Vidente",cost:3,traits:["Místicos"]},
+    {n:"Francotirador",cost:4,traits:["Tiradores"]},
+    {n:"Místico",cost:4,traits:["Místicos","Hechiceros"]},
+    {n:"Centinela",cost:5,front:true,traits:["Guardianes","Místicos"]},
+    {n:"Invocador",cost:5,traits:["Hechiceros"]},
+  ],
+};
+let board = Array(28).fill(null);   // cada celda: null o {n, items:[]}
+let pickTarget = null, dragFrom = null;
+const simUnit = (n) => SIM_TFT.units.find(x => x.n === n);
+const tierOf = (count, th) => th.reduce((lv, t) => lv + (count >= t ? 1 : 0), 0);
+const ITEM_POOL = ["Báculo Arcano","Filo de Maná","Velo Espectral","Égida del Guardián","Manto Rúnico","Filo Letal","Arco Letal","Vara Letal","Corazón Titán","Doble Crítico","Emblema Mago","Fuente de Maná"];
+const countUnits = () => board.filter(Boolean).length;
+
+function computeTraits(){
+  const counts = {}, seen = new Set();
+  board.forEach(cell => { if(!cell || seen.has(cell.n)) return; seen.add(cell.n); const u = simUnit(cell.n); if(u) u.traits.forEach(t => counts[t] = (counts[t]||0) + 1); });
+  return Object.keys(SIM_TFT.traits).map(t => {
+    const c = counts[t]||0, th = SIM_TFT.traits[t];
+    return { t, c, lv: tierOf(c, th), on: tierOf(c, th) > 0, next: th.find(x => x > c), topTh: Math.max(...th) };
+  }).sort((a, b) => (b.on - a.on) || (b.c - a.c));
+}
+function addUnit(n){ if(countUnits() >= 10) return; const i = board.findIndex(c => !c); if(i >= 0){ board[i] = {n, items:[]}; persist(); renderSim(); } }
+function removeAt(i){ board[i] = null; persist(); renderSim(); }
+function clearBoard(){ board = Array(28).fill(null); persist(); renderSim(); }
+function dragPal(n){ dragFrom = {type:'pal', n}; }
+function dragCell(i){ dragFrom = {type:'cell', i}; }
+function onDrop(i){
+  if(!dragFrom) return;
+  if(dragFrom.type === 'pal'){ if(!board[i] && countUnits() < 10) board[i] = {n:dragFrom.n, items:[]}; }
+  else { const f = dragFrom.i; const tmp = board[i]; board[i] = board[f]; board[f] = tmp; }
+  dragFrom = null; persist(); renderSim();
+}
+function openItems(i){ if(!board[i]) return; pickTarget = i; renderPicker(); document.getElementById("itempick").hidden = false; }
+function closePicker(){ document.getElementById("itempick").hidden = true; pickTarget = null; }
+function assignItem(it){ const cell = board[pickTarget]; if(!cell) return; const k = cell.items.indexOf(it); if(k >= 0) cell.items.splice(k,1); else if(cell.items.length < 3) cell.items.push(it); persist(); renderPicker(); renderSim(); }
+function renderPicker(){ const cell = board[pickTarget]; if(!cell) return;
+  document.getElementById("pick-title").textContent = `Ítems de ${cell.n} (${cell.items.length}/3)`;
+  document.getElementById("pick-grid").innerHTML = ITEM_POOL.map(it => `<button class="pick-it ${cell.items.includes(it)?'on':''}" onclick="assignItem('${it}')">${it}</button>`).join("");
+}
+function persist(){ try{ const d = board.map(c => c ? {n:c.n,i:c.items} : 0); location.hash = "b=" + btoa(unescape(encodeURIComponent(JSON.stringify(d)))); }catch(e){} }
+function loadHash(){ const m = location.hash.match(/b=([^&]+)/); if(!m) return; try{ const d = JSON.parse(decodeURIComponent(escape(atob(m[1])))); board = d.map(c => c ? {n:c.n, items:c.i||[]} : null); }catch(e){} }
+function shareComp(){ persist(); if(navigator.clipboard){ navigator.clipboard.writeText(location.href).then(()=>simToast("Enlace de la comp copiado ✓")).catch(()=>simToast("Copia la URL para compartir")); } else simToast("Copia la URL para compartir"); }
+let _tt; function simToast(msg){ let el=document.getElementById("sim-toast"); if(!el){ el=document.createElement("div"); el.id="sim-toast"; document.body.appendChild(el); } el.textContent=msg; el.className="show"; clearTimeout(_tt); _tt=setTimeout(()=>el.className="",2600); }
+function renderSim(){
+  const c = document.getElementById("content");
+  if (currentGame !== "tft") { c.innerHTML = simLolHTML(); return; }
+  const cells = board.map((cell,i) => {
+    if (!cell) return `<div class="hexcell" ondragover="event.preventDefault()" ondrop="onDrop(${i})"></div>`;
+    const u = simUnit(cell.n);
+    const dots = [0,1,2].map(k => `<span class="islot ${cell.items[k]?'f':''}" title="${cell.items[k]||''}"></span>`).join("");
+    return `<div class="hexcell filled" ondragover="event.preventDefault()" ondrop="onDrop(${i})">
+      <div class="cell-unit" draggable="true" ondragstart="dragCell(${i})" onclick="openItems(${i})" title="${cell.n}" style="--c:${COST[u.cost]}">${svgIcon(glyphUnit(cell.n),'#fff',22)}<span class="rm" onclick="event.stopPropagation();removeAt(${i})">×</span><span class="islots">${dots}</span></div>
+    </div>`;
+  }).join("");
+  const syn = computeTraits().map(t => {
+    const col = t.lv >= 3 ? "var(--gold)" : t.lv === 2 ? "var(--accent)" : "var(--accent-2)";
+    return `<div class="syn-item ${t.on ? 'on' : 'off'}"><span><b>${t.t}</b> <span style="color:var(--muted)">${t.c}/${t.topTh}</span></span>
+      <span class="syn-lv" style="color:#0A0C12;background:${t.on ? col : 'var(--border)'}">${t.on ? ('Nv ' + t.lv) : (t.next ? ('faltan ' + (t.next - t.c)) : '—')}</span></div>`;
+  }).join("");
+  const cost = board.reduce((s, cell) => s + (cell ? simUnit(cell.n).cost : 0), 0);
+  const palette = SIM_TFT.units.map(u =>
+    `<button class="pal-unit" draggable="true" ondragstart="dragPal('${u.n}')" onclick="addUnit('${u.n}')"><span class="pal-dot" style="--c:${COST[u.cost]}">${svgIcon(glyphUnit(u.n),'#fff',14)}</span>${u.n}</button>`).join("");
+  c.innerHTML = `<div class="panel"><div class="panel-head"><h2>Simulador de comps <span class="count">· pro</span></h2>
+      <div style="display:flex;gap:8px"><button class="pal-unit" onclick="shareComp()">🔗 Compartir</button><button class="pal-unit" onclick="clearBoard()">↺ Vaciar</button></div></div>
+    <div style="padding:0 16px 18px;">
+      <div class="sim-stats"><div class="sim-stat"><b>${countUnits()}</b> / 10 unidades</div><div class="sim-stat">Coste <b>${cost}</b> 🪙</div><div class="sim-stat">Nivel sugerido <b>${Math.max(countUnits(), 1)}</b></div></div>
+      <div class="sim-wrap">
+        <div>
+          <div class="sim-board">${cells}</div>
+          <p style="color:var(--muted);font-size:12px;margin:10px 0 8px;">Arrastra una unidad al tablero (o tócala para añadirla) · arrástrala entre casillas para colocar · toca una ficha para asignarle ítems · <b>Compartir</b> copia un enlace con tu comp.</p>
+          <div class="palette">${palette}</div>
+        </div>
+        <div class="sim-side"><div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px;">Sinergias activas</div><div class="syn">${syn}</div></div>
+      </div>
+    </div></div>`;
+}
+function simLolHTML(){
+  const slots = Array.from({length:6}).map(() => `<div class="hexcell" style="aspect-ratio:1"></div>`).join("");
+  return `<div class="panel"><div class="panel-head"><h2>Builds de campeón (LoL)</h2><span class="soon">✦ Próximo paso</span></div>
+    <div style="padding:0 16px 18px;">
+      <p style="color:var(--muted);font-size:14px;max-width:60ch;">El builder de LoL (6 objetos + runas, con coste y sinergias) llega en el siguiente paso. El simulador de tablero ya está disponible en <b>TFT</b>.</p>
+      <div class="sim-board" style="grid-template-columns:repeat(6,1fr);max-width:430px;margin-top:14px;">${slots}</div>
+    </div></div>`;
+}
+
+/* ===== Filtros globales (rango/región/parche/cola) ===== */
+const RANKS = ["Todos","Esmeralda+","Diamante+","Maestro+","Challenger"];
+let filtRank="Diamante+", filtRegion="EUW", filtPatch="17.4", filtQueue="Normal";
+function varWr(w){ const d = RANKS.indexOf(filtRank) - 2; return Math.max(40, Math.min(72, Math.round((w + d) * 10) / 10)); }
+function renderFilters(){
+  const queues = currentGame==="tft" ? ["Normal","Double Up","Hyperroll"] : ["Solo/Dúo","Flex"];
+  if(!queues.includes(filtQueue)) filtQueue = queues[0];
+  const pills = (arr, key, cur) => arr.map(v=>`<button class="fpill" aria-pressed="${cur===v}" onclick="setFilter('${key}','${v}')">${v}</button>`).join("");
+  document.getElementById("filters").innerHTML = `<div class="filters">
+    <div class="fgroup"><span class="fl">Rango</span>${pills(RANKS,'rank',filtRank)}</div>
+    <div class="fgroup"><span class="fl">Región</span>${pills(["EUW","NA","KR","Global"],'region',filtRegion)}</div>
+    <div class="fgroup"><span class="fl">Parche</span>${pills(["17.4","17.3"],'patch',filtPatch)}</div>
+    <div class="fgroup"><span class="fl">Cola</span>${pills(queues,'queue',filtQueue)}</div>
+  </div>`;
+}
+function setFilter(k,v){ ({rank:()=>filtRank=v,region:()=>filtRegion=v,patch:()=>filtPatch=v,queue:()=>filtQueue=v})[k](); render(); }
+
+/* ===== Drill-down (ficha detallada al hacer clic) ===== */
+const sec = (t,body)=>`<div class="d-sec"><div class="d-sec-t">${t}</div>${body}</div>`;
+const chipList = (arr)=>`<div class="chips">${(arr||[]).map(c=>`<span class="chip">${c}</span>`).join("")}</div>`;
+function detailHTML(tab,it){
+  const isTFT = currentGame==="tft", wr = varWr(it.wr), avg = 5-(wr-50)/6;
+  const icon = tab==="units" ? `<div class="xico unit" style="--c:${COST[it.cost]};width:54px;height:54px;border-radius:14px;font-size:18px">${it.n[0]}</div>`
+    : tab==="augments" ? `<div class="xico aug" style="--c:${TIER[it.tier]};width:54px;height:54px;font-size:18px">${it.tier}</div>`
+    : `<div class="xico item" style="width:54px;height:54px;border-radius:14px;font-size:18px">${it.n[0]}</div>`;
+  const sub = tab==="units" ? `${it.cost}🪙 · ${it.sub}` : tab==="augments" ? `${it.tier==="S"?"Prismático":it.tier==="A"?"Oro":"Plata"} · ${it.sub}` : it.sub;
+  const stats = `<div class="d-stats">
+    <div class="d-stat"><div class="dv" style="color:${wrColor(wr)}">${wr}%</div><div class="dk">Winrate</div></div>
+    <div class="d-stat"><div class="dv">${it.use}%</div><div class="dk">${tab==="augments"?"Pick":"Uso"}</div></div>
+    ${isTFT?`<div class="d-stat"><div class="dv">${avg.toFixed(1)}</div><div class="dk">Coloc. media</div></div>`:""}</div>`;
+  let s = "";
+  if(tab==="units"){
+    if(isTFT){ const stars=[[1,avg+1.1],[2,avg],[3,avg-1.4]].map(([st,p])=>`<div class="d-row"><span>${"★".repeat(st)}</span><span class="d-mut">Coloc. ${p.toFixed(1)}</span></div>`).join(""); s+=sec("Por estrella",`<div class="d-list">${stars}</div>`); }
+    s += sec(isTFT?"Mejores ítems (BIS)":"Mejores ítems", chipList(it.chips));
+    s += sec("Mejores comps", chipList(isTFT?["Flex Místicos","Reroll Vanguardias"]:["Poke & escala","Dive"]));
+  } else if(tab==="items"){
+    s += sec("Se forma con", chipList(isTFT?["Espada B.F.","Vara Tempo"]:["Componente base","Componente avanzado"]));
+    s += sec(isTFT?"Mejor en (unidad · WR)":"Mejor en", chipList(it.chips));
+    s += sec("Mejores comps", chipList(isTFT?["Flex Místicos","Fast 8 Francotiradores"]:["Hipercarry","Split push"]));
+  } else {
+    if(isTFT){ const stg=[["2-1",wr-2],["3-2",wr],["4-2",wr+1]].map(([st,w])=>`<div class="d-row"><span>Etapa ${st}</span><span style="color:${wrColor(w)};font-weight:800">${w}%</span></div>`).join(""); s+=sec("Por etapa de oferta",`<div class="d-list">${stg}</div>`); }
+    s += sec(isTFT?"Mejores comps":"Mejores campeones", chipList(it.chips));
+  }
+  return `<button class="modal-x" onclick="closeDetail()" aria-label="Cerrar">×</button>
+    <div class="d-head">${icon}<div><div class="d-name">${it.n}</div><div class="d-sub">${sub}</div></div></div>
+    ${stats}${s}
+    <div class="d-foot">Datos de ${filtRank} · ${filtRegion} · Parche ${filtPatch}. // En producción saldrán de /api.</div>`;
+}
+function openDetail(tab,name){
+  const it = DATA[currentGame][tab].find(x=>x.n===name); if(!it) return;
+  document.getElementById("detail-card").innerHTML = detailHTML(tab,it);
+  document.getElementById("detail").hidden = false;
+}
+function closeDetail(){ document.getElementById("detail").hidden = true; }
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeDetail(); });
+
+/* ===== Cheat sheet de recetas de ítems (TFT) — componentes genéricos ===== */
+const COMPONENTS = [
+  {k:"Espada",ic:"🗡"},{k:"Arco",ic:"🏹"},{k:"Vara",ic:"✨"},{k:"Lágrima",ic:"💧"},{k:"Cota",ic:"🛡"},
+  {k:"Capa",ic:"🧥"},{k:"Cinturón",ic:"🎗"},{k:"Guante",ic:"🥊"},{k:"Pala",ic:"⬣"}
+];
+const RECIPES = {
+  "0-0":"Filo Doble","0-1":"Filo Veloz","0-2":"Hoja Arcana","0-3":"Filo de Maná","0-4":"Tajo Templado","0-5":"Filo Sombrío","0-6":"Mandoble Vital","0-7":"Filo Letal","0-8":"Emblema Guerrero",
+  "1-1":"Ráfaga","1-2":"Arco Rúnico","1-3":"Arco de Maná","1-4":"Arco Templado","1-5":"Arco Espectral","1-6":"Arco Vital","1-7":"Arco Letal","1-8":"Emblema Tirador",
+  "2-2":"Núcleo Arcano","2-3":"Báculo Arcano","2-4":"Vara Templada","2-5":"Velo Arcano","2-6":"Vara Vital","2-7":"Vara Letal","2-8":"Emblema Mago",
+  "3-3":"Fuente de Maná","3-4":"Égida de Maná","3-5":"Velo de Maná","3-6":"Corazón de Maná","3-7":"Maná Letal","3-8":"Emblema Místico",
+  "4-4":"Muralla","4-5":"Bastión","4-6":"Égida del Guardián","4-7":"Cota Afilada","4-8":"Emblema Guardián",
+  "5-5":"Velo Espectral","5-6":"Manto Rúnico","5-7":"Capa Afilada","5-8":"Emblema Centinela",
+  "6-6":"Corazón Titán","6-7":"Guante Vital","6-8":"Emblema Coloso",
+  "7-7":"Doble Crítico","7-8":"Emblema Asesino",
+  "8-8":"Corona Cambiante"
+};
+function renderRecipes(){
+  const c=document.getElementById("content");
+  const q=(document.getElementById("q").value||"").toLowerCase();
+  const n=COMPONENTS.length;
+  let g=`<div class="rc-cell rc-corner">＋</div>`+COMPONENTS.map(cp=>`<div class="rc-cell rc-comp" title="${cp.k}">${cp.ic}<small>${cp.k}</small></div>`).join("");
+  for(let i=0;i<n;i++){
+    g+=`<div class="rc-cell rc-comp" title="${COMPONENTS[i].k}">${COMPONENTS[i].ic}<small>${COMPONENTS[i].k}</small></div>`;
+    for(let j=0;j<n;j++){
+      const a=Math.min(i,j),b=Math.max(i,j),name=RECIPES[a+"-"+b]||"—";
+      const hit=q&&name.toLowerCase().includes(q);
+      g+=`<div class="rc-cell rc-item ${hit?'hit':''}" title="${COMPONENTS[i].k} + ${COMPONENTS[j].k} = ${name}">${name}</div>`;
+    }
+  }
+  c.innerHTML=`<div class="panel"><div class="panel-head"><h2>Recetas de ítems <span class="count">· ${n} componentes · ${Object.keys(RECIPES).length} ítems</span></h2></div>
+    <p style="color:var(--muted);font-size:13px;padding:0 16px 8px;">Cruza dos componentes para ver el ítem que forman. Escribe en el buscador para resaltar un ítem (p. ej. <i>«égida»</i>).</p>
+    <div style="overflow-x:auto;padding:0 16px 18px;"><div class="recipe-grid" style="grid-template-columns:repeat(${n+1},minmax(66px,1fr));">${g}</div></div></div>`;
+}
+
+/* ===== Augments por etapa de oferta (TFT) ===== */
+function stagesHTML(){
+  const augs=DATA.tft.augments;
+  return `<div style="padding:8px 16px 2px;"><div class="d-sec-t">Mejores augments por etapa de oferta</div></div><div class="stages">` +
+    [["2-1",-1],["3-2",0],["4-2",1]].map(([st,delta])=>{
+      const ranked=augs.map(a=>({n:a.n,tier:a.tier,wr:varWr(a.wr)+delta})).sort((x,y)=>y.wr-x.wr).slice(0,4);
+      const rows=ranked.map(a=>`<div class="d-row"><span><span class="syn-lv" style="background:${TIER[a.tier]};color:#0A0C12;margin-right:7px">${a.tier}</span>${a.n}</span><span style="color:${wrColor(a.wr)};font-weight:800">${a.wr}%</span></div>`).join("");
+      return `<div class="stage-col"><div class="stage-h">Etapa ${st}</div><div class="d-list">${rows}</div></div>`;
+    }).join("") + `</div>`;
+}
+
+/* ===== Herramientas para creadores de contenido ===== */
+function togglePresent(btn){ document.body.classList.toggle("present"); btn.classList.toggle("on"); }
+function toggleClean(){ document.body.classList.toggle("clean"); }
+
+loadHash();
+renderTabs();
+render();
+</script>
+</body>
+</html>

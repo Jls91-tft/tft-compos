@@ -42,4 +42,8 @@ const API = {
   chat(game, id, question) {
     return this._post(`/chat`, { game, match_id: id, question, riot_id: this.riotId() });
   },
+  labExplorer(game, kind) { return this._get(`/lab/explorer?game=${game}&kind=${kind}`); },
+  labRecipes() { return this._get(`/lab/recipes`); },
+  labGpi(game) { return this._get(`/lab/gpi?game=${game}`); },
+  labChampion(id) { return this._get(`/lab/champion?id=${encodeURIComponent(id || "mago-control")}`); },
 };
