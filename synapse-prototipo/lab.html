@@ -272,7 +272,9 @@
 <script>
 /* ============ DATOS DE EJEMPLO (mock) — sin nombres de Riot ============
    // En producción salen de /api (stats agregadas de meta). */
-/* Set de iconos propios (SVG genérico, sin assets de Riot) */
+/* Set de iconos propios (SVG genérico, sin assets de Riot).
+   // PUNTO ÚNICO DE SUSTITUCIÓN: en producción, si las políticas de Riot lo permiten,
+   // svgIcon() puede devolver <img> de Data Dragon / Community Dragon (iconos oficiales). */
 const ICONS={
   star:'<path d="M12 3l2.2 6.3 6.8.2-5.4 4 2 6.5L12 16.8 6.4 20l2-6.5-5.4-4 6.8-.2z" fill="currentColor"/>',
   shield:'<path d="M12 3l7 2.5V11c0 4-3 7-7 8-4-1-7-4-7-8V5.5z" fill="currentColor"/>',
