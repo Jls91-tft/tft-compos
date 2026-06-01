@@ -250,14 +250,14 @@
     </nav>
     <div class="tools">
       <button class="tool" onclick="togglePresent(this)" title="Modo presentación (texto grande para vídeo)">Aa</button>
-      <button class="tool" onclick="toggleClean()" title="Modo captura limpia (oculta la interfaz para grabar)">🎬</button>
+      <button class="tool" onclick="toggleClean()" title="Modo captura limpia (oculta la interfaz para grabar)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 10h18M8 5v5M16 5v5" stroke="currentColor" stroke-width="2"/></svg></button>
       <button class="tool" onclick="exportPNG()" title="Exportar como imagen PNG (o imprimir si no hay conexión)">⬇</button>
     </div>
     <span class="avatar" title="Perfil">N</span>
   </header>
 
   <main>
-    <p class="eyebrow">⚡ Centro de entrenamiento</p>
+    <p class="eyebrow">Centro de entrenamiento</p>
     <h1 class="title">Lab</h1>
     <p class="subtitle">Estudia el juego: simula comps, y consulta winrates de unidades, ítems y augments. Pensado para mirar rápido, incluso en mitad de una partida.</p>
 
@@ -415,7 +415,7 @@ function iconHTML(item){
   return `<div class="xico item">${svgIcon('gem','#C4B5FD',20)}</div>`;
 }
 function rowHTML(item){
-  const sub = currentTab==="units" ? `${item.sub} · ${item.cost}🪙` : item.sub;
+  const sub = currentTab==="units" ? `${item.sub} · ${item.cost}` : item.sub;
   const chipCls = currentTab==="units" ? "" : "";
   const chips = (item.chips||[]).map(c=>`<span class="chip">${c}</span>`).join("");
   const m2label = currentTab==="augments" ? "Pick" : "Uso";
@@ -525,9 +525,9 @@ function renderSim(){
   const palette = SIM_TFT.units.map(u =>
     `<button class="pal-unit" draggable="true" ondragstart="dragPal('${u.n}')" onclick="addUnit('${u.n}')"><span class="pal-dot" style="--c:${COST[u.cost]}">${svgIcon(glyphUnit(u.n),'#fff',14)}</span>${u.n}</button>`).join("");
   c.innerHTML = `<div class="panel"><div class="panel-head"><h2>Simulador de comps <span class="count">· pro</span></h2>
-      <div style="display:flex;gap:8px"><button class="pal-unit" onclick="shareComp()">🔗 Compartir</button><button class="pal-unit" onclick="clearBoard()">↺ Vaciar</button></div></div>
+      <div style="display:flex;gap:8px"><button class="pal-unit" onclick="shareComp()">Compartir</button><button class="pal-unit" onclick="clearBoard()">↺ Vaciar</button></div></div>
     <div style="padding:0 16px 18px;">
-      <div class="sim-stats"><div class="sim-stat"><b>${countUnits()}</b> / 10 unidades</div><div class="sim-stat">Coste <b>${cost}</b> 🪙</div><div class="sim-stat">Nivel sugerido <b>${Math.max(countUnits(), 1)}</b></div></div>
+      <div class="sim-stats"><div class="sim-stat"><b>${countUnits()}</b> / 10 unidades</div><div class="sim-stat">Coste <b>${cost}</b></div><div class="sim-stat">Nivel sugerido <b>${Math.max(countUnits(), 1)}</b></div></div>
       <div class="sim-wrap">
         <div>
           <div class="sim-board">${cells}</div>
@@ -572,7 +572,7 @@ function detailHTML(tab,it){
   const icon = tab==="units" ? `<div class="xico unit" style="--c:${COST[it.cost]};width:54px;height:54px;border-radius:14px;font-size:18px">${it.n[0]}</div>`
     : tab==="augments" ? `<div class="xico aug" style="--c:${TIER[it.tier]};width:54px;height:54px;font-size:18px">${it.tier}</div>`
     : `<div class="xico item" style="width:54px;height:54px;border-radius:14px;font-size:18px">${it.n[0]}</div>`;
-  const sub = tab==="units" ? `${it.cost}🪙 · ${it.sub}` : tab==="augments" ? `${it.tier==="S"?"Prismático":it.tier==="A"?"Oro":"Plata"} · ${it.sub}` : it.sub;
+  const sub = tab==="units" ? `${it.cost} · ${it.sub}` : tab==="augments" ? `${it.tier==="S"?"Prismático":it.tier==="A"?"Oro":"Plata"} · ${it.sub}` : it.sub;
   const stats = `<div class="d-stats">
     <div class="d-stat"><div class="dv" style="color:${wrColor(wr)}">${wr}%</div><div class="dk">Winrate</div></div>
     <div class="d-stat"><div class="dv">${it.use}%</div><div class="dk">${tab==="augments"?"Pick":"Uso"}</div></div>
@@ -609,8 +609,8 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeDetail(); })
 
 /* ===== Cheat sheet de recetas de ítems (TFT) — componentes genéricos ===== */
 const COMPONENTS = [
-  {k:"Espada",ic:"🗡"},{k:"Arco",ic:"🏹"},{k:"Vara",ic:"✨"},{k:"Lágrima",ic:"💧"},{k:"Cota",ic:"🛡"},
-  {k:"Capa",ic:"🧥"},{k:"Cinturón",ic:"🎗"},{k:"Guante",ic:"🥊"},{k:"Pala",ic:"⬣"}
+  {k:"Espada",ic:""},{k:"Arco",ic:""},{k:"Vara",ic:""},{k:"Lágrima",ic:""},{k:"Cota",ic:""},
+  {k:"Capa",ic:""},{k:"Cinturón",ic:""},{k:"Guante",ic:""},{k:"Pala",ic:""}
 ];
 const RECIPES = {
   "0-0":"Filo Doble","0-1":"Filo Veloz","0-2":"Hoja Arcana","0-3":"Filo de Maná","0-4":"Tajo Templado","0-5":"Filo Sombrío","0-6":"Mandoble Vital","0-7":"Filo Letal","0-8":"Emblema Guerrero",

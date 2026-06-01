@@ -92,18 +92,18 @@
 
     <div class="report-grid">
       <div class="col-main">
-        <div class="panel"><h3><span class="ic ic-accent">🧩</span> Composición final (nivel 9)</h3><div class="units-grid" id="units-grid"></div></div>
-        <div class="panel"><h3><span class="ic ic-accent">📖</span> Cómo jugarla</h3>
+        <div class="panel"><h3>Composición final (nivel 9)</h3><div class="units-grid" id="units-grid"></div></div>
+        <div class="panel"><h3>Cómo jugarla</h3>
           <div class="phase"><h4><span class="ph-tag">Early · 1-2</span></h4><p>Juega el tablero más fuerte que tengas y prioriza los ítems del portador (Místico). No fuerces la comp: gana rondas y economía.</p></div>
           <div class="phase"><h4><span class="ph-tag">Mid · 3-4</span></h4><p>Transiciona a la línea mística y sube de nivel con tempo. En 4-1 busca tus 4 costes. Mantén la vida &gt; 50 para subir a 8 seguro y coloca al Místico a salvo.</p></div>
           <div class="phase"><h4><span class="ph-tag">Late · 5+</span></h4><p>A nivel 9 añade tus 5 costes y mejora a 2★ tus unidades clave. Ajusta el posicionamiento ronda a ronda según las amenazas.</p></div>
         </div>
-        <div class="panel"><h3><span class="ic ic-accent">🔀</span> Variaciones</h3>
+        <div class="panel"><h3>Variaciones</h3>
           <p class="variations"><b>Control:</b> segundo Vidente si el lobby es agresivo. · <b>Escalado:</b> prioriza al Invocador con vida/eco de sobra. · <b>Tanque:</b> doble frontline contra mucho daño físico.</p>
         </div>
       </div>
       <div class="col-side">
-        <div class="panel"><h3><span class="ic ic-accent">⬆️</span> Niveleo</h3>
+        <div class="panel"><h3>Niveleo</h3>
           <ul class="level-timeline">
             <li><span class="lv-badge">4</span><div><div class="lv-when">Etapa 2-1</div><div class="lv-txt">Tablero fuerte para buscar racha.</div></div></li>
             <li><span class="lv-badge">6</span><div><div class="lv-when">Etapa 3-2</div><div class="lv-txt">Nivel 6 con tempo; estabiliza.</div></div></li>
@@ -112,7 +112,7 @@
             <li><span class="lv-badge">9</span><div><div class="lv-when">Etapa 5-1</div><div class="lv-txt">Añade 5 costes y persigue 2★ clave.</div></div></li>
           </ul>
         </div>
-        <div class="panel"><h3><span class="ic ic-accent">✨</span> Augments recomendados</h3>
+        <div class="panel"><h3>Augments recomendados</h3>
           <ul class="aug-list">
             <li><span class="aug-pri pri-must">Top</span> Convergencia Mística</li>
             <li><span class="aug-pri pri-good">Bueno</span> Corazón de Cristal</li>
@@ -124,7 +124,7 @@
     </div>
 
     <section class="panel" style="margin-top:22px;">
-      <h3><span class="ic ic-accent">🎯</span> Posicionamiento recomendado</h3>
+      <h3>Posicionamiento recomendado</h3>
       <div class="board-layout">
         <div>
           <div class="board-legend">
@@ -169,7 +169,7 @@ document.getElementById("units-grid").innerHTML = UNITS.map(u => {
   const items = u.items.length ? `<div class="item-chips">${u.items.map(it => `<span class="item-chip">${it}</span>`).join("")}</div>` : `<div class="un-role" style="opacity:.7">Sin ítems prioritarios</div>`;
   return `<div class="unit-card" style="border-left-color:${COST[u.c]}">
     <div class="un-top"><div><div class="un-name">${u.n} ${u.carry ? '<span class="carry-flag">Portador</span>' : ""}</div><div class="un-role">${u.role}</div></div>
-    <span class="un-cost" style="color:${COST[u.c]};background:${COST[u.c]}1A;border:1px solid ${COST[u.c]}55">${u.c}🪙</span></div>${items}</div>`;
+    <span class="un-cost" style="color:${COST[u.c]};background:${COST[u.c]}1A;border:1px solid ${COST[u.c]}55">${u.c}</span></div>${items}</div>`;
 }).join("");
 
 const SIZE = 22, HW = Math.sqrt(3) * SIZE, VS = 1.5 * SIZE, MX = 16, MY = 16, VB_W = 320, VB_H = 178;
@@ -182,7 +182,7 @@ UNITS.forEach(u => {
   const ring = u.carry ? "#E3B341" : COST[u.c], ringW = u.carry ? 3.5 : 2;
   s += `<polygon points="${hexPoints(x, y)}" fill="${COST[u.c]}" fill-opacity="0.18" stroke="${ring}" stroke-width="${ringW}"/>`;
   s += `<text x="${x}" y="${y + 1}" class="u-lbl" text-anchor="middle">${u.n.slice(0, 5)}</text>`;
-  s += `<text x="${x}" y="${y + 11}" class="u-cost" text-anchor="middle">${u.c}🪙</text>`;
+  s += `<text x="${x}" y="${y + 11}" class="u-cost" text-anchor="middle">${u.c}</text>`;
 });
 s += `<text x="8" y="${VB_H - 5}" style="font-size:9px;font-weight:700;fill:#6E7681;letter-spacing:1.5px">TU ZONA</text></svg>`;
 document.getElementById("board-host").innerHTML = s;

@@ -34,7 +34,7 @@
 
     <!-- Chat con el coach -->
     <section class="panel" id="chat" style="margin-top:22px;display:none;">
-      <h3><span class="ic ic-accent" aria-hidden="true">💬</span> Pregunta a tu coach</h3>
+      <h3>Pregunta a tu coach</h3>
       <div class="chat-log" id="chat-log">
         <div class="msg coach"><div class="bubble">Pregúntame lo que quieras sobre esta partida. Aquí tienes algunas ideas:</div></div>
       </div>
@@ -105,11 +105,11 @@ function reportHTML(report, match) {
      <div class="report-grid">
        <div class="col-main">
          ${good ? `<div class="panel"><h3><span class="ic ic-good">✓</span> Lo que hiciste bien</h3><ul class="good-list">${good}</ul></div>` : ""}
-         ${errs ? `<div class="panel"><h3><span class="ic ic-bad">⚠</span> Errores clave</h3>${errs}</div>` : ""}
-         ${report.corrective ? `<div class="panel"><h3><span class="ic ic-accent">🧭</span> Qué deberías haber hecho</h3><div class="corrective"><span class="lead">El ajuste clave</span>${report.corrective}</div></div>` : ""}
+         ${errs ? `<div class="panel"><h3>Errores clave</h3>${errs}</div>` : ""}
+         ${report.corrective ? `<div class="panel"><h3>Qué deberías haber hecho</h3><div class="corrective"><span class="lead">El ajuste clave</span>${report.corrective}</div></div>` : ""}
        </div>
        <div class="col-side">
-         ${plan ? `<div class="panel"><h3><span class="ic ic-accent">⚡</span> Plan de acción</h3><ol class="action-list">${plan}</ol></div>` : ""}
+         ${plan ? `<div class="panel"><h3>Plan de acción</h3><ol class="action-list">${plan}</ol></div>` : ""}
        </div>
      </div>`;
 }

@@ -143,7 +143,7 @@ function loadView(v) { v === "coaching" ? renderCoaching() : v === "stats" ? ren
 function renderPlan(game) {
   const p = PLAN[game];
   document.getElementById("plan").innerHTML =
-    `<div class="plan-head"><h2><span aria-hidden="true">🎯</span> Tu plan de mejora</h2><span class="tag">${p.updated}</span></div>` +
+    `<div class="plan-head"><h2>Tu plan de mejora</h2><span class="tag">${p.updated}</span></div>` +
     p.focuses.map(f => {
       const pct = Math.round(f.done / f.total * 100);
       return `<div class="focus-item"><div class="focus-txt"><div class="ft">${f.t}</div><div class="fb">${f.b}</div></div>
@@ -198,12 +198,12 @@ async function renderStats() {
       <h2 class="insights-title">Dónde pierdes LP <span class="tag">IA</span></h2>
       <div class="insights">${(s.insights || []).map(insightHTML).join("")}</div>
       <div class="stat-grid">
-        <div class="panel"><h3><span class="ic">📈</span> ${s.evol.label}</h3><div class="chart-host" id="evol-chart"></div></div>
-        <div class="panel"><h3><span class="ic">📊</span> ${s.dist.label}</h3><div class="chart-host" id="dist-chart"></div></div>
+        <div class="panel"><h3>${s.evol.label}</h3><div class="chart-host" id="evol-chart"></div></div>
+        <div class="panel"><h3>${s.dist.label}</h3><div class="chart-host" id="dist-chart"></div></div>
       </div>
       <div class="stat-grid">
-        <div class="panel"><h3><span class="ic">🏆</span> ${s.tableA.title}</h3>${tableHTML(s.tableA)}</div>
-        <div class="panel"><h3><span class="ic">✨</span> ${s.tableB.title}</h3>${tableHTML(s.tableB)}</div>
+        <div class="panel"><h3>${s.tableA.title}</h3>${tableHTML(s.tableA)}</div>
+        <div class="panel"><h3>${s.tableB.title}</h3>${tableHTML(s.tableB)}</div>
       </div>`;
     renderLineChart("evol-chart", s.evol);
     renderBarChart("dist-chart", s.dist);

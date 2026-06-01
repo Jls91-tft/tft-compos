@@ -300,7 +300,7 @@
     "Modo presentación (texto grande para vídeo)": "Presentation mode (large text for video)",
     "Modo captura limpia (oculta la interfaz para grabar)": "Clean capture mode (hides the UI for recording)",
     "Exportar como imagen PNG (o imprimir si no hay conexión)": "Export as PNG image (or print if offline)",
-    "⚡ Centro de entrenamiento": "⚡ Training center",
+    "Centro de entrenamiento": "Training center",
     "Estudia el juego: simula comps, y consulta winrates de unidades, ítems y augments. Pensado para mirar rápido, incluso en mitad de una partida.":
       "Study the game: simulate comps and check win rates of units, items and augments. Designed for quick lookups, even mid-game.",
     "Cerrar": "Close",
