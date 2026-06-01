@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Lab (centro de entrenamiento)</title>
+<!--
+  MAQUETA de rediseño (ETAPA 2) — look "vibrante con profundidad" + sección Lab.
+  Autónoma (doble clic). Datos de ejemplo. Marca propia, sin assets de Riot.
+  // En producción, las tablas saldrán de /api (stats agregadas de meta).
+-->
+<style>
+  :root{
+    --bg:#090B11;--surface:#141925;--surface-2:#1A2030;--border:#262D3D;--border-soft:#1E2433;
+    --text:#EAF0F7;--muted:#8C97A8;
+    --accent:#8B5CF6;--accent-2:#22D3EE;--accent-strong:#7C3AED;
+    --accent-soft:rgba(139,92,246,.16);--glow:rgba(139,92,246,.45);
+    --good:#3FD17A;--warn:#E3B341;--bad:#F85B6B;--gold:#E9C16B;
+    --r-lg:18px;--r-md:13px;--r-sm:9px;--r-pill:999px;
+    --grad:linear-gradient(100deg,var(--accent),var(--accent-2));
+    --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(820px 480px at 88% -8%,rgba(139,92,246,.20),transparent 60%),
+      radial-gradient(760px 460px at 2% 4%,rgba(34,211,238,.12),transparent 58%),
+      radial-gradient(600px 600px at 50% 120%,rgba(139,92,246,.10),transparent 60%),
+      var(--bg);
+    background-attachment:fixed;}
+  ::selection{background:var(--glow);color:#fff;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+  a{color:var(--accent);text-decoration:none;}
+
+  /* Topbar */
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;padding:13px 24px;flex-wrap:wrap;
+    background:rgba(9,11,17,.72);backdrop-filter:blur(16px) saturate(140%);border-bottom:1px solid transparent;
+    border-image:linear-gradient(90deg,transparent,rgba(139,92,246,.5),rgba(34,211,238,.4),transparent) 1;
+    box-shadow:0 8px 30px rgba(0,0,0,.35);}
+  .brand{display:flex;align-items:center;gap:11px;flex-shrink:0;}
+  .brand .logo{filter:drop-shadow(0 0 10px var(--glow));}
+  .brand .name{font-size:21px;font-weight:850;letter-spacing:.3px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .game-switch{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;gap:2px;flex-shrink:0;}
+  .game-switch button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:7px 16px;border-radius:var(--r-pill);cursor:pointer;transition:.18s;min-height:30px;}
+  .game-switch button[aria-pressed="true"]{background:var(--grad);color:#0A0C12;box-shadow:0 2px 14px var(--glow);}
+  .game-switch button:hover[aria-pressed="false"]{color:var(--text);}
+
+  /* Buscador rápido */
+  .search{position:relative;flex:1;min-width:200px;max-width:420px;}
+  .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.6;}
+  .search input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);color:var(--text);font:inherit;font-size:14px;padding:11px 16px 11px 40px;transition:.18s;}
+  .search input:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
+  .search .hint{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:2px 7px;}
+
+  nav.main-nav{display:flex;align-items:center;gap:4px;}
+  .navlink{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:9px 13px;border-radius:var(--r-sm);cursor:pointer;transition:.18s;}
+  .navlink:hover{color:var(--text);background:var(--surface);}
+  .navlink[aria-current="page"]{color:var(--text);background:var(--accent-soft);box-shadow:inset 0 0 0 1px rgba(139,92,246,.4);}
+  .navlink .pill-ia{font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#0A0C12;background:var(--grad);padding:2px 6px;border-radius:var(--r-pill);}
+  .avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;font-weight:800;font-size:13px;color:#0A0C12;background:var(--grad);box-shadow:0 0 12px var(--glow);}
+
+  main{max-width:1200px;margin:0 auto;padding:30px 24px 90px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin:0 0 10px;}
+  h1.title{font-size:32px;font-weight:850;margin:0 0 6px;letter-spacing:-.4px;}
+  .subtitle{color:var(--muted);font-size:15.5px;margin:0 0 26px;max-width:64ch;}
+
+  /* Tabs del Lab */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+  .tab{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:var(--r-pill);cursor:pointer;transition:.18s;}
+  .tab .ti{width:20px;height:20px;display:grid;place-items:center;}
+  .tab:hover{color:var(--text);border-color:var(--accent);transform:translateY(-1px);}
+  .tab[aria-selected="true"]{color:#0A0C12;background:var(--grad);border-color:transparent;box-shadow:0 6px 20px var(--glow);}
+
+  .panel{background:linear-gradient(180deg,var(--surface),rgba(20,25,37,.6));border:1px solid var(--border);border-radius:var(--r-lg);padding:8px;box-shadow:0 10px 30px rgba(0,0,0,.28);}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px 12px;}
+  .panel-head h2{font-size:16px;font-weight:800;margin:0;}
+  .count{font-size:12px;color:var(--muted);}
+  .sort{display:inline-flex;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;}
+  .sort button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:12px;padding:6px 12px;border-radius:var(--r-pill);cursor:pointer;}
+  .sort button[aria-pressed="true"]{background:var(--accent-soft);color:#C9B6FF;}
+
+  /* Filas del explorador */
+  .rows{display:flex;flex-direction:column;}
+  .row{display:grid;grid-template-columns:46px 1.4fr 150px 90px 1.3fr;gap:14px;align-items:center;padding:13px 16px;border-radius:var(--r-md);transition:.16s;}
+  .row:hover{background:var(--surface-2);box-shadow:inset 0 0 0 1px rgba(139,92,246,.25);}
+  .row + .row{border-top:1px solid var(--border-soft);}
+  .row.head{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:6px 16px;}
+  .row.head:hover{background:transparent;box-shadow:none;}
+  .xico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-weight:850;font-size:14px;color:#fff;position:relative;flex-shrink:0;box-shadow:0 3px 10px rgba(0,0,0,.3);}
+  .xico.unit{border:1.5px solid var(--c);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 45%,#10141f),#10141f);}
+  .xico.item{border:1.5px solid rgba(139,92,246,.55);background:linear-gradient(160deg,rgba(139,92,246,.35),rgba(34,211,238,.18));}
+  .xico.aug{border:1.5px solid var(--c);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 40%,#10141f),#10141f);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);border-radius:0;}
+  .r-name{font-size:14.5px;font-weight:700;} .r-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .wr{display:flex;align-items:center;gap:9px;}
+  .wr-bar{flex:1;height:7px;border-radius:99px;background:var(--bg);border:1px solid var(--border);overflow:hidden;}
+  .wr-fill{height:100%;width:0;border-radius:99px;transition:width .7s cubic-bezier(.2,.7,.2,1);}
+  .wr-num{font-size:13px;font-weight:800;min-width:42px;text-align:right;}
+  .pct{font-size:13.5px;font-weight:800;text-align:center;}
+  .pct small{display:block;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;}
+  .chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);}
+  .chip.c{border-color:var(--c);color:color-mix(in srgb,var(--c) 80%,#fff);}
+
+  .empty{padding:40px;text-align:center;color:var(--muted);}
+
+  /* Simulador (placeholder atractivo) */
+  .sim-wrap{display:grid;grid-template-columns:1fr 280px;gap:18px;}
+  .sim-board{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;}
+  .hexcell{aspect-ratio:1/.9;border-radius:10px;background:linear-gradient(160deg,rgba(139,92,246,.08),transparent);border:1px dashed var(--border);}
+  .sim-side .traits{display:flex;flex-direction:column;gap:9px;}
+  .trait{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 13px;font-size:13px;}
+  .trait b{font-weight:800;} .trait .lv{font-size:11px;color:#0A0C12;background:var(--grad);padding:2px 8px;border-radius:var(--r-pill);font-weight:800;}
+  .soon{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#C9B6FF;background:var(--accent-soft);border:1px solid rgba(139,92,246,.4);padding:6px 13px;border-radius:var(--r-pill);}
+
+  footer{border-top:1px solid var(--border);margin-top:42px;padding:24px;text-align:center;color:var(--muted);font-size:12.5px;}
+
+  @media(max-width:860px){
+    .row{grid-template-columns:42px 1fr 90px;gap:10px;}
+    .row .wr,.row.head .h-wr{display:none;} .row .chips{grid-column:1/-1;} .row.head .h-chips{display:none;}
+    .sim-wrap{grid-template-columns:1fr;}
+    .search{order:5;max-width:none;width:100%;}
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/><circle cx="23" cy="9" r="2.4" fill="#22D3EE"/>
+        <circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
+        <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
+      </svg>
+      <span class="name">Synapse</span>
+    </div>
+    <div class="game-switch" role="group" aria-label="Juego">
+      <button id="g-tft" aria-pressed="true" onclick="setGame('tft')">TFT</button>
+      <button id="g-lol" aria-pressed="false" onclick="setGame('lol')">LoL</button>
+    </div>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="#8C97A8" stroke-width="2"/><path d="M20 20l-3.2-3.2" stroke="#8C97A8" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="q" placeholder="Busca un ítem, unidad o augment…" autocomplete="off" oninput="render()">
+      <span class="hint">rápido</span>
+    </div>
+    <nav class="main-nav" aria-label="Secciones">
+      <a class="navlink" href="01-estructura-navegacion.html#coaching">Coaching <span class="pill-ia">IA</span></a>
+      <a class="navlink" href="01-estructura-navegacion.html#stats">Perfil</a>
+      <a class="navlink" href="01-estructura-navegacion.html#meta">Meta</a>
+      <button class="navlink" aria-current="page">Lab</button>
+    </nav>
+    <span class="avatar" title="Perfil">N</span>
+  </header>
+
+  <main>
+    <p class="eyebrow">⚡ Centro de entrenamiento</p>
+    <h1 class="title">Lab</h1>
+    <p class="subtitle">Estudia el juego: simula comps, y consulta winrates de unidades, ítems y augments. Pensado para mirar rápido, incluso en mitad de una partida.</p>
+
+    <div class="tabs" id="tabs"></div>
+    <div id="content"></div>
+  </main>
+
+  <footer>Synapse — Lab (maqueta de rediseño · datos de ejemplo). Marca propia, no afiliada a los titulares de los juegos.</footer>
+
+<script>
+/* ============ DATOS DE EJEMPLO (mock) — sin nombres de Riot ============
+   // En producción salen de /api (stats agregadas de meta). */
+const COST = {1:"#9AA4B2",2:"#3FD17A",3:"#58A6FF",4:"#B061FF",5:"#E9C16B"};
+const TIER = {S:"#E9C16B",A:"#B061FF",B:"#58A6FF",C:"#8C97A8"};
+const wrColor = (w)=> w>=53?"var(--good)":w>=49?"var(--warn)":"var(--bad)";
+
+const DATA = {
+  tft:{
+    tabs:[{k:"units",label:"Unidades",ico:"♟"},{k:"items",label:"Ítems",ico:"◈"},{k:"augments",label:"Augments",ico:"❖"},{k:"sim",label:"Simulador",ico:"⊞"}],
+    units:[
+      {n:"Místico",cost:4,wr:58,use:24,sub:"Portador mágico",chips:["Báculo Arcano","Velo Espectral","Reloj de Arena"]},
+      {n:"Centinela",cost:5,wr:56,use:18,sub:"Tanque",chips:["Égida del Guardián","Manto Rúnico"]},
+      {n:"Francotirador",cost:4,wr:54,use:21,sub:"Carry físico",chips:["Filo Voraz","Guante Letal"]},
+      {n:"Vanguardia",cost:1,wr:52,use:40,sub:"Frontline reroll",chips:["Cota Reforzada"]},
+      {n:"Invocador",cost:5,wr:51,use:12,sub:"Escalado tardío",chips:["Tomo Arcano"]},
+      {n:"Pistolero",cost:2,wr:48,use:27,sub:"Carry reroll",chips:["Filo Voraz","Guante Letal"]},
+    ],
+    items:[
+      {n:"Báculo Arcano",wr:60,use:19,sub:"Poder mágico",chips:["Místico","Hechicero"]},
+      {n:"Filo Voraz",wr:57,use:23,sub:"Robo de vida",chips:["Francotirador","Pistolero"]},
+      {n:"Égida del Guardián",wr:55,use:15,sub:"Aguante",chips:["Centinela","Guardián"]},
+      {n:"Reloj de Arena",wr:53,use:11,sub:"Utilidad",chips:["Místico"]},
+      {n:"Guante Letal",wr:50,use:21,sub:"Crítico",chips:["Francotirador"]},
+      {n:"Manto Rúnico",wr:47,use:14,sub:"Resist. mágica",chips:["Centinela"]},
+    ],
+    augments:[
+      {n:"Convergencia Mística",tier:"S",wr:61,use:9,sub:"Refuerza Místicos",chips:["Flex Místicos"]},
+      {n:"Corazón de Cristal",tier:"S",wr:58,use:14,sub:"Económico-poder",chips:["Flex Místicos","Hiperscaling Magos"]},
+      {n:"Mente Táctica",tier:"A",wr:55,use:12,sub:"Tempo",chips:["Reroll Vanguardias"]},
+      {n:"Botín de Guerra",tier:"A",wr:53,use:10,sub:"Oro por combate",chips:["Fast 8 Francotiradores"]},
+      {n:"Eco Resonante",tier:"B",wr:49,use:8,sub:"Situacional",chips:["Hiperscaling Magos"]},
+    ],
+  },
+  lol:{
+    tabs:[{k:"units",label:"Campeones",ico:"♟"},{k:"items",label:"Ítems",ico:"◈"},{k:"augments",label:"Runas",ico:"❖"},{k:"sim",label:"Builds",ico:"⊞"}],
+    units:[
+      {n:"Mago de control",cost:4,wr:54,use:14,sub:"Mid",chips:["Tomo Arcano","Cetro Abisal"]},
+      {n:"Tirador hipercarry",cost:4,wr:52,use:16,sub:"ADC",chips:["Filo Voraz","Botas Veloces"]},
+      {n:"Luchador de línea",cost:3,wr:52,use:11,sub:"Top",chips:["Égida de Hierro"]},
+      {n:"Encantador",cost:2,wr:51,use:12,sub:"Support",chips:["Cetro Abisal"]},
+      {n:"Asesino",cost:4,wr:50,use:9,sub:"Mid",chips:["Filo Voraz"]},
+      {n:"Tanque iniciador",cost:3,wr:49,use:8,sub:"Top",chips:["Égida de Hierro"]},
+    ],
+    items:[
+      {n:"Filo Voraz",wr:55,use:22,sub:"Crítico + robo vida",chips:["Tirador hipercarry","Asesino"]},
+      {n:"Tomo Arcano",wr:54,use:18,sub:"Poder de habilidad",chips:["Mago de control"]},
+      {n:"Égida de Hierro",wr:53,use:15,sub:"Aguante",chips:["Luchador de línea","Tanque iniciador"]},
+      {n:"Cetro Abisal",wr:51,use:13,sub:"Penetración mágica",chips:["Mago de control","Encantador"]},
+      {n:"Botas Veloces",wr:50,use:31,sub:"Movilidad",chips:["Todos los roles"]},
+    ],
+    augments:[
+      {n:"Conquistador",tier:"S",wr:54,use:17,sub:"Combate prolongado",chips:["Luchador de línea"]},
+      {n:"Cometa Arcano",tier:"A",wr:52,use:14,sub:"Daño a distancia",chips:["Mago de control"]},
+      {n:"Golpe Letal",tier:"A",wr:51,use:12,sub:"Burst",chips:["Asesino"]},
+      {n:"Aro de Hielo",tier:"B",wr:49,use:9,sub:"Tanque/utilidad",chips:["Tanque iniciador"]},
+    ],
+  },
+};
+
+let currentGame="tft", currentTab="units", sortBy="wr";
+
+function renderTabs(){
+  document.getElementById("tabs").innerHTML = DATA[currentGame].tabs.map(t=>
+    `<button class="tab" role="tab" aria-selected="${currentTab===t.k}" onclick="setTab('${t.k}')"><span class="ti">${t.ico}</span> ${t.label}</button>`
+  ).join("");
+}
+function setTab(k){ currentTab=k; renderTabs(); render(); }
+function setGame(g){
+  currentGame=g;
+  document.getElementById("g-tft").setAttribute("aria-pressed",g==="tft");
+  document.getElementById("g-lol").setAttribute("aria-pressed",g==="lol");
+  if(!DATA[g].tabs.find(t=>t.k===currentTab)) currentTab="units";
+  renderTabs(); render();
+}
+function setSort(s){ sortBy=s; render(); }
+
+function iconHTML(item){
+  if(currentTab==="units") return `<div class="xico unit" style="--c:${COST[item.cost]}">${item.n[0]}</div>`;
+  if(currentTab==="augments") return `<div class="xico aug" style="--c:${TIER[item.tier]}">${item.tier}</div>`;
+  return `<div class="xico item">${item.n[0]}</div>`;
+}
+function rowHTML(item){
+  const sub = currentTab==="units" ? `${item.sub} · ${item.cost}🪙` : item.sub;
+  const chipCls = currentTab==="units" ? "" : "";
+  const chips = (item.chips||[]).map(c=>`<span class="chip">${c}</span>`).join("");
+  const m2label = currentTab==="augments" ? "Pick" : "Uso";
+  return `<div class="row">
+    ${iconHTML(item)}
+    <div><div class="r-name">${item.n}</div><div class="r-sub">${sub}</div></div>
+    <div class="wr"><div class="wr-bar"><div class="wr-fill" data-w="${item.wr}" style="background:${wrColor(item.wr)}"></div></div><span class="wr-num">${item.wr}%</span></div>
+    <div class="pct">${item.use}%<small>${m2label}</small></div>
+    <div class="chips">${chips}</div>
+  </div>`;
+}
+
+function render(){
+  const c = document.getElementById("content");
+  if(currentTab==="sim"){ c.innerHTML = simHTML(); return; }
+  const q = (document.getElementById("q").value||"").toLowerCase();
+  let rows = DATA[currentGame][currentTab].slice();
+  rows = rows.filter(r => r.n.toLowerCase().includes(q) || (r.sub||"").toLowerCase().includes(q) || (r.chips||[]).some(ch=>ch.toLowerCase().includes(q)));
+  rows.sort((a,b)=> sortBy==="wr" ? b.wr-a.wr : b.use-a.use);
+  const label = DATA[currentGame].tabs.find(t=>t.k===currentTab).label;
+  const colName = currentTab==="units" ? (currentGame==="tft"?"Unidad":"Campeón") : (currentTab==="items"?"Ítem":(currentGame==="tft"?"Augment":"Runa"));
+  const m2 = currentTab==="augments" ? "Pick" : "Uso";
+  const body = rows.length ? `
+    <div class="row head"><span></span><span>${colName}</span><span class="h-wr">Winrate</span><span>${m2}</span><span class="h-chips">${currentTab==="items"?"Mejor en":"Mejores con"}</span></div>
+    <div class="rows">${rows.map(rowHTML).join("")}</div>` : `<div class="empty">Sin resultados para “${q}”.</div>`;
+  c.innerHTML = `<div class="panel">
+    <div class="panel-head">
+      <h2>${label} <span class="count">· ${rows.length}</span></h2>
+      <div class="sort"><button aria-pressed="${sortBy==='wr'}" onclick="setSort('wr')">Winrate</button><button aria-pressed="${sortBy==='use'}" onclick="setSort('use')">${m2}</button></div>
+    </div>${body}</div>`;
+  requestAnimationFrame(()=> document.querySelectorAll(".wr-fill").forEach(f=> f.style.width=f.dataset.w+"%"));
+}
+
+function simHTML(){
+  const cells = Array.from({length:28}).map(()=>`<div class="hexcell"></div>`).join("");
+  return `<div class="panel"><div class="panel-head"><h2>Simulador de ${currentGame==="tft"?"comps":"builds"}</h2><span class="soon">✦ Próximo paso</span></div>
+    <div style="padding:0 16px 18px;">
+      <p style="color:var(--muted);font-size:14px;max-width:60ch;">Aquí montarás tu ${currentGame==="tft"?"tablero arrastrando unidades, viendo los rasgos/sinergias que activas y el nivel necesario":"build de objetos y runas, viendo el coste y las sinergias"}. Esta es una vista previa del layout.</p>
+      <div class="sim-wrap" style="margin-top:14px;">
+        <div class="sim-board">${cells}</div>
+        <div class="sim-side"><div class="traits">
+          <div class="trait"><span><b>Místicos</b> 4/6</span><span class="lv">activo</span></div>
+          <div class="trait"><span><b>Guardianes</b> 2/2</span><span class="lv">activo</span></div>
+          <div class="trait" style="opacity:.55"><span><b>Hechiceros</b> 1/3</span><span style="font-size:11px;color:var(--muted)">inactivo</span></div>
+        </div></div>
+      </div>
+    </div></div>`;
+}
+
+renderTabs();
+render();
+</script>
+</body>
+</html>
