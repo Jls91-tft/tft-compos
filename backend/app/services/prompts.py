@@ -141,20 +141,55 @@ def build_chat_prompt(game: str, summary: dict, question: str, lang: str = "es")
 
 
 # ----------------------------- Parseo del informe -----------------------------
+def _fallback_report(raw: str, game: str, match_id: str) -> CoachingReport:
+    return CoachingReport(
+        game=game, match_id=match_id,
+        verdict=(raw or "").strip()[:600] or "No se pudo generar el análisis esta vez.",
+        focus="", metrics=[], did_well=[], errors=[], corrective="", action_plan=[],
+    )
+
+
 def parse_report(raw: str, game: str, match_id: str) -> CoachingReport:
     """Convierte la respuesta JSON de la IA en un CoachingReport validado.
 
-    Si la IA no devolviera un JSON válido, hacemos un fallback elegante para no
-    romper la experiencia.
+    La IA a veces se desvía del schema (p. ej. devuelve números donde se espera
+    texto, u omite campos). Normalizamos antes de validar para conservar el
+    informe estructurado; solo si todo falla volcamos un fallback elegante.
     """
     try:
         data = json.loads(raw)
-        data["game"] = game
-        data["match_id"] = match_id
+        if not isinstance(data, dict):
+            raise ValueError("la respuesta de la IA no es un objeto JSON")
+    except Exception:
+        return _fallback_report(raw, game, match_id)
+
+    data["game"] = game
+    data["match_id"] = match_id
+
+    # La IA suele mandar números (p. ej. la colocación) donde el schema pide texto.
+    norm_metrics = []
+    for m in data.get("metrics") or []:
+        if not isinstance(m, dict):
+            continue
+        if m.get("value") is not None:
+            m["value"] = str(m["value"])
+        if m.get("benchmark") is not None:
+            m["benchmark"] = str(m["benchmark"])
+        norm_metrics.append(m)
+    data["metrics"] = norm_metrics
+
+    for k in ("verdict", "focus", "corrective"):
+        data.setdefault(k, "")
+    for k in ("did_well", "action_plan", "errors"):
+        data.setdefault(k, [])
+
+    try:
         return CoachingReport(**data)
     except Exception:
-        return CoachingReport(
-            game=game, match_id=match_id,
-            verdict=(raw or "").strip()[:600] or "No se pudo generar el análisis esta vez.",
-            focus="", metrics=[], did_well=[], errors=[], corrective="", action_plan=[],
-        )
+        # Reintento tolerante: si los 'errors' vienen mal formados, descártalos
+        # antes que perder todo el informe.
+        try:
+            data["errors"] = []
+            return CoachingReport(**data)
+        except Exception:
+            return _fallback_report(raw, game, match_id)
