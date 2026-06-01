@@ -288,7 +288,7 @@ const ICONS={
   gem:'<path d="M6 4h12l3 5-9 11L3 9z" fill="currentColor"/>'
 };
 function svgIcon(key,color,size){ size=size||22; return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="color:${color};display:block" aria-hidden="true">${ICONS[key]||ICONS.gem}</svg>`; }
-const GLYPH={"Místico":"star","Centinela":"shield","Guardián":"shield","Vanguardia":"shield","Berserker":"sword","Hechicero":"wand","Mago":"wand","Invocador":"crown","Vidente":"eye","Francotirador":"bow","Pistolero":"bow","Curandera":"heart","Asesino":"bolt","Mago de control":"wand","Tirador hipercarry":"bow","Luchador de línea":"sword","Encantador":"heart","Tanque iniciador":"shield"};
+const GLYPH={"Místico":"star","Centinela":"shield","Guardián":"shield","Vanguardia":"shield","Berserker":"sword","Hechicero":"wand","Mago":"wand","Invocador":"crown","Vidente":"eye","Francotirador":"bow","Pistolero":"bow","Curandera":"heart","Asesino":"bolt","Mago de control":"wand","Tirador hipercarry":"bow","Luchador de línea":"sword","Encantador":"heart","Tanque iniciador":"shield","Asesino de acceso":"bolt","Bruiser de jungla":"sword","Maga de poke":"wand","Soporte de enganche":"shield"};
 const glyphUnit=(n)=>GLYPH[n]||"sword";
 const COST = {1:"#9AA4B2",2:"#3FD17A",3:"#58A6FF",4:"#B061FF",5:"#E9C16B"};
 const TIER = {S:"#E9C16B",A:"#B061FF",B:"#58A6FF",C:"#8C97A8"};
@@ -304,6 +304,12 @@ const DATA = {
       {n:"Vanguardia",cost:1,wr:52,use:40,sub:"Frontline reroll",chips:["Cota Reforzada"]},
       {n:"Invocador",cost:5,wr:51,use:12,sub:"Escalado tardío",chips:["Tomo Arcano"]},
       {n:"Pistolero",cost:2,wr:48,use:27,sub:"Carry reroll",chips:["Filo Voraz","Guante Letal"]},
+      {n:"Hechicero",cost:3,wr:55,use:19,sub:"Daño mágico",chips:["Vara Letal","Reloj de Arena"]},
+      {n:"Guardián",cost:2,wr:53,use:22,sub:"Tanque reroll",chips:["Égida del Guardián"]},
+      {n:"Berserker",cost:2,wr:50,use:17,sub:"Luchador",chips:["Filo Voraz"]},
+      {n:"Vidente",cost:3,wr:49,use:15,sub:"Control",chips:["Reloj de Arena"]},
+      {n:"Curandera",cost:1,wr:47,use:20,sub:"Sostén",chips:["Lágrima Eterna"]},
+      {n:"Mago",cost:4,wr:53,use:14,sub:"Portador mágico",chips:["Báculo Arcano"]},
     ],
     items:[
       {n:"Báculo Arcano",wr:60,use:19,sub:"Poder mágico",chips:["Místico","Hechicero"]},
@@ -312,6 +318,10 @@ const DATA = {
       {n:"Reloj de Arena",wr:53,use:11,sub:"Utilidad",chips:["Místico"]},
       {n:"Guante Letal",wr:50,use:21,sub:"Crítico",chips:["Francotirador"]},
       {n:"Manto Rúnico",wr:47,use:14,sub:"Resist. mágica",chips:["Centinela"]},
+      {n:"Velo Espectral",wr:54,use:12,sub:"Anti-mágico",chips:["Centinela","Guardián"]},
+      {n:"Reloj de Arena",wr:52,use:13,sub:"Utilidad",chips:["Místico","Vidente"]},
+      {n:"Lágrima Eterna",wr:49,use:18,sub:"Maná",chips:["Hechicero","Mago"]},
+      {n:"Corona Solar",wr:46,use:9,sub:"Daño en área",chips:["Mago"]},
     ],
     augments:[
       {n:"Convergencia Mística",tier:"S",wr:61,use:9,sub:"Refuerza Místicos",chips:["Flex Místicos"]},
@@ -319,6 +329,9 @@ const DATA = {
       {n:"Mente Táctica",tier:"A",wr:55,use:12,sub:"Tempo",chips:["Reroll Vanguardias"]},
       {n:"Botín de Guerra",tier:"A",wr:53,use:10,sub:"Oro por combate",chips:["Fast 8 Francotiradores"]},
       {n:"Eco Resonante",tier:"B",wr:49,use:8,sub:"Situacional",chips:["Hiperscaling Magos"]},
+      {n:"Tempo Perfecto",tier:"A",wr:54,use:11,sub:"Tempo de nivel",chips:["Reroll Vanguardias"]},
+      {n:"Reserva de Oro",tier:"B",wr:50,use:13,sub:"Económico",chips:["Hiperscaling Magos"]},
+      {n:"Doble Problema",tier:"C",wr:47,use:7,sub:"Reroll agresivo",chips:["Reroll Pistoleros"]},
     ],
   },
   lol:{
@@ -330,6 +343,10 @@ const DATA = {
       {n:"Encantador",cost:2,wr:51,use:12,sub:"Support",chips:["Cetro Abisal"]},
       {n:"Asesino",cost:4,wr:50,use:9,sub:"Mid",chips:["Filo Voraz"]},
       {n:"Tanque iniciador",cost:3,wr:49,use:8,sub:"Top",chips:["Égida de Hierro"]},
+      {n:"Asesino de acceso",cost:4,wr:50,use:9,sub:"Mid/Jungla",chips:["Filo Voraz"]},
+      {n:"Bruiser de jungla",cost:3,wr:51,use:13,sub:"Jungla",chips:["Lanza Crepuscular"]},
+      {n:"Maga de poke",cost:3,wr:52,use:10,sub:"Mid",chips:["Grimorio Prohibido"]},
+      {n:"Soporte de enganche",cost:2,wr:49,use:11,sub:"Support",chips:["Coraza Vital"]},
     ],
     items:[
       {n:"Filo Voraz",wr:55,use:22,sub:"Crítico + robo vida",chips:["Tirador hipercarry","Asesino"]},
@@ -337,12 +354,19 @@ const DATA = {
       {n:"Égida de Hierro",wr:53,use:15,sub:"Aguante",chips:["Luchador de línea","Tanque iniciador"]},
       {n:"Cetro Abisal",wr:51,use:13,sub:"Penetración mágica",chips:["Mago de control","Encantador"]},
       {n:"Botas Veloces",wr:50,use:31,sub:"Movilidad",chips:["Todos los roles"]},
+      {n:"Lanza Crepuscular",wr:52,use:14,sub:"Bruiser",chips:["Bruiser de jungla","Luchador de línea"]},
+      {n:"Grimorio Prohibido",wr:51,use:12,sub:"Poder mágico",chips:["Maga de poke","Mago de control"]},
+      {n:"Coraza Vital",wr:50,use:16,sub:"Tanque",chips:["Tanque iniciador"]},
+      {n:"Daga Veloz",wr:48,use:19,sub:"Vel. ataque",chips:["Tirador hipercarry"]},
     ],
     augments:[
       {n:"Conquistador",tier:"S",wr:54,use:17,sub:"Combate prolongado",chips:["Luchador de línea"]},
       {n:"Cometa Arcano",tier:"A",wr:52,use:14,sub:"Daño a distancia",chips:["Mago de control"]},
       {n:"Golpe Letal",tier:"A",wr:51,use:12,sub:"Burst",chips:["Asesino"]},
       {n:"Aro de Hielo",tier:"B",wr:49,use:9,sub:"Tanque/utilidad",chips:["Tanque iniciador"]},
+      {n:"Tormenta Veloz",tier:"A",wr:52,use:13,sub:"Vel. ataque",chips:["Tirador hipercarry"]},
+      {n:"Muro de Hueso",tier:"B",wr:49,use:10,sub:"Defensa",chips:["Tanque iniciador"]},
+      {n:"Sed de Sangre",tier:"B",wr:50,use:11,sub:"Sustain",chips:["Bruiser de jungla"]},
     ],
   },
 };
