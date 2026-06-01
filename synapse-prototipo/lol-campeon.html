@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Build de campeón (LoL)</title>
+<!-- Maqueta AUTÓNOMA (doble clic): build de campeón LoL estilo Mobalytics/u.gg.
+     Arquetipos, ítems, runas y habilidades GENÉRICOS inventados (sin nombres de Riot). -->
+<style>
+  :root{
+    --bg:#090B11;--surface:#141925;--surface-2:#1A2030;--border:#262D3D;--border-soft:#1E2433;
+    --text:#EAF0F7;--muted:#8C97A8;--accent:#8B5CF6;--accent-2:#22D3EE;--accent-strong:#7C3AED;
+    --accent-soft:rgba(139,92,246,.16);--accent-glow:rgba(139,92,246,.45);
+    --good:#3FD17A;--warn:#E3B341;--bad:#F85B6B;--gold:#E9C16B;
+    --grad:linear-gradient(100deg,var(--accent),var(--accent-2));
+    --r-lg:18px;--r-md:13px;--r-sm:9px;--r-pill:999px;--shadow-sm:0 6px 18px rgba(0,0,0,.32);
+    --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(820px 480px at 88% -8%,rgba(139,92,246,.20),transparent 60%),radial-gradient(760px 460px at 2% 4%,rgba(34,211,238,.12),transparent 58%),var(--bg);background-attachment:fixed;}
+  a{color:var(--accent);text-decoration:none;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;padding:13px 24px;flex-wrap:wrap;background:rgba(9,11,17,.72);backdrop-filter:blur(16px) saturate(140%);border-bottom:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(139,92,246,.5),rgba(34,211,238,.4),transparent) 1;box-shadow:0 8px 30px rgba(0,0,0,.35);}
+  .brand{display:flex;align-items:center;gap:11px;flex-shrink:0;}
+  .brand .name{font-size:21px;font-weight:850;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .game-switch{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;gap:2px;}
+  .game-switch button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:7px 16px;border-radius:var(--r-pill);cursor:pointer;min-height:30px;}
+  .game-switch button[aria-pressed="true"]{background:var(--grad);color:#0A0C12;box-shadow:0 2px 14px var(--accent-glow);}
+  nav.main-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+  .navlink{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:9px 13px;border-radius:var(--r-sm);cursor:pointer;text-decoration:none;}
+  .navlink:hover{color:var(--text);background:var(--surface);}
+  .navlink[aria-current="page"]{color:var(--text);background:var(--accent-soft);box-shadow:inset 0 0 0 1px rgba(139,92,246,.4);}
+  .navlink .pill-ia{font-size:9.5px;font-weight:800;color:#0A0C12;background:var(--grad);padding:2px 6px;border-radius:var(--r-pill);}
+  .avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#0A0C12;background:var(--grad);box-shadow:0 0 12px var(--accent-glow);}
+  main{max-width:1180px;margin:0 auto;padding:26px 24px 88px;}
+  .crumbs{font-size:13px;color:var(--muted);margin-bottom:16px;}
+  .crumbs b{color:var(--text);}
+  /* Hero */
+  .hero{display:flex;align-items:center;gap:22px;flex-wrap:wrap;border:1px solid rgba(139,92,246,.4);border-radius:var(--r-lg);padding:24px;background:radial-gradient(620px 240px at 100% 0%,rgba(34,211,238,.16),transparent 70%),linear-gradient(180deg,var(--surface-2),var(--surface));box-shadow:0 14px 38px rgba(0,0,0,.4);margin-bottom:22px;}
+  .champ-ico{width:72px;height:72px;border-radius:18px;display:grid;place-items:center;font-size:26px;font-weight:850;color:#fff;border:2px solid var(--accent);background:linear-gradient(160deg,rgba(139,92,246,.45),rgba(34,211,238,.2));flex-shrink:0;}
+  .hero h1{font-size:27px;font-weight:850;margin:0 0 4px;}
+  .hero .tags{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px;color:var(--muted);} .hero .tags b{color:var(--text);}
+  .tier-badge{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:22px;font-weight:850;color:#0A0C12;background:linear-gradient(160deg,#F0CE7A,#E9C16B);}
+  .hstats{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;}
+  .hstat{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 14px;text-align:center;}
+  .hstat .v{font-size:18px;font-weight:850;} .hstat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;}
+  .panel{background:linear-gradient(180deg,var(--surface),rgba(20,25,37,.6));border:1px solid var(--border);border-radius:var(--r-md);padding:20px;margin-bottom:20px;box-shadow:var(--shadow-sm);}
+  .panel h3{margin:0 0 14px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:10px;}
+  .panel h3 .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:14px;background:var(--accent-soft);}
+  /* iconos genéricos */
+  .sq{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;border:1.5px solid var(--accent);background:linear-gradient(160deg,rgba(139,92,246,.4),rgba(34,211,238,.16));flex-shrink:0;}
+  .sq.boot{border-color:var(--accent-2);}
+  .seq{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .seq .arrow{color:var(--muted);font-weight:800;}
+  .lbl-row{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;}
+  .igroup .t{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:8px;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-size:12px;font-weight:700;padding:5px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);}
+  /* runas */
+  .runes{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .rune-col .rc-h{font-size:12px;font-weight:800;color:#C9B6FF;margin-bottom:10px;}
+  .rune{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13.5px;}
+  .rune .rd{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;border:1.5px solid var(--border);background:var(--bg);flex-shrink:0;}
+  .rune.key .rd{border-color:var(--gold);background:linear-gradient(160deg,rgba(233,193,107,.4),transparent);}
+  .rune.key{font-weight:800;}
+  /* habilidades */
+  .skills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .skill{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:18px;font-weight:850;color:#fff;border:1.5px solid var(--accent);background:linear-gradient(160deg,rgba(139,92,246,.4),rgba(34,211,238,.16));position:relative;}
+  .skill small{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);font-size:9px;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:0 5px;color:var(--muted);font-weight:700;}
+  .max{font-size:13.5px;color:var(--muted);margin-top:10px;} .max b{color:var(--text);}
+  .lvls{display:flex;gap:3px;flex-wrap:wrap;margin-top:12px;}
+  .lvl{width:22px;height:24px;border-radius:5px;display:grid;place-items:center;font-size:10px;font-weight:800;border:1px solid var(--border);}
+  .lq{background:rgba(139,92,246,.3);color:#C9B6FF;border-color:var(--accent);}
+  .lw{background:rgba(34,211,238,.22);color:#9DE9F5;}
+  .le{background:rgba(63,209,122,.2);color:#8CE6B0;}
+  .lr{background:linear-gradient(160deg,#F0CE7A,#E9C16B);color:#0A0C12;}
+  /* counters */
+  .ctr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:var(--r-sm);background:var(--bg);border:1px solid var(--border);margin-bottom:8px;font-size:13.5px;}
+  .ctr .wr{font-weight:800;}
+  .ctr-h{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin:0 0 10px;}
+  .ctr-h.good{color:var(--good);} .ctr-h.bad{color:var(--bad);}
+  /* spikes */
+  .spike{display:grid;grid-template-columns:64px 1fr 40px;gap:10px;align-items:center;font-size:13px;margin-bottom:10px;}
+  .spike .sb{height:9px;border-radius:99px;background:var(--bg);border:1px solid var(--border);overflow:hidden;}
+  .spike .sf{height:100%;border-radius:99px;background:var(--grad);}
+  footer{border-top:1px solid var(--border);margin-top:40px;padding:24px;text-align:center;color:var(--muted);font-size:12.5px;}
+  @media(max-width:860px){ .grid{grid-template-columns:1fr;} .hstats{margin-left:0;} .runes{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="filter:drop-shadow(0 0 10px var(--accent-glow))">
+        <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/><circle cx="23" cy="9" r="2.4" fill="#22D3EE"/>
+        <circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
+        <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
+      </svg><span class="name">Synapse</span>
+    </div>
+    <div class="game-switch" role="group" aria-label="Juego">
+      <button onclick="location.href='lab.html'">TFT</button>
+      <button aria-pressed="true">LoL</button>
+    </div>
+    <nav class="main-nav" aria-label="Secciones">
+      <a class="navlink is-primary" href="01-estructura-navegacion.html#coaching">Coaching <span class="pill-ia">IA</span></a>
+      <a class="navlink" href="perfil.html">Perfil</a>
+      <a class="navlink" href="lab.html">Lab</a>
+    </nav>
+    <span class="avatar">N</span>
+  </header>
+
+  <main>
+    <div class="crumbs"><a href="lab.html">Lab</a> ▸ Campeones ▸ <b>Build de campeón</b></div>
+
+    <section class="hero">
+      <div class="champ-ico">M</div>
+      <div>
+        <h1>Mago de control <span class="tier-badge" style="font-size:16px;width:auto;height:auto;padding:3px 10px;border-radius:999px;vertical-align:middle">S</span></h1>
+        <div class="tags"><span>Rol: <b>Mid</b></span><span>Dificultad: <b>Media</b></span><span>Daño: <b>Mágico</b></span><span>Parche <b>14.7</b></span></div>
+      </div>
+      <div class="hstats">
+        <div class="hstat"><div class="v" style="color:var(--good)">53%</div><div class="k">Winrate</div></div>
+        <div class="hstat"><div class="v">14%</div><div class="k">Pick</div></div>
+        <div class="hstat"><div class="v">8%</div><div class="k">Ban</div></div>
+        <div class="hstat"><div class="v">3.1</div><div class="k">KDA</div></div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <h3><span class="ic">🛠️</span> Build recomendada</h3>
+          <div class="igroup"><div class="t">Orden de objetos (core)</div>
+            <div class="seq">
+              <span class="sq">Tom</span><span class="arrow">→</span><span class="sq boot">Bot</span><span class="arrow">→</span><span class="sq">Cet</span><span class="arrow">→</span><span class="sq">Vel</span><span class="arrow">→</span><span class="sq">Rel</span>
+            </div>
+          </div>
+          <div class="lbl-row">
+            <div class="igroup"><div class="t">Inicio</div><div class="chips"><span class="chip">Tomo + 2 pociones</span></div></div>
+            <div class="igroup"><div class="t">Botas</div><div class="chips"><span class="chip">de Hechicero</span><span class="chip">de Movilidad</span></div></div>
+            <div class="igroup"><div class="t">Situacionales</div><div class="chips"><span class="chip">Manto Rúnico (vs AP)</span><span class="chip">Reloj de Arena (vs asesinos)</span></div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic">🔮</span> Runas</h3>
+          <div class="runes">
+            <div class="rune-col">
+              <div class="rc-h">Primaria · Brujería</div>
+              <div class="rune key"><span class="rd">★</span> Cometa Arcano</div>
+              <div class="rune"><span class="rd">M</span> Maná Veloz</div>
+              <div class="rune"><span class="rd">T</span> Trascendencia</div>
+              <div class="rune"><span class="rd">C</span> Combustión</div>
+            </div>
+            <div class="rune-col">
+              <div class="rc-h">Secundaria · Inspiración</div>
+              <div class="rune"><span class="rd">G</span> Galleta Mágica</div>
+              <div class="rune"><span class="rd">P</span> Perspicacia Cósmica</div>
+              <div class="rc-h" style="margin-top:14px">Fragmentos</div>
+              <div class="rune"><span class="rd">+</span> Poder · Poder · Vida</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic">⌨️</span> Habilidades</h3>
+          <div class="skills">
+            <div class="skill">Q<small>1ª</small></div>
+            <div class="skill">W<small>3ª</small></div>
+            <div class="skill">E<small>2ª</small></div>
+            <div class="skill" style="border-color:var(--gold)">R<small>R</small></div>
+          </div>
+          <div class="max">Maxea <b>Q</b> primero (daño), luego <b>E</b> (control), por último <b>W</b>. Sube <b>R</b> en niveles 6/11/16.</div>
+          <div class="lvls">
+            <span class="lvl lq">1</span><span class="lvl le">2</span><span class="lvl lq">3</span><span class="lvl lw">4</span><span class="lvl lq">5</span><span class="lvl lr">6</span><span class="lvl lq">7</span><span class="lvl le">8</span><span class="lvl lq">9</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic">✨</span> Hechizos de invocador</h3>
+          <div class="chips"><span class="chip">Parpadeo</span><span class="chip">Quemadura</span> <span style="color:var(--muted);font-size:12.5px;align-self:center">· alternativa: Teleportación en partidas de escalado</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3><span class="ic">⚔️</span> Counters</h3>
+          <div class="ctr-h good">Fuerte contra</div>
+          <div class="ctr"><span>Tanque de iniciación</span><span class="wr" style="color:var(--good)">58%</span></div>
+          <div class="ctr"><span>Luchador de línea</span><span class="wr" style="color:var(--good)">55%</span></div>
+          <div class="ctr-h bad" style="margin-top:16px">Débil contra</div>
+          <div class="ctr"><span>Asesino de acceso</span><span class="wr" style="color:var(--bad)">44%</span></div>
+          <div class="ctr"><span>Tirador móvil</span><span class="wr" style="color:var(--bad)">47%</span></div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic">📈</span> Power spikes</h3>
+          <div class="spike"><span>Early</span><span class="sb"><span class="sf" style="width:58%"></span></span><span style="text-align:right">58</span></div>
+          <div class="spike"><span>Mid</span><span class="sb"><span class="sf" style="width:88%"></span></span><span style="text-align:right">88</span></div>
+          <div class="spike"><span>Late</span><span class="sb"><span class="sf" style="width:74%"></span></span><span style="text-align:right">74</span></div>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:6px">Tu ventana fuerte es a media partida, al completar el 2.º objeto.</div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic">🧠</span> Cómo jugarlo</h3>
+          <div style="font-size:13.5px;line-height:1.6;color:var(--text)">Farmea seguro en línea hasta tu 2.º objeto. Tu pico es a media partida: busca emboscadas en los carriles laterales y zonea en peleas. Cuidado con los asesinos tras el nivel 6 — guarda <b>E</b> para frenar su acceso.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div>Synapse — Build de campeón (maqueta · datos de ejemplo)</div><div class="legal">Arquetipos, objetos y runas genéricos. Marca propia, no afiliada a los titulares de los juegos.</div></footer>
+</body>
+</html>
