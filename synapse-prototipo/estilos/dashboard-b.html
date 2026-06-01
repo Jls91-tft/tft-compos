@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — D2 · Tu Progreso</title>
+<!-- Mockup de ESTRUCTURA (autónomo, doble clic). Concepto: progreso como protagonista. -->
+<style>
+  :root{
+    --bg:#0A0C13; --panel:#141826; --line:#242B3B; --line-soft:#1C2231;
+    --text:#EAF0F8; --muted:#8A95AB; --soft:#5C6577;
+    --v:#8B5CF6; --c:#22D3EE; --good:#3FD17A; --warn:#E3B341; --gold:#E9C16B;
+    --grad:linear-gradient(105deg,var(--v),var(--c));
+    --font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    --num:"SFMono-Regular",Consolas,"Roboto Mono",monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font);color:var(--text);background:radial-gradient(900px 480px at 80% -12%,rgba(139,92,246,.18),transparent 60%),var(--bg);min-height:100vh;}
+  .flag{position:fixed;top:12px;right:12px;z-index:99;font-size:11px;font-weight:800;color:#0A0C12;background:var(--grad);padding:6px 12px;border-radius:999px;}
+  .topbar{display:flex;align-items:center;gap:16px;padding:14px 26px;border-bottom:1px solid var(--line);background:rgba(10,12,19,.7);backdrop-filter:blur(12px);position:sticky;top:0;z-index:40;}
+  .brand{display:flex;align-items:center;gap:10px;} .brand .name{font-size:20px;font-weight:850;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;}
+  .seg button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:800;font-size:12px;padding:6px 14px;border-radius:999px;cursor:pointer;}
+  .seg button[aria-pressed=true]{background:var(--grad);color:#0A0C12;}
+  nav{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap;}
+  nav a{color:var(--muted);text-decoration:none;font-weight:700;font-size:14px;padding:9px 12px;border-radius:9px;}
+  nav a.on{color:#fff;background:rgba(139,92,246,.16);} nav a:hover{color:#fff;}
+  .av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#0A0C12;background:var(--grad);margin-left:8px;}
+  main{max-width:880px;margin:0 auto;padding:40px 24px 90px;}
+  /* Hero progreso */
+  .hero{text-align:center;margin-bottom:14px;}
+  .hero .eyebrow{font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);}
+  .hero .big{font-family:var(--num);font-size:96px;font-weight:700;line-height:1;letter-spacing:-2px;margin:6px 0 2px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero .scorelbl{font-size:13px;color:var(--muted);font-weight:700;}
+  .hero .delta{display:inline-block;margin-top:12px;font-size:15px;font-weight:800;color:var(--good);background:rgba(63,209,122,.12);border:1px solid rgba(63,209,122,.3);padding:7px 16px;border-radius:999px;}
+  .hero .msg{font-size:18px;font-weight:700;margin:18px 0 0;}
+  /* Sparkline ancha */
+  .spark{margin:24px 0 34px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 20px;}
+  .spark .h{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);font-weight:700;margin-bottom:6px;}
+  .spark svg{width:100%;height:auto;display:block;}
+  /* Foco */
+  .focus{background:linear-gradient(180deg,rgba(139,92,246,.12),var(--panel));border:1px solid rgba(139,92,246,.35);border-radius:18px;padding:24px;margin-bottom:30px;}
+  .focus .k{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#C9B6FF;}
+  .focus h2{margin:8px 0 10px;font-size:23px;font-weight:850;}
+  .focus .prog{height:12px;border-radius:99px;background:#0C0F18;border:1px solid var(--line);overflow:hidden;}
+  .focus .prog i{display:block;height:100%;width:66%;background:var(--grad);}
+  .focus .row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:12px;}
+  .focus small{color:var(--muted);font-size:13px;}
+  .focus .cta{border:0;cursor:pointer;font:inherit;font-weight:800;font-size:14.5px;color:#0A0C12;background:var(--grad);padding:13px 20px;border-radius:13px;}
+  /* Registro */
+  .sec{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 0 14px;}
+  .log{position:relative;padding-left:28px;}
+  .log::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:var(--line);}
+  .item{position:relative;margin-bottom:14px;}
+  .item .dot{position:absolute;left:-23px;top:18px;width:14px;height:14px;border-radius:50%;border:3px solid var(--bg);}
+  .dot.gold{background:var(--gold);} .dot.good{background:var(--good);} .dot.mid{background:var(--warn);}
+  .item .body{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 17px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .item .res{font-family:var(--num);font-weight:700;font-size:15px;width:46px;text-align:center;}
+  .res.gold{color:var(--gold);} .res.good{color:var(--good);} .res.mid{color:var(--warn);}
+  .item .info{flex:1;min-width:0;} .item .info b{font-size:15px;} .item .info small{display:block;color:var(--muted);font-size:12.5px;}
+  .item .info .learn{color:#C9B6FF;font-size:12.5px;margin-top:3px;}
+  .item .go{border:1px solid var(--line);background:transparent;color:var(--c);font:inherit;font-weight:700;font-size:12.5px;padding:8px 13px;border-radius:9px;cursor:pointer;}
+  @media(max-width:560px){ .hero .big{font-size:72px;} }
+</style>
+</head>
+<body>
+  <span class="flag">D2 · Tu Progreso</span>
+  <header class="topbar">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 32 32" fill="none"><circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/><circle cx="23" cy="9" r="2.4" fill="#22D3EE"/><circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/><path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/></svg><span class="name">Synapse</span></div>
+    <div class="seg"><button aria-pressed="true">TFT</button><button aria-pressed="false">LoL</button></div>
+    <nav><a class="on" href="#">Progreso</a><a href="#">Coaching</a><a href="#">Meta</a><a href="#">Lab</a></nav>
+    <span class="av">N</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Synapse Score · TFT</div>
+      <div class="big">72</div>
+      <div class="scorelbl">tu nivel global esta semana</div>
+      <div class="delta">▲ +6 puntos · vas por buen camino</div>
+      <p class="msg">Tu economía está sólida. El siguiente salto está en el <b>posicionamiento</b>.</p>
+    </section>
+
+    <div class="spark">
+      <div class="h"><span>Evolución del Score · 6 semanas</span><span style="color:var(--good)">+11 total</span></div>
+      <svg viewBox="0 0 800 150" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="20,120 20,96 150,104 290,86 430,92 570,70 740,52 740,120" fill="#8B5CF6" fill-opacity="0.12"/>
+        <polyline points="20,96 150,104 290,86 430,92 570,70 740,52" fill="none" stroke="url(#g)" stroke-width="3.5" stroke-linejoin="round"/>
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8B5CF6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>
+        <circle cx="740" cy="52" r="5" fill="#0A0C13" stroke="#22D3EE" stroke-width="3"/>
+      </svg>
+    </div>
+
+    <div class="focus">
+      <div class="k">🎯 Foco de la semana</div>
+      <h2>Subir de nivel a tiempo en la etapa 3</h2>
+      <div class="prog"><i></i></div>
+      <div class="row"><small>Aplicado en <b style="color:var(--text)">4 de 6</b> últimas partidas</small><button class="cta">Generar coaching de tu última partida</button></div>
+    </div>
+
+    <h2 class="sec">Registro de entrenamiento</h2>
+    <div class="log">
+      <div class="item"><span class="dot gold"></span><div class="body"><span class="res gold">2º</span><div class="info"><b>Partida clasificatoria</b><small>Nivel 8 · 34:12 · Flex Místicos</small><div class="learn">＋ Mejoraste el timing de nivel en la 3-2</div></div><button class="go">Ver coaching →</button></div></div>
+      <div class="item"><span class="dot mid"></span><div class="body"><span class="res mid">5º</span><div class="info"><b>Partida normal</b><small>Nivel 7 · 28:40 · Reroll Vanguardias</small><div class="learn">⚠ Portador expuesto al asesino en 2 rondas</div></div><button class="go">Ver coaching →</button></div></div>
+      <div class="item"><span class="dot good"></span><div class="body"><span class="res good">▲</span><div class="info"><b>Victoria · Mago de control</b><small>Mid · KDA 7/2/9 · 31:05</small><div class="learn">＋ Control de oleadas en línea sólido</div></div><button class="go">Ver coaching →</button></div></div>
+    </div>
+  </main>
+</body>
+</html>
