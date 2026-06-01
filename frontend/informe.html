@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Informe de coaching</title>
+<link rel="stylesheet" href="assets/synapse.css">
+</head>
+<body>
+  <a href="#main" class="skip">Saltar al contenido</a>
+
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Synapse, inicio">
+      <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/><circle cx="23" cy="9" r="2.4" fill="#22D3EE"/>
+        <circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
+        <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
+      </svg>
+      <span class="name">Synapse</span>
+    </a>
+    <nav class="main-nav" aria-label="Secciones">
+      <a class="navlink is-primary" href="index.html#coaching" aria-current="page">Coaching <span class="pill-ia">IA</span></a>
+      <a class="navlink" href="index.html#stats">Estadísticas</a>
+      <a class="navlink" href="index.html#meta">Meta</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <div class="crumbs">
+      <span class="path"><a href="index.html#coaching">Coaching</a> ▸ <b>Informe de partida</b></span>
+      <a class="back-link" href="index.html#coaching">← Volver a mis partidas</a>
+    </div>
+    <div id="report-body"></div>
+
+    <!-- Chat con el coach -->
+    <section class="panel" id="chat" style="margin-top:22px;display:none;">
+      <h3><span class="ic ic-accent" aria-hidden="true">💬</span> Pregunta a tu coach</h3>
+      <div class="chat-log" id="chat-log">
+        <div class="msg coach"><div class="bubble">Pregúntame lo que quieras sobre esta partida. Aquí tienes algunas ideas:</div></div>
+      </div>
+      <div class="chat-suggest" id="chat-suggest"></div>
+      <form class="chat-input" onsubmit="askFree(event)">
+        <input type="text" id="chat-text" placeholder="Escribe tu pregunta…" autocomplete="off" aria-label="Tu pregunta para el coach">
+        <button class="btn-send" type="submit" aria-label="Enviar pregunta">➤</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <div>Synapse — Informe de coaching</div>
+    <div class="legal">Marca propia no afiliada a los titulares de los juegos.</div>
+  </footer>
+
+<script src="assets/api.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const GAME = params.get("game") === "lol" ? "lol" : "tft";
+const ID = decodeURIComponent(params.get("id") || "");
+
+const SUGGEST = {
+  tft: ["¿Por qué perdí la pelea del 4-1?", "¿Qué augment debí coger?", "¿Cómo mejoro mi economía?"],
+  lol: ["¿Por qué cedí objetivos?", "¿Cómo evito morir en su jungla?", "¿Qué cambio me hace subir?"],
+};
+
+const errorHTML = (e) => `<div class="error-box"><b>No se pudo cargar el informe.</b><br>${e.message}<br><span style="color:var(--muted)">Comprueba el backend (o <code>USE_MOCK=true</code>).</span></div>`;
+
+function heroHTML(report, match) {
+  let big = "", color = "var(--muted)", lbl = "", tag = "", tagcls = "tag-neutral";
+  if (GAME === "tft" && match) {
+    const pl = parseInt(match.result, 10);
+    big = `${pl}.º`; lbl = "de 8 jugadores";
+    if (pl === 1) { color = "var(--gold)"; tag = "1.er puesto"; tagcls = "tag-good"; }
+    else if (pl <= 4) { color = "var(--good)"; tag = "Top 4"; tagcls = "tag-good"; }
+    else { color = "var(--bad)"; tag = `${pl}.º`; tagcls = "tag-bad"; }
+  } else if (match) {
+    const win = match.result === "win";
+    big = win ? "V" : "L"; color = win ? "var(--good)" : "var(--bad)";
+    lbl = win ? "Victoria" : "Derrota"; tag = match.title?.split(" · ")[0] || ""; tagcls = "tag-neutral";
+  } else {
+    big = "★"; color = "var(--accent)"; lbl = "Partida";
+  }
+  const facts = match ? Object.entries(match.meta).map(([k, v]) => `<span>${k}: <b>${v}</b></span>`).join("") : "";
+  return `<section class="report-hero">
+    <div class="placement"><span class="big" style="color:${color}">${big}</span><span class="lbl">${lbl}</span>${tag ? `<span class="tag ${tagcls}">${tag}</span>` : ""}</div>
+    <div class="verdict-wrap">
+      <span class="ai-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#C4B5FD"/></svg> Análisis generado por Synapse IA</span>
+      <p class="verdict">${report.verdict || ""}</p>
+      ${match ? `<div class="match-facts">${facts}</div>` : ""}
+      ${report.focus ? `<div class="focus-callout"><div><div class="t">Foco para tu próxima partida</div><div class="d">${report.focus}</div></div></div>` : ""}
+    </div>
+  </section>`;
+}
+
+function reportHTML(report, match) {
+  const kpis = (report.metrics || []).map(m => `<div class="kpi ${m.status || ""}"><div class="v">${m.value}</div><div class="k">${m.label}</div>${m.benchmark ? `<div class="bench">${m.benchmark}</div>` : ""}</div>`).join("");
+  const good = (report.did_well || []).map(d => `<li><span class="mk">✓</span> ${d}</li>`).join("");
+  const errs = (report.errors || []).map(e => `<div class="err">
+      <div class="err-head"><h4>${e.title}</h4><span class="sev sev-${e.severity}">${e.severity === "major" ? "Mayor" : "Menor"}</span></div>
+      <dl><dt>Qué pasó</dt><dd>${e.what}</dd><dt>Por qué te costó</dt><dd>${e.why}</dd>
+      <dt class="fix">Cómo subsanarlo</dt><dd class="fix">${e.fix}</dd><dt>El momento</dt><dd>${e.when}</dd></dl>
+    </div>`).join("");
+  const plan = (report.action_plan || []).map((a, i) => `<li><span class="num">${i + 1}</span> ${a}</li>`).join("");
+  return heroHTML(report, match) +
+    `<div class="kpi-row">${kpis}</div>
+     <div class="report-grid">
+       <div class="col-main">
+         ${good ? `<div class="panel"><h3><span class="ic ic-good">✓</span> Lo que hiciste bien</h3><ul class="good-list">${good}</ul></div>` : ""}
+         ${errs ? `<div class="panel"><h3><span class="ic ic-bad">⚠</span> Errores clave</h3>${errs}</div>` : ""}
+         ${report.corrective ? `<div class="panel"><h3><span class="ic ic-accent">🧭</span> Qué deberías haber hecho</h3><div class="corrective"><span class="lead">El ajuste clave</span>${report.corrective}</div></div>` : ""}
+       </div>
+       <div class="col-side">
+         ${plan ? `<div class="panel"><h3><span class="ic ic-accent">⚡</span> Plan de acción</h3><ol class="action-list">${plan}</ol></div>` : ""}
+       </div>
+     </div>`;
+}
+
+async function loadReport() {
+  const body = document.getElementById("report-body");
+  body.innerHTML = `<div class="loading"><span class="spinner"></span> Generando tu informe de coaching…</div>`;
+  try {
+    const [report, matches] = await Promise.all([
+      API.report(GAME, ID),
+      API.matches(GAME).catch(() => []),
+    ]);
+    const match = matches.find(m => m.id === ID) || null;
+    body.innerHTML = reportHTML(report, match);
+    initChat();
+  } catch (e) { body.innerHTML = errorHTML(e); }
+}
+
+/* ---------- Chat ---------- */
+function initChat() {
+  document.getElementById("chat").style.display = "";
+  document.getElementById("chat-suggest").innerHTML =
+    SUGGEST[GAME].map(q => `<button class="sug" type="button" onclick="ask(this.textContent)">${q}</button>`).join("");
+}
+function addMsg(who, text) {
+  const log = document.getElementById("chat-log");
+  const d = document.createElement("div"); d.className = "msg " + who;
+  d.innerHTML = '<div class="bubble"></div>'; d.querySelector(".bubble").textContent = text;
+  log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
+}
+async function ask(question) {
+  addMsg("user", question);
+  const typing = addMsg("coach typing", "escribiendo…");
+  try {
+    const res = await API.chat(GAME, ID, question);
+    typing.classList.remove("typing"); typing.querySelector(".bubble").textContent = res.answer;
+  } catch (e) {
+    typing.classList.remove("typing"); typing.querySelector(".bubble").textContent = "No pude responder ahora mismo: " + e.message;
+  }
+  document.getElementById("chat-log").scrollTop = 9e9;
+}
+function askFree(e) {
+  e.preventDefault();
+  const inp = document.getElementById("chat-text"); const v = inp.value.trim();
+  if (!v) return; inp.value = ""; ask(v);
+}
+
+loadReport();
+</script>
+</body>
+</html>

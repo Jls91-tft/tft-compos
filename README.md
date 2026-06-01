@@ -18,7 +18,7 @@ Plataforma con dos funciones:
 - [x] **Fase 1** — Integración Riot API (partidas reales).
 - [x] **Fase 2** — Motor de coaching con Ollama + chat.
 - [x] **Fase 3** — Estadísticas personales agregadas (meta global = dataset curado).
-- [ ] **Fase 4** — Conectar el frontend (reemplazar mocks por `fetch`).
+- [x] **Fase 4** — Conectar el frontend (reemplazar mocks por `fetch`).
 - [ ] **Fase 5** — Despliegue final.
 
 ---

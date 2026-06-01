@@ -170,6 +170,9 @@ _STATS = {
 _META = {
     "tft": {
         "patch": "14.7", "rank": "Diamante +", "guide": True,
+        "styles": ["Todos", "Standard", "Reroll", "Fast 8"],
+        "metricCols": [{"k": "avg", "label": "Coloc."}, {"k": "top4", "label": "Top 4"},
+                       {"k": "win", "label": "1.º"}, {"k": "pick", "label": "Pick"}],
         "comps": [
             {"tier": "S", "name": "Flex Místicos", "style": "Standard", "difficulty": "Media",
              "metrics": {"avg": "3.9", "top4": "64%", "win": "16%", "pick": "12.4%"},
@@ -184,6 +187,9 @@ _META = {
     },
     "lol": {
         "patch": "14.7", "rank": "Esmeralda +", "guide": False,
+        "styles": ["Todos", "Top", "Jungla", "Mid", "ADC", "Support"],
+        "metricCols": [{"k": "win", "label": "Winrate"}, {"k": "pick", "label": "Pick"},
+                       {"k": "ban", "label": "Ban"}, {"k": "kda", "label": "KDA"}],
         "comps": [
             {"tier": "S", "name": "Mago de control", "style": "Mid", "difficulty": "Media",
              "metrics": {"win": "53%", "pick": "14%", "ban": "8%", "kda": "3.1"}, "units": []},

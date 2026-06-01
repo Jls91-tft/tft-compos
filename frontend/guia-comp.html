@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Guía de comp · Flex Místicos</title>
+<link rel="stylesheet" href="assets/synapse.css">
+<style>
+  /* Estilos específicos de la guía (sobre el design system) */
+  .guide-hero{display:flex;align-items:center;gap:22px;flex-wrap:wrap;border:1px solid rgba(139,92,246,.35);border-radius:var(--r-lg);padding:24px;background:radial-gradient(600px 240px at 100% 0%,rgba(139,92,246,.16),transparent 70%),linear-gradient(180deg,var(--surface-2),var(--surface));box-shadow:var(--shadow);margin-bottom:22px;}
+  .guide-hero .tier-badge{width:60px;height:60px;border-radius:var(--r-md);font-size:30px;}
+  .guide-hero .gh-main{flex:1;min-width:240px;}
+  .guide-hero h1{font-size:26px;font-weight:800;margin:0 0 6px;}
+  .gh-tags{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted);margin-bottom:4px;} .gh-tags b{color:var(--text);}
+  .gh-metrics{display:flex;gap:10px;flex-wrap:wrap;}
+  .gh-metric{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 14px;text-align:center;}
+  .gh-metric .v{font-size:18px;font-weight:800;} .gh-metric .k{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .units-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .unit-card{background:var(--bg);border:1px solid var(--border);border-left-width:3px;border-radius:var(--r-sm);padding:13px 14px;}
+  .unit-card .un-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;}
+  .un-name{font-size:14.5px;font-weight:700;} .un-role{font-size:11.5px;color:var(--muted);}
+  .un-cost{font-size:11px;font-weight:700;padding:2px 8px;border-radius:var(--r-pill);}
+  .item-chips{display:flex;flex-wrap:wrap;gap:5px;}
+  .item-chip{font-size:11px;color:var(--text);background:var(--surface-2);border:1px solid var(--border);padding:3px 8px;border-radius:6px;}
+  .carry-flag{font-size:10px;font-weight:700;color:#E3B341;background:rgba(227,179,65,.13);border:1px solid rgba(227,179,65,.35);padding:2px 7px;border-radius:var(--r-pill);}
+  .phase{margin-bottom:16px;} .phase:last-child{margin-bottom:0;}
+  .phase h4{margin:0 0 5px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:9px;}
+  .ph-tag{font-size:10.5px;font-weight:700;color:#C4B5FD;background:var(--accent-soft);border:1px solid rgba(139,92,246,.3);padding:2px 8px;border-radius:var(--r-pill);}
+  .phase p{margin:0;font-size:14px;line-height:1.6;}
+  .variations{font-size:14px;line-height:1.6;color:var(--muted);} .variations b{color:var(--text);}
+  .level-timeline{list-style:none;margin:0;padding:0;}
+  .level-timeline li{display:flex;align-items:flex-start;gap:12px;padding:0 0 14px;} .level-timeline li:last-child{padding-bottom:0;}
+  .lv-badge{flex-shrink:0;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:800;background:var(--accent-soft);color:#C4B5FD;border:1px solid rgba(139,92,246,.35);}
+  .lv-when{font-size:12px;font-weight:700;color:var(--accent);} .lv-txt{font-size:13px;line-height:1.5;}
+  .aug-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px;}
+  .aug-list li{display:flex;align-items:center;gap:11px;font-size:14px;}
+  .aug-pri{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:3px 9px;border-radius:var(--r-pill);flex-shrink:0;}
+  .pri-must{color:var(--good);background:rgba(63,185,80,.13);border:1px solid rgba(63,185,80,.3);}
+  .pri-good{color:#58A6FF;background:rgba(88,166,255,.12);border:1px solid rgba(88,166,255,.3);}
+  .pri-sit{color:var(--muted);background:var(--bg);border:1px solid var(--border);}
+  .board-host{width:330px;max-width:100%;background:linear-gradient(180deg,rgba(139,92,246,.05),rgba(139,92,246,.02));border:1px solid var(--border);border-radius:var(--r-md);padding:10px;}
+  .board-host svg{width:100%;height:auto;display:block;}
+  .board-layout{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start;}
+  .board-legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px;font-size:12px;color:var(--muted);}
+  .board-legend .lg{display:inline-flex;align-items:center;gap:6px;}
+  .board-legend .sw{width:12px;height:12px;border-radius:3px;border:2px solid;flex-shrink:0;}
+  .u-lbl{font-size:9.5px;font-weight:700;fill:#E6EDF3;font-family:var(--font);}
+  .u-cost{font-size:8px;fill:#C9D1D9;font-family:var(--font);}
+  .pos-tips{font-size:13.5px;line-height:1.6;} .pos-tips li{margin-bottom:9px;}
+  @media (max-width:920px){ .board-layout{grid-template-columns:1fr;} .board-host{width:100%;max-width:360px;margin:0 auto;} }
+</style>
+</head>
+<body>
+  <a href="#main" class="skip">Saltar al contenido</a>
+
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Synapse, inicio">
+      <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/><circle cx="23" cy="9" r="2.4" fill="#22D3EE"/>
+        <circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
+        <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
+      </svg>
+      <span class="name">Synapse</span>
+    </a>
+    <nav class="main-nav" aria-label="Secciones">
+      <a class="navlink is-primary" href="index.html#coaching">Coaching <span class="pill-ia">IA</span></a>
+      <a class="navlink" href="index.html#stats">Estadísticas</a>
+      <a class="navlink" href="index.html#meta" aria-current="page">Meta</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <div class="crumbs">
+      <span class="path"><a href="index.html#meta">Meta</a> ▸ <b>Guía de comp</b></span>
+      <a class="back-link" href="index.html#meta">← Volver a la meta</a>
+    </div>
+
+    <section class="guide-hero">
+      <div class="tier-badge tier-S">S</div>
+      <div class="gh-main">
+        <h1>Flex Místicos</h1>
+        <div class="gh-tags"><span>Estilo: <b>Standard</b></span><span>Dificultad: <b>Media</b></span><span>Nivel objetivo: <b>9</b></span><span>Parche <b>14.7</b></span></div>
+        <p style="color:var(--muted);font-size:14px;margin:6px 0 14px;max-width:60ch;">Comp flexible de daño mágico sostenido. Fuerte si empiezas con componentes de maná o poder mágico. Tu colocación del portador decide las peleas.</p>
+        <div class="gh-metrics">
+          <div class="gh-metric"><div class="v">3.9</div><div class="k">Coloc. media</div></div>
+          <div class="gh-metric"><div class="v">64%</div><div class="k">Top 4</div></div>
+          <div class="gh-metric"><div class="v">16%</div><div class="k">1.º</div></div>
+          <div class="gh-metric"><div class="v">12.4%</div><div class="k">Pick</div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="report-grid">
+      <div class="col-main">
+        <div class="panel"><h3><span class="ic ic-accent">🧩</span> Composición final (nivel 9)</h3><div class="units-grid" id="units-grid"></div></div>
+        <div class="panel"><h3><span class="ic ic-accent">📖</span> Cómo jugarla</h3>
+          <div class="phase"><h4><span class="ph-tag">Early · 1-2</span></h4><p>Juega el tablero más fuerte que tengas y prioriza los ítems del portador (Místico). No fuerces la comp: gana rondas y economía.</p></div>
+          <div class="phase"><h4><span class="ph-tag">Mid · 3-4</span></h4><p>Transiciona a la línea mística y sube de nivel con tempo. En 4-1 busca tus 4 costes. Mantén la vida &gt; 50 para subir a 8 seguro y coloca al Místico a salvo.</p></div>
+          <div class="phase"><h4><span class="ph-tag">Late · 5+</span></h4><p>A nivel 9 añade tus 5 costes y mejora a 2★ tus unidades clave. Ajusta el posicionamiento ronda a ronda según las amenazas.</p></div>
+        </div>
+        <div class="panel"><h3><span class="ic ic-accent">🔀</span> Variaciones</h3>
+          <p class="variations"><b>Control:</b> segundo Vidente si el lobby es agresivo. · <b>Escalado:</b> prioriza al Invocador con vida/eco de sobra. · <b>Tanque:</b> doble frontline contra mucho daño físico.</p>
+        </div>
+      </div>
+      <div class="col-side">
+        <div class="panel"><h3><span class="ic ic-accent">⬆️</span> Niveleo</h3>
+          <ul class="level-timeline">
+            <li><span class="lv-badge">4</span><div><div class="lv-when">Etapa 2-1</div><div class="lv-txt">Tablero fuerte para buscar racha.</div></div></li>
+            <li><span class="lv-badge">6</span><div><div class="lv-when">Etapa 3-2</div><div class="lv-txt">Nivel 6 con tempo; estabiliza.</div></div></li>
+            <li><span class="lv-badge">7</span><div><div class="lv-when">Etapa 4-1</div><div class="lv-txt">Primer roll ligero buscando 4 costes.</div></div></li>
+            <li><span class="lv-badge">8</span><div><div class="lv-when">Etapa 4-5</div><div class="lv-txt">Rollea por Místico y Centinela.</div></div></li>
+            <li><span class="lv-badge">9</span><div><div class="lv-when">Etapa 5-1</div><div class="lv-txt">Añade 5 costes y persigue 2★ clave.</div></div></li>
+          </ul>
+        </div>
+        <div class="panel"><h3><span class="ic ic-accent">✨</span> Augments recomendados</h3>
+          <ul class="aug-list">
+            <li><span class="aug-pri pri-must">Top</span> Convergencia Mística</li>
+            <li><span class="aug-pri pri-good">Bueno</span> Corazón de Cristal</li>
+            <li><span class="aug-pri pri-good">Bueno</span> Mente Táctica</li>
+            <li><span class="aug-pri pri-sit">Situac.</span> Eco Resonante</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <section class="panel" style="margin-top:22px;">
+      <h3><span class="ic ic-accent">🎯</span> Posicionamiento recomendado</h3>
+      <div class="board-layout">
+        <div>
+          <div class="board-legend">
+            <span class="lg"><span class="sw" style="border-color:#E3B341"></span> Portador</span>
+            <span class="lg"><span class="sw" style="border-color:#B061FF"></span> 4 costes</span>
+            <span class="lg"><span class="sw" style="border-color:#58A6FF"></span> 3 costes</span>
+            <span class="lg"><span class="sw" style="border-color:#3FB950"></span> 2 costes</span>
+            <span class="lg"><span class="sw" style="border-color:#9AA4B2"></span> 1 coste</span>
+          </div>
+          <div class="board-host" id="board-host" role="img" aria-label="Tablero hexagonal con el posicionamiento recomendado"></div>
+        </div>
+        <div>
+          <ul class="pos-tips">
+            <li><b>Portador (Místico)</b> en la esquina trasera: máxima distancia a los asesinos.</li>
+            <li><b>Frontline</b> (Centinela, Guardián, Vanguardia) en primera línea como muro.</li>
+            <li><b>Apoyos mágicos</b> en segunda línea, protegidos.</li>
+            <li><b>Regla viva:</b> mueve el portador a la esquina opuesta a la mayor amenaza cada ronda.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>Synapse — Guía de comp (datos de ejemplo)</div>
+    <div class="legal">Comp, ítems y augments inventados con fines de prototipado. Marca propia no afiliada a los titulares de los juegos.</div>
+  </footer>
+
+<script>
+const COST = { 1: "#9AA4B2", 2: "#3FB950", 3: "#58A6FF", 4: "#B061FF", 5: "#E3B341" };
+const UNITS = [
+  { n: "Centinela", c: 5, role: "Tanque principal", r: 0, col: 3, items: ["Égida del Guardián", "Manto Rúnico"] },
+  { n: "Guardián", c: 2, role: "Tanque", r: 0, col: 2, items: [] },
+  { n: "Vanguardia", c: 1, role: "Frontline", r: 0, col: 4, items: [] },
+  { n: "Vidente", c: 3, role: "Control", r: 1, col: 3, items: [] },
+  { n: "Hechicero", c: 3, role: "Daño mágico", r: 2, col: 2, items: ["Reloj de Arena"] },
+  { n: "Curandera", c: 2, role: "Sostén", r: 2, col: 5, items: [] },
+  { n: "Místico", c: 4, role: "Portador", r: 3, col: 0, items: ["Báculo Arcano", "Velo Espectral", "Filo de Maná"], carry: true },
+  { n: "Invocador", c: 5, role: "Escalado", r: 3, col: 6, items: [] },
+];
+document.getElementById("units-grid").innerHTML = UNITS.map(u => {
+  const items = u.items.length ? `<div class="item-chips">${u.items.map(it => `<span class="item-chip">${it}</span>`).join("")}</div>` : `<div class="un-role" style="opacity:.7">Sin ítems prioritarios</div>`;
+  return `<div class="unit-card" style="border-left-color:${COST[u.c]}">
+    <div class="un-top"><div><div class="un-name">${u.n} ${u.carry ? '<span class="carry-flag">Portador</span>' : ""}</div><div class="un-role">${u.role}</div></div>
+    <span class="un-cost" style="color:${COST[u.c]};background:${COST[u.c]}1A;border:1px solid ${COST[u.c]}55">${u.c}🪙</span></div>${items}</div>`;
+}).join("");
+
+const SIZE = 22, HW = Math.sqrt(3) * SIZE, VS = 1.5 * SIZE, MX = 16, MY = 16, VB_W = 320, VB_H = 178;
+const hexCenter = (r, c) => ({ x: MX + HW / 2 + c * HW + (r % 2) * (HW / 2), y: MY + SIZE + r * VS });
+const hexPoints = (cx, cy) => { const w = HW / 2; return `${cx},${cy - SIZE} ${cx + w},${cy - SIZE / 2} ${cx + w},${cy + SIZE / 2} ${cx},${cy + SIZE} ${cx - w},${cy + SIZE / 2} ${cx - w},${cy - SIZE / 2}`; };
+let s = `<svg viewBox="0 0 ${VB_W} ${VB_H}" xmlns="http://www.w3.org/2000/svg">`;
+for (let r = 0; r < 4; r++) for (let c = 0; c < 7; c++) { const { x, y } = hexCenter(r, c); s += `<polygon points="${hexPoints(x, y)}" fill="#8B5CF6" fill-opacity="0.05" stroke="#2A2F3A" stroke-width="1"/>`; }
+UNITS.forEach(u => {
+  const { x, y } = hexCenter(u.r, u.col);
+  const ring = u.carry ? "#E3B341" : COST[u.c], ringW = u.carry ? 3.5 : 2;
+  s += `<polygon points="${hexPoints(x, y)}" fill="${COST[u.c]}" fill-opacity="0.18" stroke="${ring}" stroke-width="${ringW}"/>`;
+  s += `<text x="${x}" y="${y + 1}" class="u-lbl" text-anchor="middle">${u.n.slice(0, 5)}</text>`;
+  s += `<text x="${x}" y="${y + 11}" class="u-cost" text-anchor="middle">${u.c}🪙</text>`;
+});
+s += `<text x="8" y="${VB_H - 5}" style="font-size:9px;font-weight:700;fill:#6E7681;letter-spacing:1.5px">TU ZONA</text></svg>`;
+document.getElementById("board-host").innerHTML = s;
+</script>
+</body>
+</html>
