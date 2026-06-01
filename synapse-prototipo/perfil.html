@@ -4,10 +4,62 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Synapse — Tu perfil</title>
-<!-- Maqueta del Perfil con el look vibrante de producción + radar de habilidades (GPI).
-     Reutiliza el design system y las gráficas de frontend/assets (doble clic, file://). -->
-<link rel="stylesheet" href="../frontend/assets/synapse.css">
+<!-- Maqueta AUTÓNOMA (doble clic): CSS y gráficas embebidos, look vibrante + radar GPI. -->
 <style>
+  :root{
+    --bg:#090B11;--surface:#141925;--surface-2:#1A2030;--border:#262D3D;--border-soft:#1E2433;
+    --text:#EAF0F7;--muted:#8C97A8;--accent:#8B5CF6;--accent-2:#22D3EE;--accent-strong:#7C3AED;
+    --accent-soft:rgba(139,92,246,.16);--accent-glow:rgba(139,92,246,.45);
+    --good:#3FD17A;--warn:#E3B341;--bad:#F85B6B;--gold:#E9C16B;
+    --grad:linear-gradient(100deg,var(--accent),var(--accent-2));
+    --r-lg:18px;--r-md:13px;--r-sm:9px;--r-pill:999px;--shadow-sm:0 6px 18px rgba(0,0,0,.32);
+    --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(820px 480px at 88% -8%,rgba(139,92,246,.20),transparent 60%),radial-gradient(760px 460px at 2% 4%,rgba(34,211,238,.12),transparent 58%),var(--bg);background-attachment:fixed;}
+  a{color:var(--accent);text-decoration:none;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;padding:13px 24px;flex-wrap:wrap;background:rgba(9,11,17,.72);backdrop-filter:blur(16px) saturate(140%);border-bottom:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(139,92,246,.5),rgba(34,211,238,.4),transparent) 1;box-shadow:0 8px 30px rgba(0,0,0,.35);}
+  .brand{display:flex;align-items:center;gap:11px;flex-shrink:0;}
+  .brand .logo{filter:drop-shadow(0 0 10px var(--accent-glow));}
+  .brand .name{font-size:21px;font-weight:850;letter-spacing:.3px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .game-switch{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;gap:2px;}
+  .game-switch button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:7px 16px;border-radius:var(--r-pill);cursor:pointer;transition:.18s;min-height:30px;}
+  .game-switch button[aria-pressed="true"]{background:var(--grad);color:#0A0C12;box-shadow:0 2px 14px var(--accent-glow);}
+  nav.main-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+  .navlink{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:9px 13px;border-radius:var(--r-sm);cursor:pointer;transition:.18s;text-decoration:none;}
+  .navlink:hover{color:var(--text);background:var(--surface);}
+  .navlink[aria-current="page"]{color:var(--text);background:var(--accent-soft);box-shadow:inset 0 0 0 1px rgba(139,92,246,.4);}
+  .navlink .pill-ia{font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#0A0C12;background:var(--grad);padding:2px 6px;border-radius:var(--r-pill);}
+  .avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#0A0C12;background:var(--grad);box-shadow:0 0 12px var(--accent-glow);}
+  main{max-width:1100px;margin:0 auto;padding:32px 24px 88px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin:0 0 10px;}
+  h1.title{font-size:32px;font-weight:850;margin:0 0 6px;letter-spacing:-.4px;}
+  .subtitle{color:var(--muted);font-size:15.5px;margin:0 0 26px;max-width:64ch;}
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:0 0 22px;}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:15px;border-left:3px solid var(--border);}
+  .kpi.good{border-left-color:var(--good);} .kpi.warn{border-left-color:var(--warn);}
+  .kpi .v{font-size:22px;font-weight:850;} .kpi .k{font-size:12px;color:var(--muted);margin-top:2px;}
+  .kpi .bench{font-size:11px;color:var(--muted);margin-top:8px;padding-top:7px;border-top:1px solid var(--border);}
+  .panel{background:linear-gradient(180deg,var(--surface),rgba(20,25,37,.6));border:1px solid var(--border);border-radius:var(--r-md);padding:20px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+  .panel h3{margin:0 0 14px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:10px;}
+  .panel h3 .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:14px;background:var(--accent-soft);}
+  .insights-title{font-size:18px;font-weight:800;margin:0 0 14px;display:flex;align-items:center;gap:10px;}
+  .insights-title .tag{font-size:11px;font-weight:800;color:#0A0C12;background:var(--grad);padding:3px 10px;border-radius:var(--r-pill);}
+  .insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:14px;margin:0 0 26px;}
+  .insight{display:flex;gap:13px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--r-md);padding:16px;}
+  .insight.warn{border-left-color:var(--warn);} .insight.bad{border-left-color:var(--bad);} .insight.good{border-left-color:var(--good);}
+  .insight .ic{flex-shrink:0;font-size:18px;} .insight .it{font-size:13.5px;font-weight:800;margin-bottom:5px;line-height:1.4;}
+  .insight .id{font-size:12.5px;color:var(--muted);line-height:1.55;} .insight .id b{color:var(--text);}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .chart-host svg{width:100%;height:auto;display:block;}
+  .ax-lbl{font-size:10px;fill:#8C97A8;font-family:var(--font);}
+  .stat-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .stat-table th{text-align:left;color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;padding:0 0 10px;border-bottom:1px solid var(--border);}
+  .stat-table td{padding:11px 0;border-bottom:1px solid var(--border-soft);} .stat-table tr:last-child td{border-bottom:0;} .stat-table .num{text-align:right;}
+  footer{border-top:1px solid var(--border);margin-top:42px;padding:24px;text-align:center;color:var(--muted);font-size:12.5px;}
+  /* GPI */
   .gpi-grid{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:center;}
   .radar svg{width:100%;height:auto;display:block;}
   .radar-lbl{font-size:10.5px;font-weight:700;fill:#8C97A8;font-family:var(--font);}
@@ -18,10 +70,10 @@
   .axis .ax-fill{height:100%;border-radius:99px;background:var(--grad);}
   .axis .ax-avg{position:absolute;top:-2px;width:2px;height:12px;background:#8C97A8;}
   .axis .ax-v{text-align:right;font-weight:800;}
-  .gpi-legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:6px;}
+  .gpi-legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:12px;}
   .gpi-legend .k{display:inline-flex;align-items:center;gap:6px;}
   .gpi-legend .sw{width:14px;height:4px;border-radius:2px;}
-  @media(max-width:760px){ .gpi-grid{grid-template-columns:1fr;} }
+  @media(max-width:760px){ .gpi-grid{grid-template-columns:1fr;} .stat-grid{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
@@ -54,7 +106,7 @@
     <div class="kpi-row" id="kpis"></div>
 
     <div class="panel">
-      <h3><span class="ic ic-accent">🧭</span> Perfil de habilidades <span style="font-size:11px;font-weight:800;color:#0A0C12;background:var(--grad);padding:3px 10px;border-radius:999px;margin-left:4px;">GPI</span></h3>
+      <h3><span class="ic">🧭</span> Perfil de habilidades <span style="font-size:11px;font-weight:800;color:#0A0C12;background:var(--grad);padding:3px 10px;border-radius:999px;margin-left:4px;">GPI</span></h3>
       <div class="gpi-grid">
         <div class="radar" id="radar" role="img" aria-label="Radar de habilidades"></div>
         <div>
@@ -68,14 +120,13 @@
     <div class="insights" id="insights"></div>
 
     <div class="stat-grid">
-      <div class="panel"><h3><span class="ic ic-accent">📈</span> <span id="evol-title">Evolución</span></h3><div class="chart-host" id="evol"></div></div>
-      <div class="panel"><h3><span class="ic ic-accent">🏆</span> <span id="ta-title"></span></h3><div id="ta"></div></div>
+      <div class="panel"><h3><span class="ic">📈</span> <span id="evol-title">Evolución</span></h3><div class="chart-host" id="evol"></div></div>
+      <div class="panel"><h3><span class="ic">🏆</span> <span id="ta-title"></span></h3><div id="ta"></div></div>
     </div>
   </main>
 
   <footer><div>Synapse — Perfil (maqueta · datos de ejemplo)</div><div class="legal">Marca propia, no afiliada a los titulares de los juegos.</div></footer>
 
-<script src="../frontend/assets/charts.js"></script>
 <script>
 const D = {
   tft:{
@@ -95,6 +146,20 @@ const D = {
 };
 let game="tft";
 
+/* Gráficas embebidas (línea y tabla) */
+function renderLineChart(hostId, evol){
+  const W=480,H=200,padL=40,padR=14,padT=16,padB=30,{min,max,invert,suffix="",points=[]}=evol,n=points.length||1;
+  const px=i=>padL+(i*(W-padL-padR)/Math.max(n-1,1)), py=v=>{let t=(v-min)/((max-min)||1);if(!invert)t=1-t;return padT+t*(H-padT-padB);};
+  let g="";
+  [min,(min+max)/2,max].forEach(t=>{const y=py(t);g+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#262D3D"/><text x="${padL-7}" y="${y+3}" class="ax-lbl" text-anchor="end">${Math.round(t*10)/10}${suffix}</text>`;});
+  const line=points.map((d,i)=>`${px(i)},${py(d.value)}`).join(" ");
+  g+=`<polygon points="${padL},${H-padB} ${line} ${W-padR},${H-padB}" fill="#8B5CF6" fill-opacity="0.10"/><polyline points="${line}" fill="none" stroke="#8B5CF6" stroke-width="2.5" stroke-linejoin="round"/>`;
+  points.forEach((d,i)=>{g+=`<circle cx="${px(i)}" cy="${py(d.value)}" r="3.5" fill="#090B11" stroke="#8B5CF6" stroke-width="2"/><text x="${px(i)}" y="${H-padB+16}" class="ax-lbl" text-anchor="middle">${d.label}</text>`;});
+  document.getElementById(hostId).innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
+}
+function renderTable(hostId,t){
+  document.getElementById(hostId).innerHTML=`<table class="stat-table"><thead><tr>${t.cols.map((c,i)=>`<th${i>0?' class="num"':''}>${c}</th>`).join("")}</tr></thead><tbody>${t.rows.map(r=>`<tr>${r.map((c,i)=>`<td${i>0?' class="num"':''}>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
 function renderRadar(hostId,axes,you,avg){
   const W=320,H=300,cx=160,cy=145,R=108,n=axes.length;
   const pt=(i,val)=>{const a=-Math.PI/2+i*2*Math.PI/n,r=R*val/100;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];};
@@ -103,7 +168,7 @@ function renderRadar(hostId,axes,you,avg){
   axes.forEach((ax,i)=>{const [x,y]=pt(i,100);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#262D3D" stroke-width="1"/>`;const [lx,ly]=pt(i,122);g+=`<text x="${lx}" y="${ly+3}" class="radar-lbl" text-anchor="middle">${ax}</text>`;});
   g+=`<polygon points="${avg.map((v,i)=>pt(i,v).join(",")).join(" ")}" fill="rgba(140,151,168,.10)" stroke="#8C97A8" stroke-width="1.5" stroke-dasharray="4 3"/>`;
   g+=`<polygon points="${you.map((v,i)=>pt(i,v).join(",")).join(" ")}" fill="rgba(139,92,246,.22)" stroke="#8B5CF6" stroke-width="2.5"/>`;
-  you.forEach((v,i)=>{const [x,y]=pt(i,v);g+=`<circle cx="${x}" cy="${y}" r="3.5" fill="#0A0C12" stroke="#8B5CF6" stroke-width="2"/>`;});
+  you.forEach((v,i)=>{const [x,y]=pt(i,v);g+=`<circle cx="${x}" cy="${y}" r="3.5" fill="#090B11" stroke="#8B5CF6" stroke-width="2"/>`;});
   document.getElementById(hostId).innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
 }
 function render(){
