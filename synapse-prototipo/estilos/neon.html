@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Estilo B · Esports Neon</title>
+<!-- Mockup de estilo AUTÓNOMO (doble clic). Solo apariencia; contenido de ejemplo. -->
+<style>
+  :root{
+    --bg:#05060A; --panel:#0B0E16; --line:#19202E; --text:#E9EEF7; --muted:#7E8AA0;
+    --cy:#19E3FF; --mg:#FF2E97; --good:#36F0A0; --warn:#FFC83D; --bad:#FF4D6D;
+    --font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    --mono:"SFMono-Regular",Consolas,"Roboto Mono",monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.45;
+    background:
+      linear-gradient(rgba(25,227,255,.035) 1px,transparent 1px) 0 0/100% 38px,
+      linear-gradient(90deg,rgba(255,46,151,.03) 1px,transparent 1px) 0 0/38px 100%,
+      radial-gradient(900px 500px at 90% -10%,rgba(255,46,151,.16),transparent 60%),
+      radial-gradient(800px 480px at 4% 0%,rgba(25,227,255,.16),transparent 60%),
+      var(--bg);
+    min-height:100vh;}
+  .style-flag{position:fixed;top:12px;right:12px;z-index:99;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+    color:#05060A;background:linear-gradient(90deg,var(--cy),var(--mg));padding:6px 12px;clip-path:polygon(8% 0,100% 0,92% 100%,0 100%);}
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;padding:13px 26px;flex-wrap:wrap;
+    background:rgba(5,6,10,.82);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);}
+  .brand .name{font-size:21px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#fff;text-shadow:0 0 14px rgba(25,227,255,.7);}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .seg{display:inline-flex;border:1px solid var(--line);background:#070912;}
+  .seg button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;cursor:pointer;}
+  .seg button[aria-pressed=true]{background:linear-gradient(90deg,var(--cy),var(--mg));color:#05060A;}
+  nav{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap;}
+  nav a{color:var(--muted);text-decoration:none;font-weight:800;font-size:12.5px;letter-spacing:.8px;text-transform:uppercase;padding:9px 13px;border-bottom:2px solid transparent;}
+  nav a:hover{color:#fff;}
+  nav a.on{color:var(--cy);border-bottom-color:var(--cy);text-shadow:0 0 10px rgba(25,227,255,.6);}
+  .pill{font-family:var(--mono);font-size:9px;font-weight:700;color:#05060A;background:var(--mg);padding:2px 5px;}
+  .avatar{width:34px;height:34px;display:grid;place-items:center;font-weight:800;color:#05060A;background:linear-gradient(135deg,var(--cy),var(--mg));clip-path:polygon(25% 0,100% 0,75% 100%,0 100%);}
+  main{max-width:1080px;margin:0 auto;padding:36px 24px 90px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cy);margin:0 0 12px;}
+  h1{font-size:40px;font-weight:900;letter-spacing:1px;text-transform:uppercase;margin:0 0 8px;line-height:1.05;}
+  h1 em{font-style:normal;background:linear-gradient(90deg,var(--cy),var(--mg));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--muted);font-size:15.5px;max-width:58ch;margin:0 0 28px;}
+  .panel{background:var(--panel);border:1px solid var(--line);position:relative;}
+  .panel::before{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:linear-gradient(var(--cy),var(--mg));}
+  .cta{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:24px 26px;margin-bottom:30px;}
+  .cta .orb{width:60px;height:60px;display:grid;place-items:center;background:#070912;border:1px solid var(--cy);box-shadow:0 0 22px rgba(25,227,255,.45) inset;flex-shrink:0;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);}
+  .cta h2{margin:0 0 4px;font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
+  .cta p{margin:0;color:var(--muted);font-size:14px;max-width:44ch;}
+  .btn{margin-left:auto;border:0;cursor:pointer;font:inherit;font-weight:900;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:#05060A;background:linear-gradient(90deg,var(--cy),var(--mg));padding:14px 24px;clip-path:polygon(6% 0,100% 0,94% 100%,0 100%);box-shadow:0 0 24px rgba(255,46,151,.4);}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:30px;}
+  .kpi{padding:16px 18px;} .kpi .v{font-family:var(--mono);font-size:26px;font-weight:700;} .kpi .v.good{color:var(--good);}
+  .kpi .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:4px;}
+  .sec-t{font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 14px;color:var(--cy);}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  .card{padding:16px;display:flex;flex-direction:column;gap:11px;}
+  .card:hover{border-color:var(--cy);box-shadow:0 0 22px rgba(25,227,255,.25);}
+  .res{font-family:var(--mono);font-size:12px;font-weight:700;padding:4px 10px;width:fit-content;text-transform:uppercase;letter-spacing:.5px;}
+  .res.good{color:var(--good);border:1px solid var(--good);} .res.mid{color:var(--warn);border:1px solid var(--warn);} .res.gold{color:#FFD86B;border:1px solid #FFD86B;}
+  .card h3{margin:0;font-size:15.5px;font-weight:800;}
+  .meta{font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;} .meta b{color:#fff;}
+  .go{margin-top:auto;align-self:flex-start;border:1px solid var(--line);background:transparent;color:var(--cy);font:inherit;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:9px 14px;cursor:pointer;}
+  .go:hover{border-color:var(--cy);box-shadow:0 0 14px rgba(25,227,255,.4);}
+  footer{max-width:1080px;margin:30px auto 0;padding:22px;color:var(--muted);font-size:12px;text-align:center;border-top:1px solid var(--line);font-family:var(--mono);}
+  @media(max-width:680px){ .kpis{grid-template-columns:1fr;} h1{font-size:30px;} }
+</style>
+</head>
+<body>
+  <span class="style-flag">B · Esports Neon</span>
+  <header class="topbar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="9" cy="11" r="3.4" fill="#19E3FF"/><circle cx="23" cy="9" r="2.4" fill="#FF2E97"/><circle cx="22" cy="23" r="3" fill="#19E3FF"/><circle cx="10" cy="23" r="2" fill="#FF2E97"/><path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#19E3FF" stroke-width="1.4" stroke-opacity=".6"/></svg>
+      <span class="name">Synapse</span>
+    </div>
+    <div class="seg"><button aria-pressed="true">TFT</button><button aria-pressed="false">LoL</button></div>
+    <nav><a class="on" href="#">Coaching <span class="pill">IA</span></a><a href="#">Estadísticas</a><a href="#">Meta</a><a href="#">Lab</a><a href="#">Perfil</a></nav>
+    <span class="avatar">N</span>
+  </header>
+
+  <main>
+    <p class="eyebrow">// Coaching IA · lo que nos diferencia</p>
+    <h1>Mejora <em>partida a partida</em></h1>
+    <p class="sub">Analizamos cada partida y te decimos qué falló y qué hacer la próxima vez. Consejos concretos y accionables.</p>
+
+    <div class="panel cta">
+      <div class="orb"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#19E3FF"/></svg></div>
+      <div><h2>Analiza tu última partida</h2><p>Genera un informe con tus métricas clave y un análisis en lenguaje natural.</p></div>
+      <button class="btn">Generar coaching</button>
+    </div>
+
+    <div class="kpis">
+      <div class="panel kpi"><div class="v good">58%</div><div class="k">Top 4 · últimas 30</div></div>
+      <div class="panel kpi"><div class="v">4.2</div><div class="k">Colocación media</div></div>
+      <div class="panel kpi"><div class="v">312</div><div class="k">Partidas analizadas</div></div>
+    </div>
+
+    <h2 class="sec-t">▸ Tus partidas recientes</h2>
+    <div class="cards">
+      <div class="panel card"><span class="res gold">★ 2.º PUESTO</span><h3>Partida clasificatoria</h3><div class="meta"><span>NIVEL <b>8</b></span><span>DUR <b>34:12</b></span></div><button class="go">Ver coaching →</button></div>
+      <div class="panel card"><span class="res mid">▼ 5.º PUESTO</span><h3>Partida normal</h3><div class="meta"><span>NIVEL <b>7</b></span><span>DUR <b>28:40</b></span></div><button class="go">Ver coaching →</button></div>
+      <div class="panel card"><span class="res good">✔ VICTORIA</span><h3>Mago de control · Mid</h3><div class="meta"><span>KDA <b>7/2/9</b></span><span>DUR <b>31:05</b></span></div><button class="go">Ver coaching →</button></div>
+    </div>
+  </main>
+  <footer>Synapse — Mockup de estilo «Esports Neon» · datos de ejemplo · marca propia no afiliada a los titulares de los juegos.</footer>
+</body>
+</html>

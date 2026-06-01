@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Propuestas de estilo</title>
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:#EEF2FA;line-height:1.5;
+    background:radial-gradient(900px 500px at 80% -10%,rgba(139,92,246,.28),transparent 60%),radial-gradient(800px 480px at 5% 0,rgba(34,211,238,.18),transparent 60%),#0A0C14;min-height:100vh;}
+  main{max-width:1000px;margin:0 auto;padding:48px 24px 80px;}
+  h1{font-size:30px;font-weight:850;margin:0 0 6px;}
+  .name{background:linear-gradient(105deg,#8B5CF6,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  p.lead{color:#97A1B6;font-size:16px;max-width:64ch;margin:0 0 32px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;}
+  .opt{display:block;text-decoration:none;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:22px;transition:transform .15s,border-color .15s;}
+  .opt:hover{transform:translateY(-4px);border-color:#8B5CF6;}
+  .swatch{height:70px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,.12);}
+  .sw-a{background:radial-gradient(200px 90px at 80% 0,rgba(34,211,238,.5),transparent),linear-gradient(105deg,#1a1430,#0b1320);}
+  .sw-b{background:linear-gradient(rgba(25,227,255,.08) 1px,transparent 1px) 0 0/100% 12px,linear-gradient(90deg,#19E3FF,#FF2E97);}
+  .sw-c{background:#FFFFFF;}
+  .opt h2{margin:0 0 4px;font-size:19px;font-weight:800;}
+  .opt .tag{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#C9B6FF;}
+  .opt p{margin:8px 0 0;color:#97A1B6;font-size:13.5px;}
+  .opt .cta{margin-top:14px;font-weight:800;color:#8B5CF6;}
+  .note{margin-top:30px;color:#7E8AA0;font-size:13px;border-top:1px solid rgba(255,255,255,.1);padding-top:18px;}
+</style>
+</head>
+<body>
+  <main>
+    <h1>Propuestas de estilo · <span class="name">Synapse</span></h1>
+    <p class="lead">Tres direcciones visuales muy distintas para la misma pantalla (la home de Coaching). Ábrelas, compáralas y dime cuál te encaja —o qué mezclar—. Luego aplico la elegida al sistema de diseño real de la web.</p>
+    <div class="grid">
+      <a class="opt" href="aurora.html"><div class="swatch sw-a"></div><span class="tag">Opción A</span><h2>Aurora Glass</h2><p>Oscuro premium con profundidad: glassmorphism, gradientes aurora y brillos suaves. Evolución refinada del look actual.</p><div class="cta">Abrir →</div></a>
+      <a class="opt" href="neon.html"><div class="swatch sw-b"></div><span class="tag">Opción B</span><h2>Esports Neon</h2><p>Casi negro, neón cian/magenta, ángulos, mayúsculas y tipografía mono. Energía competitiva y "gamer".</p><div class="cta">Abrir →</div></a>
+      <a class="opt" href="claro.html"><div class="swatch sw-c"></div><span class="tag">Opción C</span><h2>Clean Light Pro</h2><p>Tema claro, mucho aire, tipografía nítida y acento contenido. Estilo herramienta analítica premium (Linear/Mobalytics).</p><div class="cta">Abrir →</div></a>
+    </div>
+    <p class="note">Maquetas autónomas (doble clic, sin servidor). Contenido de ejemplo · marca propia genérica, no afiliada a los titulares de los juegos.</p>
+  </main>
+</body>
+</html>

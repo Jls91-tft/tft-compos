@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Estilo C · Clean Light Pro</title>
+<!-- Mockup de estilo AUTÓNOMO (doble clic). Solo apariencia; contenido de ejemplo. -->
+<style>
+  :root{
+    --bg:#F6F7FB; --card:#FFFFFF; --line:#E7E9F0; --line-2:#EFF1F6;
+    --text:#161A24; --muted:#6B7384; --soft:#8A92A3;
+    --accent:#5B5BD6; --accent-2:#7C7CF0; --good:#1FA971; --warn:#C98A1E; --bad:#D6455B; --gold:#B8860B;
+    --grad:linear-gradient(105deg,var(--accent),var(--accent-2));
+    --font:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    --sh:0 1px 2px rgba(20,24,40,.04),0 8px 24px rgba(20,24,40,.06);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;background:var(--bg);min-height:100vh;}
+  .style-flag{position:fixed;top:12px;right:12px;z-index:99;font-size:11px;font-weight:800;letter-spacing:.5px;color:#fff;background:var(--grad);padding:6px 12px;border-radius:999px;box-shadow:0 6px 18px rgba(91,91,214,.35);}
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;padding:13px 28px;flex-wrap:wrap;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .name{font-size:21px;font-weight:850;letter-spacing:-.2px;color:var(--text);}
+  .seg{display:inline-flex;background:#EEF0F6;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;}
+  .seg button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:7px 16px;border-radius:999px;cursor:pointer;}
+  .seg button[aria-pressed=true]{background:#fff;color:var(--accent);box-shadow:var(--sh);}
+  nav{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap;}
+  nav a{color:var(--muted);text-decoration:none;font-weight:700;font-size:14px;padding:9px 13px;border-radius:9px;}
+  nav a:hover{color:var(--text);background:#EEF0F6;}
+  nav a.on{color:var(--accent);background:rgba(91,91,214,.10);}
+  .pill{font-size:9.5px;font-weight:800;color:#fff;background:var(--grad);padding:2px 6px;border-radius:999px;}
+  .avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:var(--grad);}
+  main{max-width:1060px;margin:0 auto;padding:40px 24px 90px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin:0 0 12px;}
+  h1{font-size:38px;font-weight:850;letter-spacing:-.8px;margin:0 0 8px;}
+  .sub{color:var(--muted);font-size:16px;max-width:60ch;margin:0 0 30px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);}
+  .cta{display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding:26px;margin-bottom:32px;}
+  .cta .orb{width:62px;height:62px;border-radius:16px;display:grid;place-items:center;background:var(--grad);flex-shrink:0;box-shadow:0 10px 24px rgba(91,91,214,.35);}
+  .cta h2{margin:0 0 4px;font-size:21px;font-weight:800;}
+  .cta p{margin:0;color:var(--muted);font-size:14.5px;max-width:46ch;}
+  .btn{margin-left:auto;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:15px;color:#fff;background:var(--grad);padding:14px 24px;border-radius:12px;box-shadow:0 8px 22px rgba(91,91,214,.32);}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px;}
+  .kpi{padding:18px 20px;} .kpi .v{font-size:27px;font-weight:850;} .kpi .v.good{color:var(--good);} .kpi .k{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .sec-t{font-size:20px;font-weight:800;letter-spacing:-.3px;margin:0 0 16px;}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+  .ct{padding:18px;display:flex;flex-direction:column;gap:12px;transition:transform .15s,box-shadow .15s;}
+  .ct:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(20,24,40,.10);}
+  .res{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;padding:5px 12px;border-radius:999px;width:fit-content;}
+  .res.good{color:var(--good);background:rgba(31,169,113,.12);} .res.mid{color:var(--warn);background:rgba(201,138,30,.13);} .res.gold{color:var(--gold);background:rgba(184,134,11,.12);}
+  .ct h3{margin:0;font-size:16px;font-weight:800;}
+  .meta{font-size:12.5px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;} .meta b{color:var(--text);}
+  .go{margin-top:auto;align-self:flex-start;border:1px solid var(--line);background:#fff;color:var(--accent);font:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:9px;cursor:pointer;}
+  .go:hover{border-color:var(--accent);background:rgba(91,91,214,.06);}
+  footer{max-width:1060px;margin:30px auto 0;padding:24px;color:var(--soft);font-size:12.5px;text-align:center;border-top:1px solid var(--line);}
+  @media(max-width:680px){ .kpis{grid-template-columns:1fr;} h1{font-size:30px;} }
+</style>
+</head>
+<body>
+  <span class="style-flag">C · Clean Light Pro</span>
+  <header class="topbar">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none"><circle cx="9" cy="11" r="3.4" fill="#5B5BD6"/><circle cx="23" cy="9" r="2.4" fill="#7C7CF0"/><circle cx="22" cy="23" r="3" fill="#5B5BD6"/><circle cx="10" cy="23" r="2" fill="#7C7CF0"/><path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#5B5BD6" stroke-width="1.4" stroke-opacity=".5"/></svg>
+      <span class="name">Synapse</span>
+    </div>
+    <div class="seg"><button aria-pressed="true">TFT</button><button aria-pressed="false">LoL</button></div>
+    <nav><a class="on" href="#">Coaching <span class="pill">IA</span></a><a href="#">Estadísticas</a><a href="#">Meta</a><a href="#">Lab</a><a href="#">Perfil</a></nav>
+    <span class="avatar">N</span>
+  </header>
+
+  <main>
+    <p class="eyebrow">⚡ Coaching IA · lo que nos diferencia</p>
+    <h1>Mejora partida a partida</h1>
+    <p class="sub">Analizamos cada partida y te decimos qué falló y qué hacer la próxima vez. Consejos concretos y accionables.</p>
+
+    <div class="card cta">
+      <div class="orb"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="#fff" stroke-width="2"/></svg></div>
+      <div><h2>Analiza tu última partida</h2><p>Genera un informe con tus métricas clave y un análisis en lenguaje natural.</p></div>
+      <button class="btn">Generar coaching</button>
+    </div>
+
+    <div class="kpis">
+      <div class="card kpi"><div class="v good">58%</div><div class="k">Top 4 (últimas 30)</div></div>
+      <div class="card kpi"><div class="v">4.2</div><div class="k">Colocación media</div></div>
+      <div class="card kpi"><div class="v">312</div><div class="k">Partidas analizadas</div></div>
+    </div>
+
+    <h2 class="sec-t">Tus partidas recientes</h2>
+    <div class="cards">
+      <div class="card ct"><span class="res gold">★ 2.º puesto</span><h3>Partida clasificatoria</h3><div class="meta"><span>Nivel <b>8</b></span><span>Duración <b>34:12</b></span></div><button class="go">Ver coaching →</button></div>
+      <div class="card ct"><span class="res mid">▼ 5.º puesto</span><h3>Partida normal</h3><div class="meta"><span>Nivel <b>7</b></span><span>Duración <b>28:40</b></span></div><button class="go">Ver coaching →</button></div>
+      <div class="card ct"><span class="res good">✔ Victoria</span><h3>Mago de control · Mid</h3><div class="meta"><span>KDA <b>7/2/9</b></span><span>Duración <b>31:05</b></span></div><button class="go">Ver coaching →</button></div>
+    </div>
+  </main>
+  <footer>Synapse — Mockup de estilo «Clean Light Pro» · datos de ejemplo · marca propia no afiliada a los titulares de los juegos.</footer>
+</body>
+</html>
