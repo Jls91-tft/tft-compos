@@ -115,6 +115,31 @@
 
   footer{border-top:1px solid var(--border);margin-top:42px;padding:24px;text-align:center;color:var(--muted);font-size:12.5px;}
 
+  /* Filtros globales */
+  .filters{display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;margin-bottom:20px;padding:12px 15px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);}
+  .fgroup{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .fl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-right:2px;}
+  .fpill{border:1px solid var(--border);background:var(--bg);color:var(--muted);font:inherit;font-weight:700;font-size:12px;padding:5px 11px;border-radius:var(--r-pill);cursor:pointer;transition:.15s;}
+  .fpill:hover{color:var(--text);border-color:var(--accent);}
+  .fpill[aria-pressed="true"]{background:var(--accent-soft);color:#C9B6FF;border-color:var(--accent);}
+
+  /* Modal drill-down */
+  .modal{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(6,8,12,.72);backdrop-filter:blur(7px);padding:20px;}
+  .modal[hidden]{display:none;}
+  .modal-card{position:relative;width:min(540px,100%);max-height:88vh;overflow:auto;background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid rgba(139,92,246,.4);border-radius:var(--r-lg);padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.55);}
+  .modal-x{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--muted);font-size:18px;cursor:pointer;}
+  .modal-x:hover{color:#fff;border-color:var(--accent);}
+  .d-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+  .d-name{font-size:20px;font-weight:850;} .d-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+  .d-stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .d-stat{flex:1;min-width:90px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);padding:12px;text-align:center;}
+  .d-stat .dv{font-size:22px;font-weight:850;} .d-stat .dk{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:3px;}
+  .d-sec{margin-top:16px;} .d-sec-t{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:9px;}
+  .d-list{display:flex;flex-direction:column;gap:7px;}
+  .d-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 13px;font-size:13.5px;}
+  .d-mut{color:var(--muted);}
+  .d-foot{margin-top:18px;font-size:11px;color:var(--muted);opacity:.6;}
+
   /* Simulador interactivo */
   .hexcell.filled{border-style:solid;cursor:pointer;}
   .cell-unit{width:84%;height:84%;border-radius:9px;display:grid;place-items:center;font-weight:850;font-size:12px;color:#fff;border:1.5px solid var(--c);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 50%,#10141f),#10141f);position:relative;}
@@ -176,8 +201,13 @@
     <p class="subtitle">Estudia el juego: simula comps, y consulta winrates de unidades, ítems y augments. Pensado para mirar rápido, incluso en mitad de una partida.</p>
 
     <div class="tabs" id="tabs"></div>
+    <div id="filters"></div>
     <div id="content"></div>
   </main>
+
+  <div class="modal" id="detail" hidden onclick="if(event.target===this)closeDetail()">
+    <div class="modal-card" id="detail-card"></div>
+  </div>
 
   <footer>Synapse — Lab (maqueta de rediseño · datos de ejemplo). Marca propia, no afiliada a los titulares de los juegos.</footer>
 
@@ -268,7 +298,7 @@ function rowHTML(item){
   const chipCls = currentTab==="units" ? "" : "";
   const chips = (item.chips||[]).map(c=>`<span class="chip">${c}</span>`).join("");
   const m2label = currentTab==="augments" ? "Pick" : "Uso";
-  return `<div class="row">
+  return `<div class="row" data-n="${item.n}" onclick="openDetail('${currentTab}', this.dataset.n)" style="cursor:pointer">
     ${iconHTML(item)}
     <div><div class="r-name">${item.n}</div><div class="r-sub">${sub}</div></div>
     <div class="wr"><div class="wr-bar"><div class="wr-fill" data-w="${item.wr}" style="background:${wrColor(item.wr)}"></div></div><span class="wr-num">${item.wr}%</span></div>
@@ -278,10 +308,11 @@ function rowHTML(item){
 }
 
 function render(){
+  renderFilters();
   const c = document.getElementById("content");
   if(currentTab==="sim"){ renderSim(); return; }
   const q = (document.getElementById("q").value||"").toLowerCase();
-  let rows = DATA[currentGame][currentTab].slice();
+  let rows = DATA[currentGame][currentTab].map(r => ({...r, wr: varWr(r.wr)}));
   rows = rows.filter(r => r.n.toLowerCase().includes(q) || (r.sub||"").toLowerCase().includes(q) || (r.chips||[]).some(ch=>ch.toLowerCase().includes(q)));
   rows.sort((a,b)=> sortBy==="wr" ? b.wr-a.wr : b.use-a.use);
   const label = DATA[currentGame].tabs.find(t=>t.k===currentTab).label;
@@ -373,6 +404,62 @@ function simLolHTML(){
       <div class="sim-board" style="grid-template-columns:repeat(6,1fr);max-width:430px;margin-top:14px;">${slots}</div>
     </div></div>`;
 }
+
+/* ===== Filtros globales (rango/región/parche/cola) ===== */
+const RANKS = ["Todos","Esmeralda+","Diamante+","Maestro+","Challenger"];
+let filtRank="Diamante+", filtRegion="EUW", filtPatch="17.4", filtQueue="Normal";
+function varWr(w){ const d = RANKS.indexOf(filtRank) - 2; return Math.max(40, Math.min(72, Math.round((w + d) * 10) / 10)); }
+function renderFilters(){
+  const queues = currentGame==="tft" ? ["Normal","Double Up","Hyperroll"] : ["Solo/Dúo","Flex"];
+  if(!queues.includes(filtQueue)) filtQueue = queues[0];
+  const pills = (arr, key, cur) => arr.map(v=>`<button class="fpill" aria-pressed="${cur===v}" onclick="setFilter('${key}','${v}')">${v}</button>`).join("");
+  document.getElementById("filters").innerHTML = `<div class="filters">
+    <div class="fgroup"><span class="fl">Rango</span>${pills(RANKS,'rank',filtRank)}</div>
+    <div class="fgroup"><span class="fl">Región</span>${pills(["EUW","NA","KR","Global"],'region',filtRegion)}</div>
+    <div class="fgroup"><span class="fl">Parche</span>${pills(["17.4","17.3"],'patch',filtPatch)}</div>
+    <div class="fgroup"><span class="fl">Cola</span>${pills(queues,'queue',filtQueue)}</div>
+  </div>`;
+}
+function setFilter(k,v){ ({rank:()=>filtRank=v,region:()=>filtRegion=v,patch:()=>filtPatch=v,queue:()=>filtQueue=v})[k](); render(); }
+
+/* ===== Drill-down (ficha detallada al hacer clic) ===== */
+const sec = (t,body)=>`<div class="d-sec"><div class="d-sec-t">${t}</div>${body}</div>`;
+const chipList = (arr)=>`<div class="chips">${(arr||[]).map(c=>`<span class="chip">${c}</span>`).join("")}</div>`;
+function detailHTML(tab,it){
+  const isTFT = currentGame==="tft", wr = varWr(it.wr), avg = 5-(wr-50)/6;
+  const icon = tab==="units" ? `<div class="xico unit" style="--c:${COST[it.cost]};width:54px;height:54px;border-radius:14px;font-size:18px">${it.n[0]}</div>`
+    : tab==="augments" ? `<div class="xico aug" style="--c:${TIER[it.tier]};width:54px;height:54px;font-size:18px">${it.tier}</div>`
+    : `<div class="xico item" style="width:54px;height:54px;border-radius:14px;font-size:18px">${it.n[0]}</div>`;
+  const sub = tab==="units" ? `${it.cost}🪙 · ${it.sub}` : tab==="augments" ? `${it.tier==="S"?"Prismático":it.tier==="A"?"Oro":"Plata"} · ${it.sub}` : it.sub;
+  const stats = `<div class="d-stats">
+    <div class="d-stat"><div class="dv" style="color:${wrColor(wr)}">${wr}%</div><div class="dk">Winrate</div></div>
+    <div class="d-stat"><div class="dv">${it.use}%</div><div class="dk">${tab==="augments"?"Pick":"Uso"}</div></div>
+    ${isTFT?`<div class="d-stat"><div class="dv">${avg.toFixed(1)}</div><div class="dk">Coloc. media</div></div>`:""}</div>`;
+  let s = "";
+  if(tab==="units"){
+    if(isTFT){ const stars=[[1,avg+1.1],[2,avg],[3,avg-1.4]].map(([st,p])=>`<div class="d-row"><span>${"★".repeat(st)}</span><span class="d-mut">Coloc. ${p.toFixed(1)}</span></div>`).join(""); s+=sec("Por estrella",`<div class="d-list">${stars}</div>`); }
+    s += sec(isTFT?"Mejores ítems (BIS)":"Mejores ítems", chipList(it.chips));
+    s += sec("Mejores comps", chipList(isTFT?["Flex Místicos","Reroll Vanguardias"]:["Poke & escala","Dive"]));
+  } else if(tab==="items"){
+    s += sec("Se forma con", chipList(isTFT?["Espada B.F.","Vara Tempo"]:["Componente base","Componente avanzado"]));
+    s += sec(isTFT?"Mejor en (unidad · WR)":"Mejor en", chipList(it.chips));
+    s += sec("Mejores comps", chipList(isTFT?["Flex Místicos","Fast 8 Francotiradores"]:["Hipercarry","Split push"]));
+  } else {
+    if(isTFT){ const stg=[["2-1",wr-2],["3-2",wr],["4-2",wr+1]].map(([st,w])=>`<div class="d-row"><span>Etapa ${st}</span><span style="color:${wrColor(w)};font-weight:800">${w}%</span></div>`).join(""); s+=sec("Por etapa de oferta",`<div class="d-list">${stg}</div>`); }
+    s += sec(isTFT?"Mejores comps":"Mejores campeones", chipList(it.chips));
+  }
+  return `<button class="modal-x" onclick="closeDetail()" aria-label="Cerrar">×</button>
+    <div class="d-head">${icon}<div><div class="d-name">${it.n}</div><div class="d-sub">${sub}</div></div></div>
+    ${stats}${s}
+    <div class="d-foot">Datos de ${filtRank} · ${filtRegion} · Parche ${filtPatch}. // En producción saldrán de /api.</div>`;
+}
+function openDetail(tab,name){
+  const it = DATA[currentGame][tab].find(x=>x.n===name); if(!it) return;
+  document.getElementById("detail-card").innerHTML = detailHTML(tab,it);
+  document.getElementById("detail").hidden = false;
+}
+function closeDetail(){ document.getElementById("detail").hidden = true; }
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeDetail(); });
 
 renderTabs();
 render();
