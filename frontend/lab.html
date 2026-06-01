@@ -231,7 +231,7 @@
     </div>
     <nav class="main-nav" aria-label="Secciones">
       <a class="navlink" href="index.html#coaching">Coaching <span class="pill-ia">IA</span></a>
-      <a class="navlink" href="index.html#stats">Perfil</a>
+      <a class="navlink" href="perfil.html">Perfil</a>
       <a class="navlink" href="index.html#meta">Meta</a>
       <button class="navlink" aria-current="page">Lab</button>
     </nav>
@@ -584,7 +584,11 @@ function detailHTML(tab,it){
 }
 function openDetail(tab,name){
   const it = DATA[currentGame][tab].find(x=>x.n===name); if(!it) return;
-  document.getElementById("detail-card").innerHTML = detailHTML(tab,it);
+  let html = detailHTML(tab,it);
+  if(currentGame==='lol' && tab==='units'){
+    html += `<a href="lol-campeon.html?id=${encodeURIComponent(it.n)}" style="display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:10px 16px;border-radius:10px;background:var(--grad);color:#0A0C12;font-weight:800;text-decoration:none">Ver build completa →</a>`;
+  }
+  document.getElementById("detail-card").innerHTML = html;
   document.getElementById("detail").hidden = false;
 }
 function closeDetail(){ document.getElementById("detail").hidden = true; }

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Build de campeón (LoL)</title>
+<!-- Página de producción (servida por nginx): build de campeón LoL.
+     Se rellena desde /api/lab/champion; si la API no responde, usa el ejemplo inline.
+     Iconos genéricos (iniciales); marca propia, sin nombres/logos de Riot en el branding. -->
+<style>
+  :root{
+    --bg:#090B11;--surface:#141925;--surface-2:#1A2030;--border:#262D3D;--border-soft:#1E2433;
+    --text:#EAF0F7;--muted:#8C97A8;--accent:#8B5CF6;--accent-2:#22D3EE;--accent-strong:#7C3AED;
+    --accent-soft:rgba(139,92,246,.16);--accent-glow:rgba(139,92,246,.45);
+    --good:#3FD17A;--warn:#E3B341;--bad:#F85B6B;--gold:#E9C16B;
+    --grad:linear-gradient(100deg,var(--accent),var(--accent-2));
+    --r-lg:18px;--r-md:13px;--r-sm:9px;--r-pill:999px;--shadow-sm:0 6px 18px rgba(0,0,0,.32);
+    --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(820px 480px at 88% -8%,rgba(139,92,246,.20),transparent 60%),radial-gradient(760px 460px at 2% 4%,rgba(34,211,238,.12),transparent 58%),var(--bg);background-attachment:fixed;}
+  a{color:var(--accent);text-decoration:none;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+  .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;padding:13px 24px;flex-wrap:wrap;background:rgba(9,11,17,.72);backdrop-filter:blur(16px) saturate(140%);border-bottom:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(139,92,246,.5),rgba(34,211,238,.4),transparent) 1;box-shadow:0 8px 30px rgba(0,0,0,.35);}
+  .brand{display:flex;align-items:center;gap:11px;flex-shrink:0;}
+  .brand .name{font-size:21px;font-weight:850;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .game-switch{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-pill);padding:3px;gap:2px;}
+  .game-switch button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13px;padding:7px 16px;border-radius:var(--r-pill);cursor:pointer;min-height:30px;}
+  .game-switch button[aria-pressed="true"]{background:var(--grad);color:#0A0C12;box-shadow:0 2px 14px var(--accent-glow);}
+  nav.main-nav{display:flex;align-items:center;gap:4px;margin-left:auto;}
+  .navlink{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:14px;padding:9px 13px;border-radius:var(--r-sm);cursor:pointer;text-decoration:none;}
+  .navlink:hover{color:var(--text);background:var(--surface);}
+  .navlink[aria-current="page"]{color:var(--text);background:var(--accent-soft);box-shadow:inset 0 0 0 1px rgba(139,92,246,.4);}
+  .navlink .pill-ia{font-size:9.5px;font-weight:800;color:#0A0C12;background:var(--grad);padding:2px 6px;border-radius:var(--r-pill);}
+  .avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#0A0C12;background:var(--grad);box-shadow:0 0 12px var(--accent-glow);}
+  main{max-width:1180px;margin:0 auto;padding:26px 24px 88px;}
+  .crumbs{font-size:13px;color:var(--muted);margin-bottom:16px;}
+  .crumbs b{color:var(--text);}
+  /* Hero */
+  .hero{display:flex;align-items:center;gap:22px;flex-wrap:wrap;border:1px solid rgba(139,92,246,.4);border-radius:var(--r-lg);padding:24px;background:radial-gradient(620px 240px at 100% 0%,rgba(34,211,238,.16),transparent 70%),linear-gradient(180deg,var(--surface-2),var(--surface));box-shadow:0 14px 38px rgba(0,0,0,.4);margin-bottom:22px;}
+  .champ-ico{width:72px;height:72px;border-radius:18px;display:grid;place-items:center;font-size:30px;font-weight:850;color:#fff;border:2px solid var(--accent);background:linear-gradient(160deg,rgba(139,92,246,.45),rgba(34,211,238,.2));flex-shrink:0;}
+  .hero h1{font-size:27px;font-weight:850;margin:0 0 4px;}
+  .hero .tags{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px;color:var(--muted);} .hero .tags b{color:var(--text);}
+  .tier-badge{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:22px;font-weight:850;color:#0A0C12;background:linear-gradient(160deg,#F0CE7A,#E9C16B);}
+  .hstats{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;}
+  .hstat{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 14px;text-align:center;}
+  .hstat .v{font-size:18px;font-weight:850;} .hstat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;}
+  .panel{background:linear-gradient(180deg,var(--surface),rgba(20,25,37,.6));border:1px solid var(--border);border-radius:var(--r-md);padding:20px;margin-bottom:20px;box-shadow:var(--shadow-sm);}
+  .panel h3{margin:0 0 14px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:10px;}
+  .panel h3 .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:14px;background:var(--accent-soft);}
+  /* iconos genéricos */
+  .sq{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff;border:1.5px solid var(--accent);background:linear-gradient(160deg,rgba(139,92,246,.4),rgba(34,211,238,.16));flex-shrink:0;}
+  .sq.boot{border-color:var(--accent-2);}
+  .seq{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .seq .arrow{color:var(--muted);font-weight:800;}
+  .lbl-row{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;}
+  .igroup .t{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:8px;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{font-size:12px;font-weight:700;padding:5px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);}
+  /* runas */
+  .runes{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .rune-col .rc-h{font-size:12px;font-weight:800;color:#C9B6FF;margin-bottom:10px;}
+  .rune{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13.5px;}
+  .rune .rd{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;border:1.5px solid var(--border);background:var(--bg);flex-shrink:0;}
+  .rune.key .rd{border-color:var(--gold);background:linear-gradient(160deg,rgba(233,193,107,.4),transparent);}
+  .rune.key{font-weight:800;}
+  /* habilidades */
+  .skills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .skill{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:18px;font-weight:850;color:#fff;border:1.5px solid var(--accent);background:linear-gradient(160deg,rgba(139,92,246,.4),rgba(34,211,238,.16));position:relative;}
+  .skill small{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);font-size:9px;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:0 5px;color:var(--muted);font-weight:700;}
+  .max{font-size:13.5px;color:var(--muted);margin-top:10px;} .max b{color:var(--text);}
+  /* counters */
+  .ctr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:var(--r-sm);background:var(--bg);border:1px solid var(--border);margin-bottom:8px;font-size:13.5px;}
+  .ctr .wr{font-weight:800;}
+  .ctr-h{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin:0 0 10px;}
+  .ctr-h.good{color:var(--good);} .ctr-h.bad{color:var(--bad);}
+  /* spikes */
+  .spike{display:grid;grid-template-columns:64px 1fr 40px;gap:10px;align-items:center;font-size:13px;margin-bottom:10px;}
+  .spike .sb{height:9px;border-radius:99px;background:var(--bg);border:1px solid var(--border);overflow:hidden;}
+  .spike .sf{height:100%;border-radius:99px;background:var(--grad);}
+  footer{border-top:1px solid var(--border);margin-top:40px;padding:24px;text-align:center;color:var(--muted);font-size:12.5px;}
+  @media(max-width:860px){ .grid{grid-template-columns:1fr;} .hstats{margin-left:0;} .runes{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true" style="filter:drop-shadow(0 0 10px var(--accent-glow))">
+        <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/><circle cx="23" cy="9" r="2.4" fill="#22D3EE"/>
+        <circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
+        <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
+      </svg><span class="name">Synapse</span>
+    </div>
+    <div class="game-switch" role="group" aria-label="Juego">
+      <button onclick="location.href='lab.html'">TFT</button>
+      <button aria-pressed="true">LoL</button>
+    </div>
+    <nav class="main-nav" aria-label="Secciones">
+      <a class="navlink is-primary" href="index.html#coaching">Coaching <span class="pill-ia">IA</span></a>
+      <a class="navlink" href="perfil.html">Perfil</a>
+      <a class="navlink" href="lab.html">Lab</a>
+    </nav>
+    <span class="avatar">N</span>
+  </header>
+
+  <main>
+    <div class="crumbs"><a href="lab.html">Lab</a> ▸ Campeones ▸ <b>Build de campeón</b></div>
+
+    <section class="hero">
+      <div class="champ-ico" id="c-ini">M</div>
+      <div>
+        <h1><span id="c-name">Mago de control</span> <span class="tier-badge" id="c-tier" style="font-size:16px;width:auto;height:auto;padding:3px 10px;border-radius:999px;vertical-align:middle">S</span></h1>
+        <div class="tags" id="c-tags"></div>
+      </div>
+      <div class="hstats" id="c-hstats"></div>
+    </section>
+
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <h3><span class="ic">🛠️</span> Build recomendada</h3>
+          <div class="igroup"><div class="t">Orden de objetos (core)</div>
+            <div class="seq" id="c-build"></div>
+          </div>
+          <div class="lbl-row">
+            <div class="igroup"><div class="t">Notas</div><div class="chips"><span class="chip" style="color:var(--muted)">Adapta botas y situacionales al rival</span></div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic">🔮</span> Runas</h3>
+          <div class="runes" id="c-runes"></div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic">⌨️</span> Habilidades</h3>
+          <div class="skills" id="c-skills"></div>
+          <div class="max" id="c-skillmax"></div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic">✨</span> Hechizos de invocador</h3>
+          <div class="chips" id="c-spells"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h3><span class="ic">⚔️</span> Counters</h3>
+          <div id="c-counters"></div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic">📈</span> Power spikes</h3>
+          <div id="c-spikes"></div>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:6px">La barra indica la fuerza relativa del campeón en cada fase de la partida.</div>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ic">🧠</span> Cómo jugarlo</h3>
+          <div style="font-size:13.5px;line-height:1.6;color:var(--text)">Juega tu fase fuerte (la de mayor power spike) buscando ventaja; cede espacio en tus fases débiles. Guarda tu control para frenar el acceso de los campeones contra los que eres débil.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer><div>Synapse — Build de campeón</div><div class="legal">Arquetipos, objetos y runas genéricos en la maqueta. Marca propia, no afiliada a los titulares de los juegos.</div></footer>
+
+<script>
+/* Datos de EJEMPLO (fallback). El build real llega de /api/lab/champion. */
+const FALLBACK = {
+  name:"Mago de control", role:"Mid", tier:"S", difficulty:"Media",
+  stats:{wr:"53%", pick:"14%", ban:"8%", kda:"3.1"},
+  build:["Tomo Arcano","Botas de Hechicero","Cetro Abisal","Velo Espectral","Reloj de Arena"],
+  runes:{primary:["Cometa Arcano","Maná Veloz","Trascendencia","Combustión"], secondary:["Galleta Mágica","Perspicacia Cósmica"]},
+  skills:{order:"Q > E > W", ult:"6 / 11 / 16"},
+  spells:["Parpadeo","Quemadura"],
+  counters:{strong:[["Tanque de iniciación","58%"],["Luchador de línea","55%"]], weak:[["Asesino de acceso","44%"],["Tirador móvil","47%"]]},
+  spikes:{early:58, mid:88, late:74},
+};
+
+function initials(n){ const w=(n||"").split(/\s+/).filter(Boolean); return ((w[0]?.[0]||"")+(w[1]?.[0]||"")).toUpperCase()||"?"; }
+
+function renderChampion(c){
+  document.getElementById("c-ini").textContent = (c.name||"?").trim().charAt(0).toUpperCase();
+  document.getElementById("c-name").textContent = c.name||"—";
+  document.getElementById("c-tier").textContent = c.tier||"—";
+  document.getElementById("c-tags").innerHTML = `<span>Rol: <b>${c.role||"—"}</b></span><span>Dificultad: <b>${c.difficulty||"—"}</b></span>`;
+  const st = c.stats||{};
+  document.getElementById("c-hstats").innerHTML =
+    `<div class="hstat"><div class="v" style="color:var(--good)">${st.wr||"—"}</div><div class="k">Winrate</div></div>`+
+    `<div class="hstat"><div class="v">${st.pick||"—"}</div><div class="k">Pick</div></div>`+
+    `<div class="hstat"><div class="v">${st.ban||"—"}</div><div class="k">Ban</div></div>`+
+    `<div class="hstat"><div class="v">${st.kda||"—"}</div><div class="k">KDA</div></div>`;
+  document.getElementById("c-build").innerHTML = (c.build||[]).map((n,i)=>{
+    const sq = `<span class="sq${i===1?" boot":""}" title="${n}">${initials(n)}</span>`;
+    return i ? `<span class="arrow">→</span>${sq}` : sq;
+  }).join("");
+  const pr=(c.runes&&c.runes.primary)||[], sc=(c.runes&&c.runes.secondary)||[];
+  document.getElementById("c-runes").innerHTML =
+    `<div class="rune-col"><div class="rc-h">Primaria</div>`+
+    pr.map((r,i)=>`<div class="rune ${i===0?"key":""}"><span class="rd">${i===0?"★":(r||"?").charAt(0)}</span> ${r}</div>`).join("")+
+    `</div><div class="rune-col"><div class="rc-h">Secundaria</div>`+
+    sc.map(r=>`<div class="rune"><span class="rd">${(r||"?").charAt(0)}</span> ${r}</div>`).join("")+`</div>`;
+  const sk=c.skills||{};
+  document.getElementById("c-skills").innerHTML =
+    ["Q","W","E","R"].map(k=>`<div class="skill"${k==="R"?' style="border-color:var(--gold)"':''}>${k}</div>`).join("");
+  document.getElementById("c-skillmax").innerHTML = `Orden de subida: <b>${sk.order||"—"}</b>. Ulti (R) en niveles <b>${sk.ult||"—"}</b>.`;
+  document.getElementById("c-spells").innerHTML = (c.spells||[]).map(s=>`<span class="chip">${s}</span>`).join("");
+  const strong=(c.counters&&c.counters.strong)||[], weak=(c.counters&&c.counters.weak)||[];
+  document.getElementById("c-counters").innerHTML =
+    `<div class="ctr-h good">Fuerte contra</div>`+
+    strong.map(p=>`<div class="ctr"><span>${p[0]}</span><span class="wr" style="color:var(--good)">${p[1]}</span></div>`).join("")+
+    `<div class="ctr-h bad" style="margin-top:16px">Débil contra</div>`+
+    weak.map(p=>`<div class="ctr"><span>${p[0]}</span><span class="wr" style="color:var(--bad)">${p[1]}</span></div>`).join("");
+  const sp=c.spikes||{};
+  document.getElementById("c-spikes").innerHTML =
+    [["Early",sp.early],["Mid",sp.mid],["Late",sp.late]].map(p=>{
+      const v=p[1]||0; return `<div class="spike"><span>${p[0]}</span><span class="sb"><span class="sf" style="width:${v}%"></span></span><span style="text-align:right">${v}</span></div>`;
+    }).join("");
+}
+
+async function load(){
+  let c = FALLBACK;
+  try{
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id") || "mago-control";
+    const r = await fetch("/api/lab/champion?id=" + encodeURIComponent(id));
+    if(r.ok){ const d = await r.json(); if(d && d.name) c = d; }
+  }catch(e){ /* sin backend: se usa el ejemplo */ }
+  renderChampion(c);
+}
+load();
+</script>
+</body>
+</html>
