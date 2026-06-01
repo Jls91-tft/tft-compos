@@ -20,9 +20,12 @@ class Settings(BaseSettings):
     http_timeout: float = 15.0
     riot_max_concurrency: int = 5
 
-    # --- IA local (Ollama) ---
+    # --- IA: proveedor configurable (ollama local | groq API) ---
+    llm_provider: str = "ollama"      # "ollama" | "groq"
     ollama_host: str = "http://ollama:11434"
     ollama_model: str = "llama3.1:8b"
+    groq_api_key: str = ""            # clave gratuita en https://console.groq.com
+    groq_model: str = "llama-3.1-8b-instant"
 
     # --- Aplicación ---
     cors_origins: list[str] = [
