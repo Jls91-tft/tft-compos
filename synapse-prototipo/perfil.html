@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Tu perfil</title>
+<!-- Maqueta del Perfil con el look vibrante de producción + radar de habilidades (GPI).
+     Reutiliza el design system y las gráficas de frontend/assets (doble clic, file://). -->
+<link rel="stylesheet" href="../frontend/assets/synapse.css">
+<style>
+  .gpi-grid{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:center;}
+  .radar svg{width:100%;height:auto;display:block;}
+  .radar-lbl{font-size:10.5px;font-weight:700;fill:#8C97A8;font-family:var(--font);}
+  .axes{display:flex;flex-direction:column;gap:11px;}
+  .axis{display:grid;grid-template-columns:96px 1fr 38px;gap:11px;align-items:center;font-size:13px;}
+  .axis .ax-n{color:var(--text);font-weight:600;}
+  .axis .ax-bar{height:8px;border-radius:99px;background:var(--bg);border:1px solid var(--border);overflow:hidden;position:relative;}
+  .axis .ax-fill{height:100%;border-radius:99px;background:var(--grad);}
+  .axis .ax-avg{position:absolute;top:-2px;width:2px;height:12px;background:#8C97A8;}
+  .axis .ax-v{text-align:right;font-weight:800;}
+  .gpi-legend{display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:6px;}
+  .gpi-legend .k{display:inline-flex;align-items:center;gap:6px;}
+  .gpi-legend .sw{width:14px;height:4px;border-radius:2px;}
+  @media(max-width:760px){ .gpi-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/><circle cx="23" cy="9" r="2.4" fill="#22D3EE"/>
+        <circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
+        <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
+      </svg><span class="name">Synapse</span>
+    </div>
+    <div class="game-switch" role="group" aria-label="Juego">
+      <button id="g-tft" aria-pressed="true" onclick="setGame('tft')">TFT</button>
+      <button id="g-lol" aria-pressed="false" onclick="setGame('lol')">LoL</button>
+    </div>
+    <nav class="main-nav" aria-label="Secciones">
+      <a class="navlink is-primary" href="01-estructura-navegacion.html#coaching">Coaching <span class="pill-ia">IA</span></a>
+      <button class="navlink" aria-current="page">Perfil</button>
+      <a class="navlink" href="01-estructura-navegacion.html#meta">Meta</a>
+      <a class="navlink" href="lab.html">Lab</a>
+    </nav>
+    <span class="avatar">N</span>
+  </header>
+
+  <main>
+    <p class="eyebrow" id="eyebrow">Tu rendimiento · TFT</p>
+    <h1 class="title">Tu perfil</h1>
+    <p class="subtitle">Tu nivel de un vistazo: un perfil de habilidades que te dice en qué eres fuerte y dónde mejorar, comparado con la media de tu rango.</p>
+
+    <div class="kpi-row" id="kpis"></div>
+
+    <div class="panel">
+      <h3><span class="ic ic-accent">🧭</span> Perfil de habilidades <span style="font-size:11px;font-weight:800;color:#0A0C12;background:var(--grad);padding:3px 10px;border-radius:999px;margin-left:4px;">GPI</span></h3>
+      <div class="gpi-grid">
+        <div class="radar" id="radar" role="img" aria-label="Radar de habilidades"></div>
+        <div>
+          <div class="axes" id="axes"></div>
+          <div class="gpi-legend"><span class="k"><span class="sw" style="background:#8B5CF6"></span> Tú</span><span class="k"><span class="sw" style="background:#8C97A8"></span> Media de tu rango</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="insights-title">Dónde mejoras más rápido <span class="tag">IA</span></h2>
+    <div class="insights" id="insights"></div>
+
+    <div class="stat-grid">
+      <div class="panel"><h3><span class="ic ic-accent">📈</span> <span id="evol-title">Evolución</span></h3><div class="chart-host" id="evol"></div></div>
+      <div class="panel"><h3><span class="ic ic-accent">🏆</span> <span id="ta-title"></span></h3><div id="ta"></div></div>
+    </div>
+  </main>
+
+  <footer><div>Synapse — Perfil (maqueta · datos de ejemplo)</div><div class="legal">Marca propia, no afiliada a los titulares de los juegos.</div></footer>
+
+<script src="../frontend/assets/charts.js"></script>
+<script>
+const D = {
+  tft:{
+    kpis:[{v:"4.2",k:"Colocación media",cls:"good",bench:"Top 200 EUW"},{v:"58%",k:"Top 4",cls:"good",bench:"Media: 50%"},{v:"14%",k:"Top 1",cls:"good",bench:"Media: 12.5%"},{v:"312",k:"Partidas",cls:"",bench:"Últimos 30 días"}],
+    gpi:{axes:["Economía","Posición","Nivel","Augments","Flexib.","Consist."],you:[72,55,68,61,80,66],avg:[60,60,60,60,60,60]},
+    insights:[{cls:"warn",ic:"🎯",t:"Tu punto débil: posicionamiento (55)",d:"Por debajo de la media de tu rango. Trabajarlo es tu mayor salto de LP."},{cls:"good",ic:"✅",t:"Tu fuerte: flexibilidad (80)",d:"Lees bien lo que te dan y pivotas. Mantenlo."}],
+    evol:{label:"Colocación por semana (menor es mejor)",min:1,max:8,invert:true,suffix:"",points:[{label:"S1",value:4.8},{label:"S2",value:4.6},{label:"S3",value:4.3},{label:"S4",value:4.4},{label:"S5",value:4.1},{label:"S6",value:4.2}]},
+    ta:{title:"Comps más jugadas",cols:["Comp","Partidas","Coloc."],rows:[["Flex Místicos","86","3.8"],["Reroll Vanguardias","64","4.1"],["Fast 8 Francotiradores","48","4.6"]]},
+  },
+  lol:{
+    kpis:[{v:"54%",k:"Winrate",cls:"good",bench:"Media: 50%"},{v:"2.8",k:"KDA medio",cls:"good",bench:"Objetivo: 2.5"},{v:"6.4",k:"CS/min",cls:"warn",bench:"Objetivo: 6.5"},{v:"204",k:"Partidas",cls:"",bench:"Últimos 30 días"}],
+    gpi:{axes:["Farmeo","Lucha","Visión","Objetivos","Supervi.","Consist."],you:[74,63,48,52,58,67],avg:[60,60,60,60,60,60]},
+    insights:[{cls:"bad",ic:"🐉",t:"Tu punto débil: objetivos (52) y visión (48)",d:"El control de mapa es lo que te frena. Prioriza drakes/heraldo y pon más visión."},{cls:"good",ic:"✅",t:"Tu fuerte: farmeo (74)",d:"Tu CS temprano es sólido. Tu problema es macro, no mecánica."}],
+    evol:{label:"Winrate por semana",min:30,max:70,invert:false,suffix:"%",points:[{label:"S1",value:48},{label:"S2",value:50},{label:"S3",value:53},{label:"S4",value:55},{label:"S5",value:52},{label:"S6",value:54}]},
+    ta:{title:"Campeones más jugados",cols:["Campeón","Partidas","Winrate"],rows:[["Mago de control","78","57%"],["Asesino","31","52%"],["Tirador","22","50%"]]},
+  }
+};
+let game="tft";
+
+function renderRadar(hostId,axes,you,avg){
+  const W=320,H=300,cx=160,cy=145,R=108,n=axes.length;
+  const pt=(i,val)=>{const a=-Math.PI/2+i*2*Math.PI/n,r=R*val/100;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];};
+  let g="";
+  [25,50,75,100].forEach(f=>{g+=`<polygon points="${axes.map((_,i)=>pt(i,f).join(",")).join(" ")}" fill="none" stroke="#262D3D" stroke-width="1"/>`;});
+  axes.forEach((ax,i)=>{const [x,y]=pt(i,100);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#262D3D" stroke-width="1"/>`;const [lx,ly]=pt(i,122);g+=`<text x="${lx}" y="${ly+3}" class="radar-lbl" text-anchor="middle">${ax}</text>`;});
+  g+=`<polygon points="${avg.map((v,i)=>pt(i,v).join(",")).join(" ")}" fill="rgba(140,151,168,.10)" stroke="#8C97A8" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+  g+=`<polygon points="${you.map((v,i)=>pt(i,v).join(",")).join(" ")}" fill="rgba(139,92,246,.22)" stroke="#8B5CF6" stroke-width="2.5"/>`;
+  you.forEach((v,i)=>{const [x,y]=pt(i,v);g+=`<circle cx="${x}" cy="${y}" r="3.5" fill="#0A0C12" stroke="#8B5CF6" stroke-width="2"/>`;});
+  document.getElementById(hostId).innerHTML=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
+}
+function render(){
+  const d=D[game];
+  document.getElementById("eyebrow").textContent="Tu rendimiento · "+game.toUpperCase();
+  document.getElementById("kpis").innerHTML=d.kpis.map(k=>`<div class="kpi ${k.cls}"><div class="v">${k.v}</div><div class="k">${k.k}</div><div class="bench">${k.bench}</div></div>`).join("");
+  renderRadar("radar",d.gpi.axes,d.gpi.you,d.gpi.avg);
+  document.getElementById("axes").innerHTML=d.gpi.axes.map((ax,i)=>{const y=d.gpi.you[i],a=d.gpi.avg[i];return `<div class="axis"><span class="ax-n">${ax}</span><span class="ax-bar"><span class="ax-fill" style="width:${y}%"></span><span class="ax-avg" style="left:${a}%"></span></span><span class="ax-v" style="color:${y>=a?'var(--good)':'var(--warn)'}">${y}</span></div>`;}).join("");
+  document.getElementById("insights").innerHTML=d.insights.map(i=>`<div class="insight ${i.cls}"><span class="ic">${i.ic}</span><div><div class="it">${i.t}</div><div class="id">${i.d}</div></div></div>`).join("");
+  document.getElementById("evol-title").textContent=d.evol.label;
+  renderLineChart("evol",d.evol);
+  document.getElementById("ta-title").textContent=d.ta.title;
+  renderTable("ta",d.ta);
+}
+function setGame(g){game=g;document.getElementById("g-tft").setAttribute("aria-pressed",g==="tft");document.getElementById("g-lol").setAttribute("aria-pressed",g==="lol");render();}
+render();
+</script>
+</body>
+</html>
