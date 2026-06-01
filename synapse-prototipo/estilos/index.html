@@ -6,50 +6,61 @@
 <title>Synapse — Propuestas de estilo</title>
 <style>
   *{box-sizing:border-box;}
-  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:#EEF2FA;line-height:1.5;
-    background:radial-gradient(900px 500px at 80% -10%,rgba(139,92,246,.28),transparent 60%),radial-gradient(800px 480px at 5% 0,rgba(34,211,238,.18),transparent 60%),#0A0C14;min-height:100vh;}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:#181B24;line-height:1.5;background:#F4F5F8;min-height:100vh;}
   main{max-width:1000px;margin:0 auto;padding:48px 24px 80px;}
-  h1{font-size:30px;font-weight:850;margin:0 0 6px;}
-  .name{background:linear-gradient(105deg,#8B5CF6,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  p.lead{color:#97A1B6;font-size:16px;max-width:66ch;margin:0 0 30px;}
-  h2.group{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#8A95AB;margin:34px 0 14px;border-top:1px solid rgba(255,255,255,.08);padding-top:22px;}
-  h2.group:first-of-type{border:0;padding-top:0;margin-top:8px;}
-  .tagline{color:#7E8AA0;font-size:13.5px;margin:-8px 0 16px;}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;}
-  .opt{display:block;text-decoration:none;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:22px;transition:transform .15s,border-color .15s;}
-  .opt:hover{transform:translateY(-4px);border-color:#8B5CF6;}
-  .opt.hot{border-color:rgba(139,92,246,.5);box-shadow:0 0 0 1px rgba(139,92,246,.25),0 14px 40px rgba(0,0,0,.4);}
-  .swatch{height:74px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,.12);position:relative;overflow:hidden;}
-  .sw-d1{background:#0E1019;} .sw-d1::before{content:"";position:absolute;left:0;top:0;bottom:0;width:34%;background:#141826;border-right:1px solid #242B3B;} .sw-d1::after{content:"";position:absolute;right:10px;top:12px;width:46%;height:46px;border-radius:8px;background:linear-gradient(105deg,rgba(139,92,246,.5),rgba(34,211,238,.4));}
-  .sw-d2{background:#0A0C13;display:grid;place-items:center;} .sw-d2::after{content:"72";font-family:Consolas,monospace;font-weight:700;font-size:34px;background:linear-gradient(105deg,#8B5CF6,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .sw-a{background:radial-gradient(200px 90px at 80% 0,rgba(34,211,238,.5),transparent),linear-gradient(105deg,#1a1430,#0b1320);}
-  .sw-b{background:linear-gradient(rgba(25,227,255,.08) 1px,transparent 1px) 0 0/100% 12px,linear-gradient(90deg,#19E3FF,#FF2E97);}
+  h1{font-size:30px;font-weight:850;margin:0 0 6px;letter-spacing:-.5px;}
+  .name{background:linear-gradient(105deg,#7C5CFC,#22B8CF);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  p.lead{color:#69707E;font-size:16px;max-width:68ch;margin:0 0 28px;}
+  h2.group{font-size:12.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#8A91A0;margin:34px 0 6px;border-top:1px solid #E7E9F0;padding-top:22px;}
+  h2.group:first-of-type{border:0;padding-top:0;margin-top:6px;}
+  .tagline{color:#8A91A0;font-size:13.5px;margin:0 0 16px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+  .opt{display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid #E7E9F0;border-radius:18px;padding:20px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 10px 24px rgba(16,24,40,.05);transition:transform .15s,border-color .15s,box-shadow .15s;}
+  .opt:hover{transform:translateY(-4px);border-color:#7C5CFC;box-shadow:0 16px 40px rgba(16,24,40,.10);}
+  .opt.hero{grid-column:1/-1;display:flex;gap:22px;align-items:center;flex-wrap:wrap;border-color:rgba(124,92,252,.45);box-shadow:0 0 0 1px rgba(124,92,252,.18),0 18px 44px rgba(16,24,40,.10);}
+  .swatch{height:78px;border-radius:12px;border:1px solid #E7E9F0;position:relative;overflow:hidden;flex-shrink:0;}
+  .opt:not(.hero) .swatch{margin-bottom:14px;}
+  .opt.hero .swatch{width:240px;height:120px;}
+  .sw-h{background:#F4F5F8;} .sw-h::before{content:"";position:absolute;left:0;top:0;bottom:0;width:26%;background:#fff;border-right:1px solid #E7E9F0;} .sw-h::after{content:"";position:absolute;left:32%;right:10px;top:10px;bottom:10px;background:linear-gradient(135deg,#fff 60%,rgba(124,92,252,.18));border:1px solid #E7E9F0;border-radius:8px;}
+  .sw-d1{background:#0E1019;} .sw-d1::before{content:"";position:absolute;left:0;top:0;bottom:0;width:34%;background:#141826;} .sw-d1::after{content:"";position:absolute;right:10px;top:12px;width:46%;height:46px;border-radius:8px;background:linear-gradient(105deg,rgba(139,92,246,.5),rgba(34,211,238,.4));}
+  .sw-d2{background:#0A0C13;display:grid;place-items:center;} .sw-d2::after{content:"72";font-family:Consolas,monospace;font-weight:700;font-size:32px;background:linear-gradient(105deg,#8B5CF6,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sw-a{background:radial-gradient(160px 70px at 80% 0,rgba(34,211,238,.5),transparent),linear-gradient(105deg,#1a1430,#0b1320);}
+  .sw-b{background:linear-gradient(rgba(25,227,255,.1) 1px,transparent 1px) 0 0/100% 12px,linear-gradient(90deg,#19E3FF,#FF2E97);}
   .sw-c{background:#FFFFFF;}
-  .opt .tag{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#C9B6FF;}
-  .opt h3{margin:2px 0 4px;font-size:19px;font-weight:800;}
-  .opt p{margin:8px 0 0;color:#97A1B6;font-size:13.5px;}
-  .opt .cta{margin-top:14px;font-weight:800;color:#8B5CF6;}
-  .note{margin-top:30px;color:#7E8AA0;font-size:13px;border-top:1px solid rgba(255,255,255,.1);padding-top:18px;}
+  .tag{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#7C5CFC;}
+  .opt h3{margin:2px 0 4px;font-size:19px;font-weight:850;}
+  .opt p{margin:6px 0 0;color:#69707E;font-size:13.5px;}
+  .opt .cta{margin-top:12px;font-weight:800;color:#7C5CFC;}
+  .hero .body{flex:1;min-width:240px;}
+  .note{margin-top:30px;color:#8A91A0;font-size:13px;border-top:1px solid #E7E9F0;padding-top:18px;}
 </style>
 </head>
 <body>
   <main>
     <h1>Propuestas de estilo · <span class="name">Synapse</span></h1>
-    <p class="lead">Dos grupos. Arriba, lo importante: <b>cambios de estructura</b> con concepto «dashboard de rendimiento» (tu progreso es el protagonista). Abajo, las tres primeras pruebas, que solo cambiaban <b>colores</b>. Ábrelas, compáralas y dime qué dirección seguir.</p>
+    <p class="lead">Mi recomendación está arriba: el <b>híbrido</b> (navegación lateral + Synapse Score + foco) en layout <b>bento</b>, con tema <b>claro por defecto</b> y conmutador a <b>tenue</b>. Debajo, las exploraciones previas de estructura y de color.</p>
 
-    <h2 class="group">Estructura · dashboard de rendimiento (recomendado)</h2>
-    <p class="tagline">Mismo contenido reorganizado alrededor de tu mejora, con un concepto propio nuevo: el <b>Synapse Score</b>.</p>
+    <h2 class="group">★ Recomendado</h2>
     <div class="grid">
-      <a class="opt hot" href="dashboard-a.html"><div class="swatch sw-d1"></div><span class="tag">Opción D1</span><h3>Command Center</h3><p>Barra lateral + rejilla de paneles: trayectoria, Synapse Score, habilidades, foco y sesiones. Denso, tipo herramienta pro.</p><div class="cta">Abrir →</div></a>
-      <a class="opt hot" href="dashboard-b.html"><div class="swatch sw-d2"></div><span class="tag">Opción D2</span><h3>Tu Progreso</h3><p>Una columna centrada en la historia: Score grande, evolución, foco de la semana y registro de entrenamiento. Amplio y motivador.</p><div class="cta">Abrir →</div></a>
+      <a class="opt hero" href="hibrido.html">
+        <div class="swatch sw-h"></div>
+        <div class="body"><span class="tag">Híbrido · tendencia actual</span><h3>Bento · claro / tenue</h3><p>Sidebar (de D1) + hero del Synapse Score y foco de la semana (de D2), en rejilla bento con tarjetas suaves, bordes finos, tipografía grande y un solo acento. Tema claro por defecto; pulsa «Tenue» dentro para ver la versión oscura suave (sin negro puro).</p><div class="cta">Abrir →</div></div>
+      </a>
+    </div>
+
+    <h2 class="group">Estructura · dashboard de rendimiento</h2>
+    <p class="tagline">Las dos variantes de las que sale el híbrido (fondo oscuro).</p>
+    <div class="grid">
+      <a class="opt" href="dashboard-a.html"><div class="swatch sw-d1"></div><span class="tag">D1</span><h3>Command Center</h3><p>Sidebar + rejilla densa de paneles. Tipo herramienta pro.</p><div class="cta">Abrir →</div></a>
+      <a class="opt" href="dashboard-b.html"><div class="swatch sw-d2"></div><span class="tag">D2</span><h3>Tu Progreso</h3><p>Una columna, foco en la historia. Amplio y motivador.</p><div class="cta">Abrir →</div></a>
     </div>
 
     <h2 class="group">Solo color (primeras pruebas)</h2>
-    <p class="tagline">Misma estructura que la web actual, distinta paleta. Útiles solo para elegir tono de color, no estructura.</p>
+    <p class="tagline">Misma estructura que la web actual, distinta paleta.</p>
     <div class="grid">
-      <a class="opt" href="aurora.html"><div class="swatch sw-a"></div><span class="tag">A</span><h3>Aurora Glass</h3><p>Oscuro premium con glassmorphism y gradientes aurora.</p><div class="cta">Abrir →</div></a>
-      <a class="opt" href="neon.html"><div class="swatch sw-b"></div><span class="tag">B</span><h3>Esports Neon</h3><p>Neón cian/magenta, ángulos y mayúsculas. Energía competitiva.</p><div class="cta">Abrir →</div></a>
-      <a class="opt" href="claro.html"><div class="swatch sw-c"></div><span class="tag">C</span><h3>Clean Light Pro</h3><p>Tema claro, mucho aire, acento contenido.</p><div class="cta">Abrir →</div></a>
+      <a class="opt" href="aurora.html"><div class="swatch sw-a"></div><span class="tag">A</span><h3>Aurora Glass</h3><p>Oscuro premium con glassmorphism.</p><div class="cta">Abrir →</div></a>
+      <a class="opt" href="neon.html"><div class="swatch sw-b"></div><span class="tag">B</span><h3>Esports Neon</h3><p>Neón, ángulos y mayúsculas.</p><div class="cta">Abrir →</div></a>
+      <a class="opt" href="claro.html"><div class="swatch sw-c"></div><span class="tag">C</span><h3>Clean Light Pro</h3><p>Claro, mucho aire, acento contenido.</p><div class="cta">Abrir →</div></a>
     </div>
 
     <p class="note">Maquetas autónomas (doble clic, sin servidor). Contenido de ejemplo · marca propia genérica, no afiliada a los titulares de los juegos.</p>
