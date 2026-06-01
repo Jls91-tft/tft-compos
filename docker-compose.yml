@@ -1,10 +1,10 @@
 # Synapse — orquestación de servicios (ETAPA 2)
-# En el OTRO PC:  cp .env.example .env  →  rellena .env  →  docker compose up -d
+# En el OTRO PC:  cp .env.example .env  →  rellena .env  →  docker compose up -d --build
 #
-# Servicios:
-#   api    → backend FastAPI (http://localhost:8000, docs en /docs)
-#   web    → nginx sirviendo el frontend + proxy a la API (http://localhost:8080)
-#   ollama → IA local (http://localhost:11434); el modelo se descarga la 1ª vez
+#   api         → backend FastAPI (http://localhost:8000, docs en /docs)
+#   web         → nginx: frontend + proxy a la API (http://localhost:8080)
+#   ollama      → IA local (http://localhost:11434)
+#   ollama-pull → descarga el modelo automáticamente la primera vez y termina
 
 services:
   api:
@@ -13,7 +13,14 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - ollama
+      ollama:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     restart: unless-stopped
 
   web:
@@ -24,7 +31,13 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ >/dev/null 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   ollama:
@@ -33,9 +46,23 @@ services:
       - ollama_models:/root/.ollama
     ports:
       - "11434:11434"
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
-    # Nota: tras el primer arranque, descarga el modelo con:
-    #   docker compose exec ollama ollama pull llama3.1:8b
+
+  # Descarga el modelo una vez (no-op en arranques posteriores) y termina.
+  ollama-pull:
+    image: ollama/ollama:latest
+    env_file: .env
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c", "OLLAMA_HOST=http://ollama:11434 ollama pull \"${OLLAMA_MODEL:-llama3.1:8b}\""]
+    restart: "no"
 
 volumes:
   ollama_models:
