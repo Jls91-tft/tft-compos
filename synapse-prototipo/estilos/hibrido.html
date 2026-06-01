@@ -3,101 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Synapse — Híbrido · bento (claro/tenue)</title>
-<!-- Mockup AUTÓNOMO (doble clic). Híbrido: sidebar + Synapse Score + foco, en layout bento.
-     Conmutador de tema Claro/Tenue arriba a la derecha. Solo apariencia; datos de ejemplo. -->
+<title>Synapse — Híbrido · Resumen (tenue/claro)</title>
+<!-- Mockup AUTÓNOMO (doble clic). Híbrido bento: sidebar + última partida + Synapse Score +
+     foco + radar de habilidades + sesiones + objetivo. Tema TENUE por defecto, conmutable a Claro. -->
 <style>
-  /* ===== Tema CLARO (por defecto) ===== */
   body[data-theme="light"]{
     --bg:#F4F5F8; --panel:#FFFFFF; --panel-2:#FBFBFD; --line:#E7E9F0; --line-soft:#EEF0F5;
     --text:#181B24; --muted:#69707E; --soft:#9AA1AE;
-    --sh:0 1px 2px rgba(16,24,40,.04),0 10px 26px rgba(16,24,40,.06);
-    --track:#EEF0F5;
+    --sh:0 1px 2px rgba(16,24,40,.04),0 10px 26px rgba(16,24,40,.06); --track:#EEF0F5; --gridln:#E7E9F0;
   }
-  /* ===== Tema TENUE (dim, no negro) ===== */
   body[data-theme="dim"]{
     --bg:#171A21; --panel:#1E222C; --panel-2:#232733; --line:#2D323F; --line-soft:#262B36;
     --text:#E9ECF3; --muted:#9AA3B2; --soft:#6B7280;
-    --sh:0 1px 2px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.30);
-    --track:#161A22;
+    --sh:0 1px 2px rgba(0,0,0,.25),0 12px 30px rgba(0,0,0,.30); --track:#141821; --gridln:#2A2F3B;
   }
-  :root{ --v:#7C5CFC; --v2:#22B8CF; --good:#16A34A; --warn:#D08700; --gold:#CA8A04; --bad:#E5484D;
+  :root{ --v:#7C5CFC; --v2:#22B8CF; --good:#22B36B; --warn:#D08700; --gold:#CA8A04; --bad:#E5484D;
     --grad:linear-gradient(105deg,var(--v),var(--v2));
     --font:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
     --num:"SFMono-Regular",Consolas,"Roboto Mono",monospace; }
   *{box-sizing:border-box;}
   body{margin:0;font-family:var(--font);color:var(--text);background:var(--bg);min-height:100vh;
     display:grid;grid-template-columns:228px 1fr;transition:background .2s,color .2s;}
-  .flag{position:fixed;top:12px;right:130px;z-index:99;font-size:11px;font-weight:800;color:#fff;background:var(--grad);padding:6px 12px;border-radius:999px;}
-  /* Sidebar */
+  .flag{position:fixed;top:12px;right:128px;z-index:99;font-size:11px;font-weight:800;color:#fff;background:var(--grad);padding:6px 12px;border-radius:999px;}
   .side{position:sticky;top:0;height:100vh;background:var(--panel);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:4px;}
-  .brand{display:flex;align-items:center;gap:10px;padding:4px 8px 16px;}
-  .brand .name{font-size:19px;font-weight:850;letter-spacing:-.2px;}
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 8px 16px;} .brand .name{font-size:19px;font-weight:850;letter-spacing:-.2px;}
   .seg{display:flex;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px;margin:0 4px 14px;}
   .seg button{flex:1;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:800;font-size:12px;padding:7px;border-radius:8px;cursor:pointer;}
   .seg button[aria-pressed=true]{background:var(--grad);color:#fff;}
   .navi{display:flex;align-items:center;gap:12px;color:var(--muted);text-decoration:none;font-weight:700;font-size:14px;padding:11px 12px;border-radius:11px;}
   .navi:hover{color:var(--text);background:var(--panel-2);}
-  .navi.on{color:var(--text);background:color-mix(in srgb,var(--v) 14%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--v) 35%,transparent);}
+  .navi.on{color:var(--text);background:color-mix(in srgb,var(--v) 16%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--v) 38%,transparent);}
   .navi svg{width:18px;height:18px;flex-shrink:0;}
   .me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px;border-top:1px solid var(--line);}
   .me .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:var(--grad);}
   .me .who{font-size:13px;font-weight:700;} .me .who small{display:block;color:var(--muted);font-weight:600;}
-  /* Main */
   main{padding:24px 30px 70px;max-width:1180px;}
   .top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:20px;}
-  .hello{font-size:12.5px;color:var(--muted);font-weight:700;}
-  .top h1{font-size:25px;font-weight:850;margin:3px 0 0;letter-spacing:-.4px;}
-  .top .right{display:flex;align-items:center;gap:12px;}
-  .rankchip{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,transparent);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent);padding:7px 13px;border-radius:999px;}
+  .hello{font-size:12.5px;color:var(--muted);font-weight:700;} .top h1{font-size:25px;font-weight:850;margin:3px 0 0;letter-spacing:-.4px;}
+  .right{display:flex;align-items:center;gap:12px;}
   .theme{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;}
   .theme button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:800;font-size:12px;padding:6px 12px;border-radius:999px;cursor:pointer;}
   .theme button.on{background:var(--grad);color:#fff;}
-  /* Bento */
   .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--sh);}
   .card h3{margin:0 0 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);}
-  .s2{grid-column:span 2;} .s3{grid-column:1/-1;}
-  /* Score hero */
-  .score{display:flex;align-items:center;gap:20px;}
-  .ring{position:relative;width:128px;height:128px;flex-shrink:0;}
+  .s2{grid-column:span 2;}
+  /* Hero última partida */
+  .last{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .last .badge{width:62px;height:62px;border-radius:15px;display:grid;place-items:center;font-family:var(--num);font-weight:700;font-size:22px;flex-shrink:0;}
+  .badge.gold{color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,transparent);}
+  .last .mid{flex:1;min-width:200px;} .last .mid .t{font-size:16px;font-weight:800;} .last .mid .v{font-size:13.5px;color:var(--muted);margin-top:4px;line-height:1.5;} .last .mid .v b{color:var(--text);}
+  .last .when{font-size:11.5px;color:var(--soft);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+  .cta{border:0;cursor:pointer;font:inherit;font-weight:800;font-size:14px;color:#fff;background:var(--grad);padding:12px 18px;border-radius:12px;box-shadow:0 8px 20px color-mix(in srgb,var(--v) 30%,transparent);white-space:nowrap;}
+  /* Score + sparkline */
+  .score{display:flex;align-items:center;gap:18px;}
+  .ring{position:relative;width:108px;height:108px;flex-shrink:0;}
   .ring .n{position:absolute;inset:0;display:grid;place-content:center;text-align:center;}
-  .ring .n b{font-family:var(--num);font-size:40px;font-weight:700;letter-spacing:-1px;}
-  .ring .n small{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;}
-  .score .delta{display:inline-block;font-size:13px;color:var(--good);font-weight:800;background:color-mix(in srgb,var(--good) 13%,transparent);padding:5px 11px;border-radius:999px;}
-  .score .msg{margin:10px 0 0;font-size:14.5px;line-height:1.5;max-width:30ch;} .score .msg b{color:var(--v);}
-  /* Chart */
-  .chart svg{width:100%;height:auto;display:block;}
-  .chart .cap{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);font-weight:700;margin-bottom:8px;}
-  .chart .cap .up{color:var(--good);}
-  /* Skills */
-  .bar{display:grid;grid-template-columns:88px 1fr 34px;gap:10px;align-items:center;font-size:13px;margin-bottom:12px;}
-  .bar:last-child{margin-bottom:0;}
-  .bar .track{height:8px;border-radius:99px;background:var(--track);overflow:hidden;}
-  .bar .fill{height:100%;border-radius:99px;background:var(--grad);}
-  .bar .v{font-family:var(--num);font-weight:700;text-align:right;}
-  /* Focus */
-  .focus .ft{font-size:18px;font-weight:850;margin-bottom:4px;letter-spacing:-.3px;}
-  .focus .sub{color:var(--muted);font-size:13px;margin-bottom:12px;}
-  .focus .prog{height:11px;border-radius:99px;background:var(--track);overflow:hidden;}
-  .focus .prog i{display:block;height:100%;width:66%;background:var(--grad);}
-  .focus .row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:12px;}
-  .focus small{color:var(--muted);font-size:12.5px;}
-  .cta{border:0;cursor:pointer;font:inherit;font-weight:800;font-size:14px;color:#fff;background:var(--grad);padding:12px 18px;border-radius:12px;box-shadow:0 8px 20px color-mix(in srgb,var(--v) 30%,transparent);}
-  /* Sessions */
-  .ses{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line-soft);}
-  .ses:last-child{border-bottom:0;}
-  .ses .res{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-family:var(--num);font-weight:700;font-size:15px;flex-shrink:0;}
-  .res.gold{color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,transparent);}
-  .res.good{color:var(--good);background:color-mix(in srgb,var(--good) 13%,transparent);}
-  .res.mid{color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,transparent);}
-  .ses .info{flex:1;min-width:0;} .ses .info b{font-size:14.5px;font-weight:700;} .ses .info small{display:block;color:var(--muted);font-size:12.5px;}
-  .ses .go{border:1px solid var(--line);background:transparent;color:var(--v);font:inherit;font-weight:800;font-size:12.5px;padding:8px 14px;border-radius:10px;cursor:pointer;}
-  .ses .go:hover{border-color:var(--v);}
-  @media(max-width:1000px){ body{grid-template-columns:1fr;} .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px;} .me{margin:0 0 0 auto;border:0;padding:6px;} .bento{grid-template-columns:1fr;} .s2,.s3{grid-column:auto;} .flag{display:none;} }
+  .ring .n b{font-family:var(--num);font-size:34px;font-weight:700;letter-spacing:-1px;} .ring .n small{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;}
+  .delta{display:inline-block;font-size:12.5px;color:var(--good);font-weight:800;background:color-mix(in srgb,var(--good) 14%,transparent);padding:4px 10px;border-radius:999px;}
+  .spark{margin-top:12px;} .spark svg{width:100%;height:38px;display:block;}
+  .spark .cap{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:2px;}
+  /* Foco */
+  .focus .ft{font-size:17px;font-weight:850;margin-bottom:4px;letter-spacing:-.3px;}
+  .focus .d{color:var(--muted);font-size:13px;margin-bottom:12px;}
+  .prog{height:11px;border-radius:99px;background:var(--track);overflow:hidden;} .prog i{display:block;height:100%;background:var(--grad);}
+  .focus .row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:12px;} .focus small{color:var(--muted);font-size:12.5px;}
+  /* Radar */
+  .radar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .radar svg{width:170px;height:160px;flex-shrink:0;}
+  .radar .legend{font-size:12.5px;color:var(--muted);}
+  .radar .legend .k{display:flex;align-items:center;gap:7px;margin-bottom:7px;} .radar .legend .sw{width:13px;height:4px;border-radius:2px;}
+  .radar .weak{margin-top:8px;font-size:12.5px;} .radar .weak b{color:var(--warn);}
+  /* Sesiones */
+  .ses{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line-soft);} .ses:last-child{border-bottom:0;}
+  .ses .res{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-family:var(--num);font-weight:700;font-size:15px;flex-shrink:0;}
+  .res.gold{color:var(--gold);background:color-mix(in srgb,var(--gold) 15%,transparent);} .res.good{color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent);} .res.mid{color:var(--warn);background:color-mix(in srgb,var(--warn) 15%,transparent);}
+  .ses .info{flex:1;min-width:0;} .ses .info b{font-size:14px;font-weight:700;} .ses .info small{display:block;color:var(--muted);font-size:12.5px;}
+  .ses .go{border:1px solid var(--line);background:transparent;color:var(--v);font:inherit;font-weight:800;font-size:12.5px;padding:8px 13px;border-radius:10px;cursor:pointer;} .ses .go:hover{border-color:var(--v);}
+  /* Objetivo */
+  .goal .g-rank{font-size:18px;font-weight:850;letter-spacing:-.3px;margin-bottom:2px;} .goal .g-sub{font-size:12.5px;color:var(--muted);margin-bottom:12px;}
+  .goal .g-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:700;margin-top:8px;} .goal .g-row b{color:var(--text);font-family:var(--num);}
+  @media(max-width:1000px){ body{grid-template-columns:1fr;} .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px;} .me{margin:0 0 0 auto;border:0;padding:6px;} .bento{grid-template-columns:1fr;} .s2{grid-column:auto;} .flag{display:none;} }
 </style>
 </head>
-<body data-theme="light">
+<body data-theme="dim">
   <span class="flag">Híbrido · bento</span>
   <aside class="side">
     <div class="brand"><svg width="26" height="26" viewBox="0 0 32 32" fill="none"><circle cx="9" cy="11" r="3.4" fill="#7C5CFC"/><circle cx="23" cy="9" r="2.4" fill="#22B8CF"/><circle cx="22" cy="23" r="3" fill="#B0A0FF"/><circle cx="10" cy="23" r="2" fill="#7C5CFC"/><path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#7C5CFC" stroke-width="1.4" stroke-opacity=".55"/></svg><span class="name">Synapse</span></div>
@@ -113,66 +102,79 @@
   <main>
     <div class="top">
       <div><div class="hello">Tu rendimiento · TFT</div><h1>Hola, Invocador 👋</h1></div>
-      <div class="right">
-        <span class="rankchip">◆ Oro II</span>
-        <div class="theme" role="group" aria-label="Tema"><button class="on" data-t="light" onclick="setTheme('light')">Claro</button><button data-t="dim" onclick="setTheme('dim')">Tenue</button></div>
-      </div>
+      <div class="right"><div class="theme" role="group" aria-label="Tema"><button data-t="light" onclick="setTheme('light')">Claro</button><button class="on" data-t="dim" onclick="setTheme('dim')">Tenue</button></div></div>
     </div>
 
     <div class="bento">
-      <!-- Score hero -->
+      <!-- HERO: última partida (el núcleo: coaching) -->
+      <div class="card last s2">
+        <span class="badge gold">2º</span>
+        <div class="mid">
+          <div class="when">Hace 12 min · partida clasificatoria</div>
+          <div class="t">Flex Místicos · 2.º puesto</div>
+          <div class="v">Buena economía, pero <b>perdiste tempo en la 3-2</b> y la colocación del portador costó la pelea clave.</div>
+        </div>
+        <button class="cta">Ver coaching completo →</button>
+      </div>
+
+      <!-- Synapse Score + sparkline -->
       <div class="card">
         <h3>Synapse Score</h3>
         <div class="score">
           <div class="ring">
-            <svg width="128" height="128" viewBox="0 0 128 128"><circle cx="64" cy="64" r="55" fill="none" stroke="var(--track)" stroke-width="12"/><circle cx="64" cy="64" r="55" fill="none" stroke="url(#g2)" stroke-width="12" stroke-linecap="round" stroke-dasharray="249 346" transform="rotate(-90 64 64)"/><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C5CFC"/><stop offset="1" stop-color="#22B8CF"/></linearGradient></defs></svg>
-            <div class="n"><b>72</b><small>/ 100</small></div>
+            <svg width="108" height="108" viewBox="0 0 108 108"><circle cx="54" cy="54" r="46" fill="none" stroke="var(--track)" stroke-width="11"/><circle cx="54" cy="54" r="46" fill="none" stroke="url(#g2)" stroke-width="11" stroke-linecap="round" stroke-dasharray="208 289" transform="rotate(-90 54 54)"/><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C5CFC"/><stop offset="1" stop-color="#22B8CF"/></linearGradient></defs></svg>
+            <div class="n"><b>72</b><small>/100</small></div>
           </div>
+          <div><span class="delta">▲ +6 sem.</span></div>
+        </div>
+        <div class="spark">
+          <svg viewBox="0 0 220 38" preserveAspectRatio="none"><polygon points="6,30 6,28 50,30 94,20 138,22 182,12 214,9 214,38 6,38" fill="#7C5CFC" fill-opacity="0.12"/><polyline points="6,28 50,30 94,20 138,22 182,12 214,9" fill="none" stroke="url(#g3)" stroke-width="2.5"/><defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7C5CFC"/><stop offset="1" stop-color="#22B8CF"/></linearGradient></defs></svg>
+          <div class="cap">6 semanas · +11 puntos</div>
+        </div>
+      </div>
+
+      <!-- Foco de la semana -->
+      <div class="card focus s2">
+        <h3>Foco de la semana</h3>
+        <div class="ft">🎯 Subir de nivel a tiempo en la etapa 3</div>
+        <div class="d">La IA lo detectó como tu mayor fuga de LP. Refuerza tu punto débil del radar.</div>
+        <div class="prog"><i style="width:66%"></i></div>
+        <div class="row"><small>Aplicado en <b style="color:var(--text)">4 de 6</b> partidas</small></div>
+      </div>
+
+      <!-- Radar de habilidades -->
+      <div class="card">
+        <h3>Perfil de habilidades</h3>
+        <div class="radar">
+          <svg viewBox="0 0 180 168" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="90,20 145.4,52 145.4,116 90,148 34.6,116 34.6,52" fill="none" stroke="var(--gridln)"/>
+            <polygon points="90,52 117.7,68 117.7,100 90,116 62.3,100 62.3,68" fill="none" stroke="var(--gridln)"/>
+            <line x1="90" y1="84" x2="90" y2="20" stroke="var(--gridln)"/><line x1="90" y1="84" x2="145.4" y2="52" stroke="var(--gridln)"/><line x1="90" y1="84" x2="145.4" y2="116" stroke="var(--gridln)"/><line x1="90" y1="84" x2="90" y2="148" stroke="var(--gridln)"/><line x1="90" y1="84" x2="34.6" y2="116" stroke="var(--gridln)"/><line x1="90" y1="84" x2="34.6" y2="52" stroke="var(--gridln)"/>
+            <polygon points="90,44.3 122.1,65.5 123.8,103.5 90,121.8 58.4,102.2 55.1,63.9" fill="none" stroke="var(--soft)" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <polygon points="90,37.9 120.5,66.4 127.7,105.8 90,123 45.7,109.6 53.4,62.9" fill="rgba(124,92,252,.22)" stroke="#7C5CFC" stroke-width="2.5"/>
+          </svg>
           <div>
-            <span class="delta">▲ +6 esta semana</span>
-            <p class="msg">Tu economía va sólida. El siguiente salto está en el <b>posicionamiento</b>.</p>
+            <div class="legend"><span class="k"><span class="sw" style="background:#7C5CFC"></span> Tú</span><span class="k"><span class="sw" style="background:var(--soft)"></span> Media rango</span></div>
+            <div class="weak">Punto débil: <b>Posición (55)</b><br><span style="color:var(--muted)">→ es tu Foco de la semana</span></div>
           </div>
         </div>
       </div>
 
-      <!-- Trayectoria -->
-      <div class="card s2 chart">
-        <h3>Evolución del Score · 6 semanas</h3>
-        <div class="cap"><span>Tendencia al alza</span><span class="up">+11 total</span></div>
-        <svg viewBox="0 0 640 170" xmlns="http://www.w3.org/2000/svg">
-          <line x1="0" y1="40" x2="640" y2="40" stroke="var(--line)"/><line x1="0" y1="90" x2="640" y2="90" stroke="var(--line)"/><line x1="0" y1="140" x2="640" y2="140" stroke="var(--line)"/>
-          <polygon points="30,110 30,108 150,116 280,90 400,96 520,72 610,56 610,140 30,140" fill="#7C5CFC" fill-opacity="0.10"/>
-          <polyline points="30,108 150,116 280,90 400,96 520,72 610,56" fill="none" stroke="url(#g)" stroke-width="3.5" stroke-linejoin="round"/>
-          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7C5CFC"/><stop offset="1" stop-color="#22B8CF"/></linearGradient></defs>
-          <circle cx="610" cy="56" r="5" fill="var(--panel)" stroke="#22B8CF" stroke-width="3"/>
-          <text x="30" y="162" fill="var(--soft)" font-size="11">S1</text><text x="300" y="162" fill="var(--soft)" font-size="11">S3</text><text x="600" y="162" fill="var(--soft)" font-size="11">S6</text>
-        </svg>
-      </div>
-
-      <!-- Foco -->
-      <div class="card s2 focus">
-        <h3>Foco de la semana</h3>
-        <div class="ft">🎯 Subir de nivel a tiempo en la etapa 3</div>
-        <div class="sub">La IA lo detectó como tu mayor fuga de LP en las últimas partidas.</div>
-        <div class="prog"><i></i></div>
-        <div class="row"><small>Aplicado en <b style="color:var(--text)">4 de 6</b> partidas</small><button class="cta">Generar coaching de tu última partida</button></div>
-      </div>
-
-      <!-- Habilidades -->
-      <div class="card">
-        <h3>Perfil de habilidades</h3>
-        <div class="bar"><span>Economía</span><span class="track"><span class="fill" style="width:72%"></span></span><span class="v">72</span></div>
-        <div class="bar"><span>Posición</span><span class="track"><span class="fill" style="width:55%"></span></span><span class="v">55</span></div>
-        <div class="bar"><span>Nivel</span><span class="track"><span class="fill" style="width:68%"></span></span><span class="v">68</span></div>
-        <div class="bar"><span>Flexib.</span><span class="track"><span class="fill" style="width:80%"></span></span><span class="v">80</span></div>
-      </div>
-
-      <!-- Sesiones -->
-      <div class="card s3">
+      <!-- Sesiones recientes -->
+      <div class="card s2">
         <h3>Sesiones recientes</h3>
-        <div class="ses"><span class="res gold">2º</span><div class="info"><b>Partida clasificatoria</b><small>Nivel 8 · 34:12 · Flex Místicos</small></div><button class="go">Ver coaching →</button></div>
         <div class="ses"><span class="res mid">5º</span><div class="info"><b>Partida normal</b><small>Nivel 7 · 28:40 · Reroll Vanguardias</small></div><button class="go">Ver coaching →</button></div>
         <div class="ses"><span class="res good">▲</span><div class="info"><b>Victoria · Mago de control</b><small>Mid · KDA 7/2/9 · 31:05</small></div><button class="go">Ver coaching →</button></div>
+        <div class="ses"><span class="res gold">1º</span><div class="info"><b>Partida clasificatoria</b><small>Nivel 9 · 39:02 · Hiperscaling Magos</small></div><button class="go">Ver coaching →</button></div>
+      </div>
+
+      <!-- Objetivo de rango -->
+      <div class="card goal">
+        <h3>Tu objetivo</h3>
+        <div class="g-rank">◆ Platino IV</div>
+        <div class="g-sub">Vas por buen camino: +118 LP este mes.</div>
+        <div class="prog"><i style="width:64%"></i></div>
+        <div class="g-row"><span>Oro II</span><span><b>64%</b></span><span>Platino IV</span></div>
       </div>
     </div>
   </main>
