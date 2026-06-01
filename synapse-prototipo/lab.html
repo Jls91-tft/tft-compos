@@ -175,6 +175,19 @@
     main{padding:0;max-width:none;}
   }
 
+  /* Simulador pro: ítems y compartir */
+  .islots{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);display:flex;gap:2px;}
+  .islot{width:7px;height:7px;border-radius:2px;border:1px solid var(--border);background:var(--bg);}
+  .islot.f{background:linear-gradient(160deg,var(--accent),var(--accent-2));border-color:var(--accent);}
+  .hexcell.filled .cell-unit{cursor:grab;}
+  .itempick .modal-card{width:min(420px,100%);}
+  .pick-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .pick-it{border:1px solid var(--border);background:var(--bg);color:var(--text);font:inherit;font-size:12.5px;font-weight:700;padding:7px 12px;border-radius:var(--r-pill);cursor:pointer;transition:.15s;}
+  .pick-it:hover{border-color:var(--accent);}
+  .pick-it.on{background:var(--accent-soft);border-color:var(--accent);color:#C9B6FF;}
+  #sim-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);background:var(--surface-2);border:1px solid var(--accent);color:var(--text);padding:12px 18px;border-radius:var(--r-md);font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.2s;z-index:95;box-shadow:0 10px 30px rgba(0,0,0,.45);}
+  #sim-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
   /* Cheat sheet de recetas */
   .recipe-grid{display:grid;gap:5px;min-width:660px;}
   .rc-cell{border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px 4px;font-size:10.5px;min-height:48px;}
@@ -242,6 +255,15 @@
 
   <div class="modal" id="detail" hidden onclick="if(event.target===this)closeDetail()">
     <div class="modal-card" id="detail-card"></div>
+  </div>
+
+  <div class="modal itempick" id="itempick" hidden onclick="if(event.target===this)closePicker()">
+    <div class="modal-card">
+      <button class="modal-x" onclick="closePicker()" aria-label="Cerrar">×</button>
+      <div class="d-name" id="pick-title">Ítems</div>
+      <div class="pick-grid" id="pick-grid"></div>
+      <div class="d-foot">Máximo 3 ítems por unidad. Toca para añadir o quitar.</div>
+    </div>
   </div>
 
   <button class="clean-exit" onclick="toggleClean()">✕ Salir de captura</button>
@@ -382,51 +404,70 @@ const SIM_TFT = {
     {n:"Invocador",cost:5,traits:["Hechiceros"]},
   ],
 };
-let comp = [];
+let board = Array(28).fill(null);   // cada celda: null o {n, items:[]}
+let pickTarget = null, dragFrom = null;
 const simUnit = (n) => SIM_TFT.units.find(x => x.n === n);
 const tierOf = (count, th) => th.reduce((lv, t) => lv + (count >= t ? 1 : 0), 0);
+const ITEM_POOL = ["Báculo Arcano","Filo de Maná","Velo Espectral","Égida del Guardián","Manto Rúnico","Filo Letal","Arco Letal","Vara Letal","Corazón Titán","Doble Crítico","Emblema Mago","Fuente de Maná"];
+const countUnits = () => board.filter(Boolean).length;
 
 function computeTraits(){
-  const counts = {};
-  comp.forEach(n => { const u = simUnit(n); if (u) u.traits.forEach(t => counts[t] = (counts[t]||0) + 1); });
+  const counts = {}, seen = new Set();
+  board.forEach(cell => { if(!cell || seen.has(cell.n)) return; seen.add(cell.n); const u = simUnit(cell.n); if(u) u.traits.forEach(t => counts[t] = (counts[t]||0) + 1); });
   return Object.keys(SIM_TFT.traits).map(t => {
     const c = counts[t]||0, th = SIM_TFT.traits[t];
     return { t, c, lv: tierOf(c, th), on: tierOf(c, th) > 0, next: th.find(x => x > c), topTh: Math.max(...th) };
   }).sort((a, b) => (b.on - a.on) || (b.c - a.c));
 }
-function toggleUnit(n){ const i = comp.indexOf(n); if (i >= 0) comp.splice(i, 1); else if (comp.length < 10) comp.push(n); renderSim(); }
-function clearComp(){ comp = []; renderSim(); }
-function placeBoard(){
-  const slots = Array(28).fill(null);
-  const front = comp.filter(n => simUnit(n).front), back = comp.filter(n => !simUnit(n).front);
-  front.forEach((n, i) => { if (i < 7) slots[i] = n; });
-  back.forEach((n, i) => { if (i < 7) slots[21 + i] = n; });
-  let mid = 7; [...front.slice(7), ...back.slice(7)].forEach(n => { while (mid < 21 && slots[mid]) mid++; if (mid < 21) slots[mid++] = n; });
-  return slots;
+function addUnit(n){ if(countUnits() >= 10) return; const i = board.findIndex(c => !c); if(i >= 0){ board[i] = {n, items:[]}; persist(); renderSim(); } }
+function removeAt(i){ board[i] = null; persist(); renderSim(); }
+function clearBoard(){ board = Array(28).fill(null); persist(); renderSim(); }
+function dragPal(n){ dragFrom = {type:'pal', n}; }
+function dragCell(i){ dragFrom = {type:'cell', i}; }
+function onDrop(i){
+  if(!dragFrom) return;
+  if(dragFrom.type === 'pal'){ if(!board[i] && countUnits() < 10) board[i] = {n:dragFrom.n, items:[]}; }
+  else { const f = dragFrom.i; const tmp = board[i]; board[i] = board[f]; board[f] = tmp; }
+  dragFrom = null; persist(); renderSim();
 }
+function openItems(i){ if(!board[i]) return; pickTarget = i; renderPicker(); document.getElementById("itempick").hidden = false; }
+function closePicker(){ document.getElementById("itempick").hidden = true; pickTarget = null; }
+function assignItem(it){ const cell = board[pickTarget]; if(!cell) return; const k = cell.items.indexOf(it); if(k >= 0) cell.items.splice(k,1); else if(cell.items.length < 3) cell.items.push(it); persist(); renderPicker(); renderSim(); }
+function renderPicker(){ const cell = board[pickTarget]; if(!cell) return;
+  document.getElementById("pick-title").textContent = `Ítems de ${cell.n} (${cell.items.length}/3)`;
+  document.getElementById("pick-grid").innerHTML = ITEM_POOL.map(it => `<button class="pick-it ${cell.items.includes(it)?'on':''}" onclick="assignItem('${it}')">${it}</button>`).join("");
+}
+function persist(){ try{ const d = board.map(c => c ? {n:c.n,i:c.items} : 0); location.hash = "b=" + btoa(unescape(encodeURIComponent(JSON.stringify(d)))); }catch(e){} }
+function loadHash(){ const m = location.hash.match(/b=([^&]+)/); if(!m) return; try{ const d = JSON.parse(decodeURIComponent(escape(atob(m[1])))); board = d.map(c => c ? {n:c.n, items:c.i||[]} : null); }catch(e){} }
+function shareComp(){ persist(); if(navigator.clipboard){ navigator.clipboard.writeText(location.href).then(()=>simToast("Enlace de la comp copiado ✓")).catch(()=>simToast("Copia la URL para compartir")); } else simToast("Copia la URL para compartir"); }
+let _tt; function simToast(msg){ let el=document.getElementById("sim-toast"); if(!el){ el=document.createElement("div"); el.id="sim-toast"; document.body.appendChild(el); } el.textContent=msg; el.className="show"; clearTimeout(_tt); _tt=setTimeout(()=>el.className="",2600); }
 function renderSim(){
   const c = document.getElementById("content");
   if (currentGame !== "tft") { c.innerHTML = simLolHTML(); return; }
-  const cells = placeBoard().map(n => {
-    if (!n) return `<div class="hexcell"></div>`;
-    const u = simUnit(n);
-    return `<div class="hexcell filled" title="${n}" onclick="toggleUnit('${n}')"><div class="cell-unit" style="--c:${COST[u.cost]}">${n.slice(0,3)}<span class="rm">×</span></div></div>`;
+  const cells = board.map((cell,i) => {
+    if (!cell) return `<div class="hexcell" ondragover="event.preventDefault()" ondrop="onDrop(${i})"></div>`;
+    const u = simUnit(cell.n);
+    const dots = [0,1,2].map(k => `<span class="islot ${cell.items[k]?'f':''}" title="${cell.items[k]||''}"></span>`).join("");
+    return `<div class="hexcell filled" ondragover="event.preventDefault()" ondrop="onDrop(${i})">
+      <div class="cell-unit" draggable="true" ondragstart="dragCell(${i})" onclick="openItems(${i})" style="--c:${COST[u.cost]}">${cell.n.slice(0,3)}<span class="rm" onclick="event.stopPropagation();removeAt(${i})">×</span><span class="islots">${dots}</span></div>
+    </div>`;
   }).join("");
   const syn = computeTraits().map(t => {
     const col = t.lv >= 3 ? "var(--gold)" : t.lv === 2 ? "var(--accent)" : "var(--accent-2)";
     return `<div class="syn-item ${t.on ? 'on' : 'off'}"><span><b>${t.t}</b> <span style="color:var(--muted)">${t.c}/${t.topTh}</span></span>
       <span class="syn-lv" style="color:#0A0C12;background:${t.on ? col : 'var(--border)'}">${t.on ? ('Nv ' + t.lv) : (t.next ? ('faltan ' + (t.next - t.c)) : '—')}</span></div>`;
   }).join("");
-  const cost = comp.reduce((s, n) => s + (simUnit(n) ? simUnit(n).cost : 0), 0);
+  const cost = board.reduce((s, cell) => s + (cell ? simUnit(cell.n).cost : 0), 0);
   const palette = SIM_TFT.units.map(u =>
-    `<button class="pal-unit" aria-pressed="${comp.includes(u.n)}" onclick="toggleUnit('${u.n}')"><span class="pal-dot" style="--c:${COST[u.cost]}">${u.n[0]}</span>${u.n}</button>`).join("");
-  c.innerHTML = `<div class="panel"><div class="panel-head"><h2>Simulador de comps</h2><button class="pal-unit" onclick="clearComp()">↺ Vaciar</button></div>
+    `<button class="pal-unit" draggable="true" ondragstart="dragPal('${u.n}')" onclick="addUnit('${u.n}')"><span class="pal-dot" style="--c:${COST[u.cost]}">${u.n[0]}</span>${u.n}</button>`).join("");
+  c.innerHTML = `<div class="panel"><div class="panel-head"><h2>Simulador de comps <span class="count">· pro</span></h2>
+      <div style="display:flex;gap:8px"><button class="pal-unit" onclick="shareComp()">🔗 Compartir</button><button class="pal-unit" onclick="clearBoard()">↺ Vaciar</button></div></div>
     <div style="padding:0 16px 18px;">
-      <div class="sim-stats"><div class="sim-stat"><b>${comp.length}</b> / 10 unidades</div><div class="sim-stat">Coste <b>${cost}</b> 🪙</div><div class="sim-stat">Nivel sugerido <b>${Math.max(comp.length, 1)}</b></div></div>
+      <div class="sim-stats"><div class="sim-stat"><b>${countUnits()}</b> / 10 unidades</div><div class="sim-stat">Coste <b>${cost}</b> 🪙</div><div class="sim-stat">Nivel sugerido <b>${Math.max(countUnits(), 1)}</b></div></div>
       <div class="sim-wrap">
         <div>
           <div class="sim-board">${cells}</div>
-          <p style="color:var(--muted);font-size:12px;margin:10px 0 8px;">Toca una unidad de la lista para añadirla · toca una del tablero para quitarla.</p>
+          <p style="color:var(--muted);font-size:12px;margin:10px 0 8px;">Arrastra una unidad al tablero (o tócala para añadirla) · arrástrala entre casillas para colocar · toca una ficha para asignarle ítems · <b>Compartir</b> copia un enlace con tu comp.</p>
           <div class="palette">${palette}</div>
         </div>
         <div class="sim-side"><div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px;">Sinergias activas</div><div class="syn">${syn}</div></div>
@@ -547,6 +588,7 @@ function stagesHTML(){
 function togglePresent(btn){ document.body.classList.toggle("present"); btn.classList.toggle("on"); }
 function toggleClean(){ document.body.classList.toggle("clean"); }
 
+loadHash();
 renderTabs();
 render();
 </script>
