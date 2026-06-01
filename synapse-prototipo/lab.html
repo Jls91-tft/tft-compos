@@ -272,6 +272,22 @@
 <script>
 /* ============ DATOS DE EJEMPLO (mock) — sin nombres de Riot ============
    // En producción salen de /api (stats agregadas de meta). */
+/* Set de iconos propios (SVG genérico, sin assets de Riot) */
+const ICONS={
+  star:'<path d="M12 3l2.2 6.3 6.8.2-5.4 4 2 6.5L12 16.8 6.4 20l2-6.5-5.4-4 6.8-.2z" fill="currentColor"/>',
+  shield:'<path d="M12 3l7 2.5V11c0 4-3 7-7 8-4-1-7-4-7-8V5.5z" fill="currentColor"/>',
+  sword:'<path d="M18.5 5.5l-8 8M14 5.5h4.5V10M4.5 19.5l3-3M8.5 15l1.5 1.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  bow:'<path d="M5 19C12 17.5 17.5 12 19 5M5 19l4.5-1.2M5 19l1.2-4.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  wand:'<path d="M5 19l9-9M14.5 6.5l3-3M17.5 3.5l1.5 1.5M14.5 6.5l1.5 1.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  bolt:'<path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/>',
+  eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/>',
+  crown:'<path d="M4 8l3.2 3.6L12 5l4.8 6.6L20 8v9H4z" fill="currentColor"/>',
+  heart:'<path d="M12 20s-6.5-4.2-6.5-9A3.7 3.7 0 0112 8a3.7 3.7 0 016.5 3c0 4.8-6.5 9-6.5 9z" fill="currentColor"/>',
+  gem:'<path d="M6 4h12l3 5-9 11L3 9z" fill="currentColor"/>'
+};
+function svgIcon(key,color,size){ size=size||22; return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="color:${color};display:block" aria-hidden="true">${ICONS[key]||ICONS.gem}</svg>`; }
+const GLYPH={"Místico":"star","Centinela":"shield","Guardián":"shield","Vanguardia":"shield","Berserker":"sword","Hechicero":"wand","Mago":"wand","Invocador":"crown","Vidente":"eye","Francotirador":"bow","Pistolero":"bow","Curandera":"heart","Asesino":"bolt","Mago de control":"wand","Tirador hipercarry":"bow","Luchador de línea":"sword","Encantador":"heart","Tanque iniciador":"shield"};
+const glyphUnit=(n)=>GLYPH[n]||"sword";
 const COST = {1:"#9AA4B2",2:"#3FD17A",3:"#58A6FF",4:"#B061FF",5:"#E9C16B"};
 const TIER = {S:"#E9C16B",A:"#B061FF",B:"#58A6FF",C:"#8C97A8"};
 const wrColor = (w)=> w>=53?"var(--good)":w>=49?"var(--warn)":"var(--bad)";
@@ -347,9 +363,9 @@ function setGame(g){
 function setSort(s){ sortBy=s; render(); }
 
 function iconHTML(item){
-  if(currentTab==="units") return `<div class="xico unit" style="--c:${COST[item.cost]}">${item.n[0]}</div>`;
-  if(currentTab==="augments") return `<div class="xico aug" style="--c:${TIER[item.tier]}">${item.tier}</div>`;
-  return `<div class="xico item">${item.n[0]}</div>`;
+  if(currentTab==="units") return `<div class="xico unit" style="--c:${COST[item.cost]}">${svgIcon(glyphUnit(item.n),COST[item.cost],22)}</div>`;
+  if(currentTab==="augments") return `<div class="xico aug" style="--c:${TIER[item.tier]}">${svgIcon('star',TIER[item.tier],16)}</div>`;
+  return `<div class="xico item">${svgIcon('gem','#C4B5FD',20)}</div>`;
 }
 function rowHTML(item){
   const sub = currentTab==="units" ? `${item.sub} · ${item.cost}🪙` : item.sub;
@@ -449,7 +465,7 @@ function renderSim(){
     const u = simUnit(cell.n);
     const dots = [0,1,2].map(k => `<span class="islot ${cell.items[k]?'f':''}" title="${cell.items[k]||''}"></span>`).join("");
     return `<div class="hexcell filled" ondragover="event.preventDefault()" ondrop="onDrop(${i})">
-      <div class="cell-unit" draggable="true" ondragstart="dragCell(${i})" onclick="openItems(${i})" style="--c:${COST[u.cost]}">${cell.n.slice(0,3)}<span class="rm" onclick="event.stopPropagation();removeAt(${i})">×</span><span class="islots">${dots}</span></div>
+      <div class="cell-unit" draggable="true" ondragstart="dragCell(${i})" onclick="openItems(${i})" title="${cell.n}" style="--c:${COST[u.cost]}">${svgIcon(glyphUnit(cell.n),'#fff',22)}<span class="rm" onclick="event.stopPropagation();removeAt(${i})">×</span><span class="islots">${dots}</span></div>
     </div>`;
   }).join("");
   const syn = computeTraits().map(t => {
@@ -459,7 +475,7 @@ function renderSim(){
   }).join("");
   const cost = board.reduce((s, cell) => s + (cell ? simUnit(cell.n).cost : 0), 0);
   const palette = SIM_TFT.units.map(u =>
-    `<button class="pal-unit" draggable="true" ondragstart="dragPal('${u.n}')" onclick="addUnit('${u.n}')"><span class="pal-dot" style="--c:${COST[u.cost]}">${u.n[0]}</span>${u.n}</button>`).join("");
+    `<button class="pal-unit" draggable="true" ondragstart="dragPal('${u.n}')" onclick="addUnit('${u.n}')"><span class="pal-dot" style="--c:${COST[u.cost]}">${svgIcon(glyphUnit(u.n),'#fff',14)}</span>${u.n}</button>`).join("");
   c.innerHTML = `<div class="panel"><div class="panel-head"><h2>Simulador de comps <span class="count">· pro</span></h2>
       <div style="display:flex;gap:8px"><button class="pal-unit" onclick="shareComp()">🔗 Compartir</button><button class="pal-unit" onclick="clearBoard()">↺ Vaciar</button></div></div>
     <div style="padding:0 16px 18px;">
