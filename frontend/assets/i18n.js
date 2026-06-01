@@ -227,6 +227,8 @@
     "Plan de acción": "Action plan",
     "Generando tu informe de coaching…": "Generating your coaching report…",
     "escribiendo…": "typing…",
+    "Has cambiado el idioma de la web.": "You changed the site language.",
+    "Regenerar el informe en este idioma": "Regenerate the report in this language",
     "¿Por qué perdí la pelea del 4-1?": "Why did I lose the 4-1 fight?",
     "¿Qué augment debí coger?": "Which augment should I have taken?",
     "¿Cómo mejoro mi economía?": "How do I improve my economy?",

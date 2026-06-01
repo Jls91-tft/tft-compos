@@ -124,9 +124,32 @@ async function loadReport() {
     ]);
     const match = matches.find(m => m.id === ID) || null;
     body.innerHTML = reportHTML(report, match);
+    reportLang = API.lang();
+    hideLangReload();
     initChat();
   } catch (e) { body.innerHTML = errorHTML(e); }
 }
+
+/* Si cambias el idioma con el informe ya generado, ofrecemos regenerarlo
+   en el nuevo idioma con un clic (no se rehace solo: evita gasto de IA). */
+let reportLang = null;
+function ensureLangBar() {
+  let bar = document.getElementById("lang-reload");
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "lang-reload";
+    bar.style.cssText = "display:none;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 16px;padding:12px 16px;border:1px solid rgba(139,92,246,.4);border-radius:12px;background:var(--accent-soft);font-size:14px;";
+    document.getElementById("main").insertBefore(bar, document.getElementById("report-body"));
+  }
+  return bar;
+}
+function showLangReload() {
+  const bar = ensureLangBar();
+  bar.innerHTML = '<span>Has cambiado el idioma de la web.</span> <button type="button" class="btn btn-ghost btn-sm" onclick="loadReport()">Regenerar el informe en este idioma</button>';
+  bar.style.display = "flex";
+}
+function hideLangReload() { const b = document.getElementById("lang-reload"); if (b) b.style.display = "none"; }
+document.addEventListener("synapse:lang", function (e) { if (reportLang && e.detail !== reportLang) showLangReload(); });
 
 /* ---------- Chat ---------- */
 function initChat() {
