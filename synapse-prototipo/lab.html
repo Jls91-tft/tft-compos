@@ -106,8 +106,19 @@
 
   /* Simulador (placeholder atractivo) */
   .sim-wrap{display:grid;grid-template-columns:1fr 280px;gap:18px;}
-  .sim-board{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;}
-  .hexcell{aspect-ratio:1/.9;border-radius:10px;background:linear-gradient(160deg,rgba(139,92,246,.08),transparent);border:1px dashed var(--border);}
+  .sim-board{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);padding:18px;}
+  /* Tablero hexagonal real: el hexágono va en capas ::before/::after para NO recortar los overlays (×, ítems) */
+  .hexcell{position:relative;aspect-ratio:1/.88;background:transparent;border:0;}
+  .hexcell::before,.hexcell::after{content:"";position:absolute;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);}
+  .hexcell::before{inset:0;background:var(--border);}
+  .hexcell::after{inset:1.5px;background:linear-gradient(160deg,rgba(139,92,246,.10),#0b0e15);}
+  .hexcell.filled::before{background:var(--accent);}
+  .hexcell.filled::after{background:linear-gradient(160deg,rgba(139,92,246,.20),#0b0e15);}
+  /* escalonado de filas (7 col × 4): ±25% = medio hexágono entre filas contiguas */
+  .sim-board .hexcell:nth-child(-n+7),
+  .sim-board .hexcell:nth-child(n+15):nth-child(-n+21){transform:translateX(-25%);}
+  .sim-board .hexcell:nth-child(n+8):nth-child(-n+14),
+  .sim-board .hexcell:nth-child(n+22){transform:translateX(25%);}
   .sim-side .traits{display:flex;flex-direction:column;gap:9px;}
   .trait{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 13px;font-size:13px;}
   .trait b{font-weight:800;} .trait .lv{font-size:11px;color:#0A0C12;background:var(--grad);padding:2px 8px;border-radius:var(--r-pill);font-weight:800;}
@@ -142,7 +153,7 @@
 
   /* Simulador interactivo */
   .hexcell.filled{border-style:solid;cursor:pointer;}
-  .cell-unit{width:84%;height:84%;border-radius:9px;display:grid;place-items:center;font-weight:850;font-size:12px;color:#fff;border:1.5px solid var(--c);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 50%,#10141f),#10141f);position:relative;}
+  .cell-unit{width:84%;height:84%;border-radius:9px;display:grid;place-items:center;font-weight:850;font-size:12px;color:#fff;border:1.5px solid var(--c);background:linear-gradient(160deg,color-mix(in srgb,var(--c) 50%,#10141f),#10141f);position:relative;z-index:1;}
   .cell-unit .rm{position:absolute;top:-7px;right:-7px;width:17px;height:17px;border-radius:50%;background:var(--bad);color:#fff;font-size:11px;display:none;place-items:center;}
   .hexcell.filled:hover .cell-unit .rm{display:grid;}
   .palette{display:flex;flex-wrap:wrap;gap:8px;}
@@ -209,6 +220,8 @@
     .search{order:5;max-width:none;width:100%;}
   }
 </style>
+<!-- html2canvas para exportar a PNG (CDN). Si no carga (offline), exportPNG cae a imprimir. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -238,7 +251,7 @@
     <div class="tools">
       <button class="tool" onclick="togglePresent(this)" title="Modo presentación (texto grande para vídeo)">Aa</button>
       <button class="tool" onclick="toggleClean()" title="Modo captura limpia (oculta la interfaz para grabar)">🎬</button>
-      <button class="tool" onclick="window.print()" title="Exportar / imprimir (guardar como PDF o imagen)">⬇</button>
+      <button class="tool" onclick="exportPNG()" title="Exportar como imagen PNG (o imprimir si no hay conexión)">⬇</button>
     </div>
     <span class="avatar" title="Perfil">N</span>
   </header>
@@ -629,6 +642,18 @@ function stagesHTML(){
 /* ===== Herramientas para creadores de contenido ===== */
 function togglePresent(btn){ document.body.classList.toggle("present"); btn.classList.toggle("on"); }
 function toggleClean(){ document.body.classList.toggle("clean"); }
+/* Export a PNG real con html2canvas (captura el simulador o la vista actual). */
+async function exportPNG(){
+  const target = document.querySelector('.sim-wrap') || document.getElementById('content');
+  if(!target) return window.print();
+  if(typeof html2canvas !== 'function'){ simToast('Sin conexión: usa imprimir / guardar como imagen'); return window.print(); }
+  simToast('Generando imagen…');
+  try{
+    const canvas = await html2canvas(target,{backgroundColor:'#090B11',scale:2,useCORS:true});
+    const a=document.createElement('a'); a.download='synapse-comp.png'; a.href=canvas.toDataURL('image/png'); a.click();
+    simToast('Imagen descargada ✓');
+  }catch(e){ simToast('No se pudo generar; usa imprimir'); window.print(); }
+}
 
 loadHash();
 renderTabs();
