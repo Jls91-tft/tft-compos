@@ -24,11 +24,23 @@ Las estadísticas de meta se **calculan agregando muchísimas partidas de alto e
 
 ### Opciones (de menor a mayor esfuerzo)
 - **A. Mock** (estado actual): datos de ejemplo en `backend/app/data/mock_lab.py` y `mock.py`. Para diseñar/demostrar.
-- **B. Pipeline ligero**: una sola región + solo Challenger/GM + muestreo. Meta orientativa, coste bajo. Recomendado para empezar.
+- **B. Pipeline ligero** ✅ **IMPLEMENTADO**: una sola región + solo Challenger + muestreo. Meta orientativa, coste bajo. Es el worker `backend/app/services/meta_pipeline.py` + `app/worker/refresh_meta.py`.
 - **C. Pipeline completo**: todas las regiones, gran volumen (como MetaTFT). Requiere production key + infra.
 - **D. Curaduría**: comps/guías definidas por expertos (estilo TFT Academy); los números (ítems/augments) salen igual del pipeline.
 
 ## Estado actual en el código
 - `/stats` (perfil) → **datos reales** del historial del jugador (cuando `USE_MOCK=false`).
-- `/lab/*` y `/meta` → **mock** (pendiente del pipeline de la opción B/C).
+- `/lab/explorer` → **datos reales** (winrate y uso de unidades, ítems y augments) agregados por el **worker de meta** (opción B) cuando `USE_MOCK=false` y el worker ha generado los JSON; si no, mock.
+- `/lab/recipes`, `/lab/gpi`, `/lab/champion` y `/meta` → **mock/curado** (recetas = conocimiento estático; GPI = pipeline personal; build de campeón y la tier list de comps quedan pendientes/curados).
 - El cambio a datos reales no altera la forma de las respuestas (mismo contrato): solo se sustituye el origen.
+
+### Cómo ejecutar el worker de meta (en el PC con clave de producción)
+```bash
+# una pasada (con USE_MOCK=false y RIOT_API_KEY de producción en el .env):
+python -m app.worker.refresh_meta          # TFT y LoL
+python -m app.worker.refresh_meta tft      # solo TFT
+# en la beta, en bucle automático cada META_REFRESH_SECONDS:
+docker compose -f docker-compose.prod.yml --profile meta up -d
+```
+Escribe `backend/app/data/generated/explorer_<juego>.json`, que sirve `/lab/explorer`.
+Nota: TFT agrega unidades, ítems y augments completos; LoL agrega **campeones** (winrate/uso/rol) — sus ítems y runas requieren mapear ids con **Data Dragon** (trabajo futuro).

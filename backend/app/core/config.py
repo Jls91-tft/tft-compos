@@ -36,5 +36,12 @@ class Settings(BaseSettings):
     # Fase 0: True (la API devuelve mocks). Se pondrá a False al cablear Riot/Ollama.
     use_mock: bool = True
 
+    # --- Worker de meta (agregación real; docs/DATOS.md, opción B) ---
+    meta_data_dir: str = "app/data/generated"   # JSON generados por el worker
+    meta_sample_players: int = 40                # jugadores del ladder a muestrear
+    meta_matches_per_player: int = 8             # partidas por jugador
+    meta_top_n: int = 24                         # entradas por explorador
+    meta_min_games: int = 5                      # mínimo de apariciones para listar
+
 
 settings = Settings()

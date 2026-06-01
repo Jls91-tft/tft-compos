@@ -1,11 +1,15 @@
 """Lab (centro de entrenamiento): exploradores, recetas, GPI y build de campeón.
 
-Mock (Fase actual). En producción saldrá de agregaciones de meta + Riot API.
+Los exploradores sirven datos REALES agregados por el worker de meta cuando
+existen (USE_MOCK=false y JSON generado); si no, caen al mock genérico.
+Recetas/GPI/champion siguen en mock (GPI = pipeline personal; champion = Data Dragon).
 """
 from fastapi import APIRouter, HTTPException, Query
 
+from app.core.config import settings
 from app.schemas.models import Game
 from app.data import mock_lab
+from app.services import meta_store
 
 router = APIRouter(prefix="/lab", tags=["lab"])
 
@@ -14,7 +18,18 @@ router = APIRouter(prefix="/lab", tags=["lab"])
 def explorer(game: Game = "tft", kind: str = Query("units", description="units | items | augments")):
     if kind not in ("units", "items", "augments"):
         raise HTTPException(status_code=400, detail="kind debe ser 'units', 'items' o 'augments'")
-    return {"items": mock_lab.explorer(game, kind), "styles": mock_lab.STYLES.get(game, [])}
+    # Datos reales del worker si están disponibles; si no, mock genérico.
+    if not settings.use_mock:
+        data = meta_store.load_explorer(game)
+        if data and data.get(kind):
+            return {
+                "items": data[kind],
+                "styles": data.get("styles") or mock_lab.STYLES.get(game, []),
+                "source": "real",
+                "generated_at": data.get("generated_at"),
+                "sample": data.get("sample"),
+            }
+    return {"items": mock_lab.explorer(game, kind), "styles": mock_lab.STYLES.get(game, []), "source": "mock"}
 
 
 @router.get("/recipes")

@@ -6,6 +6,8 @@
 #
 # La IA por defecto es Groq (gratis/rápido). Para usar Ollama local en la VM:
 #   LLM_PROVIDER=ollama  y  docker compose -f docker-compose.prod.yml --profile local-llm up -d
+# Para agregar datos de meta REALES en segundo plano (requiere clave de producción):
+#   docker compose -f docker-compose.prod.yml --profile meta up -d
 
 services:
   api:
@@ -13,6 +15,8 @@ services:
     env_file: .env
     expose:
       - "8000"           # solo accesible dentro de la red de Docker (no se publica al host)
+    volumes:
+      - meta_data:/app/app/data/generated   # lee los JSON de meta que genera el worker
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 20s
@@ -52,5 +56,17 @@ services:
       - ollama_models:/root/.ollama
     restart: unless-stopped
 
+  # Worker de META OPCIONAL — agrega datos reales del ladder a JSON cada META_REFRESH_SECONDS.
+  # Actívalo con --profile meta. Requiere clave de PRODUCCIÓN de Riot y USE_MOCK=false.
+  meta-worker:
+    build: ./backend
+    env_file: .env
+    profiles: ["meta"]
+    command: sh -c "while true; do python -m app.worker.refresh_meta; sleep ${META_REFRESH_SECONDS:-43200}; done"
+    volumes:
+      - meta_data:/app/app/data/generated
+    restart: unless-stopped
+
 volumes:
   ollama_models:
+  meta_data:

@@ -4,6 +4,7 @@ Resuelve Riot ID → puuid, historial y detalle de partidas. Incluye:
   - routing regional (europe/americas/asia) para account-v1 y match
   - control de concurrencia (semáforo) y reintento ante 429 (Retry-After)
   - caché: detalle de partida 24 h (inmutable), historial 60 s
+  - ladder alto (Challenger) para el worker de meta
 
 La clave (RIOT_API_KEY) se lee del entorno; nunca está en el código.
 """
@@ -33,6 +34,9 @@ class RiotClient:
     @property
     def _regional(self) -> str:
         return f"https://{settings.riot_region}.api.riotgames.com"
+
+    def _platform_base(self, platform: str | None = None) -> str:
+        return f"https://{platform or settings.riot_platform}.api.riotgames.com"
 
     async def _get(self, url: str) -> dict:
         if settings.riot_api_key.startswith("RGAPI-PON"):
@@ -85,6 +89,26 @@ class RiotClient:
         data = await self._get(url)
         _match_cache.set(match_id, data, ttl=86400)
         return data
+
+    # ---------------------- Ladder alto (worker de meta) ----------------------
+    async def get_challenger(self, game: str, platform: str | None = None,
+                             queue: str = "RANKED_SOLO_5x5") -> list[dict]:
+        """Entradas del ladder Challenger (tft-league-v1 · league-v4)."""
+        base = self._platform_base(platform)
+        if game == "tft":
+            url = f"{base}/tft/league/v1/challenger"
+        else:
+            url = f"{base}/lol/league/v4/challengerleagues/by-queue/{queue}"
+        data = await self._get(url)
+        return data.get("entries", []) if isinstance(data, dict) else []
+
+    async def get_summoner_puuid(self, summoner_id: str, game: str,
+                                 platform: str | None = None) -> str:
+        """summonerId → puuid (tft-summoner-v1 · summoner-v4)."""
+        base = self._platform_base(platform)
+        path = "tft/summoner/v1" if game == "tft" else "lol/summoner/v4"
+        data = await self._get(f"{base}/{path}/summoners/{summoner_id}")
+        return data["puuid"]
 
 
 riot_client = RiotClient()

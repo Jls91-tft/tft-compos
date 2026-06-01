@@ -26,3 +26,6 @@ __pycache__/
 .venv/
 venv/
 *.db
+
+# Datos de meta generados por el worker (artefactos, no versionar)
+backend/app/data/generated/

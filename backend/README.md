@@ -55,6 +55,18 @@ uvicorn app.main:app --reload --port 8000   # docs en http://localhost:8000/docs
 - `account-v1`, `match-v5` (LoL) y `tft-match-v1` (TFT) usan host **regional** (`RIOT_REGION`).
 - El detalle de partida se cachea 24 h (inmutable). Reintento ante `429` respetando `Retry-After`.
 
-## Ollama (notas)
-- Endpoint `/api/chat` con `format: json` para el informe estructurado.
-- Modelo configurable con `OLLAMA_MODEL`. Ajusta según la potencia del PC.
+## IA: Ollama (local) o Groq (API)
+`LLM_PROVIDER` elige el backend de IA (`ollama` | `groq`), en `services/ollama_client.py`.
+- **Ollama** (`/api/chat`, `format: json`): privado/local. Modelo en `OLLAMA_MODEL`.
+- **Groq** (API estilo OpenAI, gratis/rápido): clave en `GROQ_API_KEY`, modelo en `GROQ_MODEL`. Recomendado para la beta.
+
+## Worker de meta (datos reales del Lab)
+`/lab/explorer` puede servir estadísticas **reales** (winrate y uso de unidades, ítems y augments) en vez del mock. Las genera un worker que agrega partidas del ladder Challenger vía Riot API (ver `docs/DATOS.md`).
+- `services/meta_pipeline.py` — muestrea el ladder, descarga partidas y agrega.
+- `services/meta_store.py` — lee/escribe los JSON en `data/generated/` (ignorado por git).
+- `worker/refresh_meta.py` — entrypoint del worker.
+```bash
+python -m app.worker.refresh_meta            # requiere USE_MOCK=false + clave de producción
+```
+En la beta se lanza con `docker compose -f docker-compose.prod.yml --profile meta up -d`.
+Sin datos generados, `/lab/explorer` cae al mock (`data/mock_lab.py`).
