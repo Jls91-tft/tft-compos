@@ -23,7 +23,10 @@
   .side .profile{justify-content:flex-start;}
   /* Bento */
   .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-  .dcard{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow-sm);}
+  .dcard{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow-sm);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;}
+  .dcard::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:var(--grad);opacity:0;transition:opacity .2s ease;}
+  .dcard:hover{transform:translateY(-3px);border-color:var(--border-soft);box-shadow:var(--shadow-lg);}
+  .dcard:hover::before{opacity:1;}
   .dcard h3{margin:0 0 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);}
   .s2{grid-column:span 2;}
   /* Hero última partida */
@@ -62,11 +65,13 @@
   /* Objetivo */
   .goal .g-rank{font-size:18px;font-weight:850;letter-spacing:-.3px;margin-bottom:2px;} .goal .g-sub{font-size:12.5px;color:var(--muted);margin-bottom:12px;}
   .goal .g-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:700;margin-top:8px;} .goal .g-row b{color:var(--text);}
-  @media(max-width:1000px){
+  @media(max-width:1080px){ .bento{grid-template-columns:repeat(2,1fr);} .s2{grid-column:auto;} }
+  @media(max-width:860px){
     .app{grid-template-columns:1fr;} .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px;}
     .side .brand{padding:4px 8px;} .side .game-switch{margin:0;} .navi{width:auto;} .side .foot{margin:0 0 0 auto;flex-direction:row;border:0;padding:0;align-items:center;} .side .riot-input{width:150px;}
-    .app main{padding:22px 16px 70px;} .bento{grid-template-columns:1fr;} .s2{grid-column:auto;}
+    .app main{padding:22px 16px 70px;}
   }
+  @media(max-width:560px){ .bento{grid-template-columns:1fr;} .s2{grid-column:auto;} }
 </style>
 </head>
 <body>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse — Estructura Prisma + paleta Tenue (mockup)</title>
+<style>
+  /* ============================================================
+     Synapse · estructura/layout inspirado en Palo Alto "Prisma"
+     PERO con la paleta TENUE del design system (oscura, violeta→cian)
+     Tokens tomados de frontend/assets/synapse.css
+     Autónomo: se abre con doble clic. Solo maqueta visual.
+     ============================================================ */
+  :root{
+    /* Base Tenue (oscura) */
+    --bg:        #171A21;
+    --bg-soft:   #1A1E27;   /* sección alterna, sutilmente distinta */
+    --surface:   #1E222C;
+    --surface-2: #232733;
+    --line:      #2D323F;
+    --line-2:    #39404f;
+
+    --ink:   #F2F4FA;   /* titulares */
+    --ink-2: #C7CCD8;   /* cuerpo */
+    --ink-3: #9AA3B2;   /* secundario (muted) */
+
+    /* Acento Tenue: violeta → cian */
+    --accent:   #7C5CFC;
+    --accent-2: #22B8CF;
+    --accent-soft: rgba(124,92,252,.14);
+    --accent-glow: rgba(124,92,252,.40);
+    --grad: linear-gradient(105deg, var(--accent), var(--accent-2));
+
+    --good:#22B36B; --warn:#D08700; --bad:#E5484D; --gold:#CA8A04;
+
+    --radius:   18px;
+    --radius-s: 12px;
+    --shadow:   0 1px 2px rgba(0,0,0,.22), 0 12px 30px rgba(0,0,0,.30);
+    --shadow-lg:0 24px 60px rgba(124,92,252,.22);
+    --font: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);
+    background:
+      radial-gradient(900px 500px at 100% -10%, rgba(34,184,207,.07), transparent 60%),
+      radial-gradient(700px 460px at -10% 0%, rgba(124,92,252,.10), transparent 60%),
+      var(--bg);
+    color:var(--ink-2);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  /* Texto con degradado */
+  .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(23,26,33,.72);
+    backdrop-filter:saturate(160%) blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{display:flex;align-items:center;gap:34px;height:68px}
+  .logo{display:flex;align-items:center;gap:11px;font-weight:850;color:var(--ink);font-size:20px;letter-spacing:-.01em}
+  .logo .name{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .logo .mark{
+    width:30px;height:30px;border-radius:9px;background:var(--grad);
+    box-shadow:0 0 16px var(--accent-glow);
+    position:relative;flex:0 0 auto;
+  }
+  .logo .mark::after{content:"";position:absolute;inset:7px;border-radius:4px;background:var(--bg);opacity:.9;
+    clip-path:polygon(50% 0,100% 100%,0 100%)}
+  nav ul{list-style:none;display:flex;gap:28px;margin-left:8px}
+  nav a{color:var(--ink-3);text-decoration:none;font-size:15px;font-weight:600;transition:color .15s}
+  nav a:hover{color:var(--ink)}
+  .nav-cta{margin-left:auto;display:flex;gap:12px;align-items:center}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font);font-weight:800;font-size:15px;cursor:pointer;
+    border:1px solid transparent;border-radius:999px;padding:11px 22px;text-decoration:none;
+    transition:transform .15s ease, box-shadow .2s ease, filter .15s, border-color .15s;
+  }
+  .btn-primary{background:var(--grad);color:#0A0C12;box-shadow:0 8px 24px var(--accent-glow)}
+  .btn-primary:hover{transform:translateY(-2px);filter:brightness(1.08);box-shadow:0 14px 32px var(--accent-glow)}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line-2)}
+  .btn-ghost:hover{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .btn-sm{padding:9px 16px;font-size:14px}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;padding:96px 0 72px;overflow:hidden}
+  .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;z-index:0;pointer-events:none}
+  .blob.a{width:520px;height:520px;background:radial-gradient(circle,var(--accent),transparent 65%);top:-160px;right:-120px}
+  .blob.b{width:420px;height:420px;background:radial-gradient(circle,var(--accent-2),transparent 65%);top:40px;right:120px;opacity:.35}
+  .hero .wrap{position:relative;z-index:1}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:9px;
+    font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--ink);
+    background:var(--surface);border:1px solid var(--line-2);border-radius:999px;
+    padding:7px 15px;margin-bottom:26px;box-shadow:var(--shadow)
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--grad)}
+  h1{
+    font-size:clamp(40px,6vw,72px);line-height:1.03;letter-spacing:-.03em;
+    color:var(--ink);font-weight:850;max-width:14ch;margin-bottom:22px;
+  }
+  .hero p.lead{font-size:clamp(17px,2vw,21px);color:var(--ink-3);max-width:56ch;margin-bottom:34px}
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .hero-actions .note{font-size:13px;color:var(--ink-3);margin-left:6px}
+
+  .stats{display:flex;gap:48px;flex-wrap:wrap;margin-top:56px;padding-top:34px;border-top:1px solid var(--line)}
+  .stat .n{font-size:34px;font-weight:850;letter-spacing:-.03em;color:var(--ink)}
+  .stat .l{font-size:14px;color:var(--ink-3)}
+
+  /* ---------- SECCIONES ---------- */
+  section.block{padding:84px 0}
+  .sec-head{max-width:62ch;margin-bottom:48px}
+  .sec-head .kicker{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+  .sec-head h2{font-size:clamp(30px,4vw,46px);letter-spacing:-.03em;color:var(--ink);font-weight:850;line-height:1.08;margin-bottom:14px}
+  .sec-head p{font-size:18px;color:var(--ink-3)}
+
+  /* Pilares */
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .pillar{
+    background:linear-gradient(180deg,var(--surface-2),var(--surface));
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:30px;position:relative;box-shadow:var(--shadow);overflow:hidden;
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s;
+  }
+  .pillar:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--accent)}
+  .pillar .num{font-size:13px;font-weight:800;color:var(--ink-3)}
+  .pillar .ico{width:46px;height:46px;border-radius:12px;background:var(--accent-soft);border:1px solid rgba(124,92,252,.3);display:grid;place-items:center;margin:14px 0 18px}
+  .pillar .ico svg{width:24px;height:24px;stroke:var(--accent)}
+  .pillar h3{font-size:21px;color:var(--ink);font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+  .pillar p{font-size:15px;color:var(--ink-3)}
+  .pillar::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:var(--grad);opacity:0;transition:opacity .2s}
+  .pillar:hover::before{opacity:1}
+
+  /* Bento */
+  .bento{display:grid;grid-template-columns:repeat(6,1fr);gap:20px}
+  .card{
+    background:linear-gradient(180deg,var(--surface),rgba(20,25,37,.7));
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:28px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--accent)}
+  .card h3{font-size:20px;color:var(--ink);font-weight:800;letter-spacing:-.02em;margin-bottom:10px}
+  .card p{font-size:15px;color:var(--ink-3)}
+  .card .tag{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;
+    background:var(--accent-soft);color:#C9B6FF;border:1px solid rgba(124,92,252,.3);padding:5px 11px;border-radius:999px;margin-bottom:16px}
+  .col-3{grid-column:span 3}
+  .col-2{grid-column:span 2}
+
+  /* Synapse Score — destacada con realce de acento */
+  .score-card{
+    grid-column:span 3;
+    background:
+      radial-gradient(420px 200px at 100% 0%, rgba(34,184,207,.16), transparent 70%),
+      linear-gradient(180deg,var(--surface-2),var(--surface));
+    border:1px solid rgba(124,92,252,.4);
+  }
+  .score-ring{display:flex;align-items:center;gap:22px;margin-top:22px}
+  .ring{
+    width:108px;height:108px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+    background:
+      radial-gradient(closest-side,var(--surface) 78%,transparent 79% 100%),
+      conic-gradient(from 220deg, var(--accent), var(--accent-2) 78%, var(--line) 78%);
+  }
+  .ring b{font-size:30px;font-weight:850;color:var(--ink);letter-spacing:-.03em}
+  .ring b span{font-size:14px;color:var(--ink-3)}
+  .score-card ul{list-style:none;font-size:14px;color:var(--ink-2)}
+  .score-card li{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}
+  .score-card li b{color:var(--ink);font-weight:700}
+
+  /* Informe */
+  .report .row{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line)}
+  .report .row:last-child{border-bottom:none}
+  .report .badge{flex:0 0 auto;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:13px;font-weight:800;color:#0A0C12}
+  .report .b-err{background:var(--bad);color:#fff}
+  .report .b-fix{background:var(--accent-2)}
+  .report .b-tip{background:var(--accent);color:#fff}
+  .report .txt b{color:var(--ink);font-weight:700}
+  .report .txt span{font-size:14px;color:var(--ink-3)}
+
+  /* ---------- CTA ---------- */
+  .cta{position:relative;margin:30px 0 90px}
+  .cta-inner{
+    background:
+      radial-gradient(600px 300px at 0% 0%, rgba(124,92,252,.22), transparent 60%),
+      radial-gradient(600px 300px at 100% 100%, rgba(34,184,207,.18), transparent 60%),
+      linear-gradient(180deg,var(--surface-2),var(--surface));
+    border:1px solid rgba(124,92,252,.4);
+    border-radius:26px;padding:64px 48px;text-align:center;position:relative;overflow:hidden;
+    box-shadow:var(--shadow-lg);
+  }
+  .cta-inner h2{position:relative;z-index:1;font-size:clamp(28px,4vw,44px);color:var(--ink);font-weight:850;letter-spacing:-.03em;margin-bottom:16px}
+  .cta-inner p{position:relative;z-index:1;color:var(--ink-3);font-size:18px;max-width:52ch;margin:0 auto 28px}
+  .cta-inner .hero-actions{position:relative;z-index:1;justify-content:center}
+
+  /* ---------- FOOTER ---------- */
+  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--ink-3);font-size:14px}
+  .foot-inner{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;align-items:center}
+
+  @media(max-width:860px){
+    .pillars{grid-template-columns:1fr}
+    .bento{grid-template-columns:1fr}
+    .col-3,.col-2,.score-card{grid-column:span 1}
+    nav ul{display:none}
+    .stats{gap:28px}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="logo"><span class="mark"></span> <span class="name">Synapse</span></div>
+    <nav>
+      <ul>
+        <li><a href="#coaching">Coaching IA</a></li>
+        <li><a href="#ciclo">Cómo funciona</a></li>
+        <li><a href="#funciones">Funciones</a></li>
+        <li><a href="#stats">Estadísticas</a></li>
+      </ul>
+    </nav>
+    <div class="nav-cta">
+      <a href="#" class="btn btn-ghost btn-sm">Entrar</a>
+      <a href="#" class="btn btn-primary btn-sm">Probar gratis</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob a"></div><div class="blob b"></div>
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> Coaching con IA para TFT y LoL</span>
+    <h1>Convierte cada partida en una <span class="grad">lección accionable</span></h1>
+    <p class="lead">Synapse analiza tu última partida, detecta tus errores, te explica cómo corregirlos y traza un plan para tu siguiente sesión. Sin humo: consejos concretos y un coach con el que puedes hablar.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Analizar mi partida</a>
+      <a href="#ciclo" class="btn btn-ghost">Ver cómo funciona</a>
+      <span class="note">Sin tarjeta · funciona con tu Riot ID</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n grad">+18%</div><div class="l">mejora media de winrate en beta</div></div>
+      <div class="stat"><div class="n">&lt;30s</div><div class="l">en generar tu informe</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">juegos: TFT y LoL</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CICLO -->
+<section class="block" id="ciclo">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker grad">El ciclo Synapse</div>
+      <h2>Analiza, corrige y mejora — partida a partida</h2>
+      <p>Un flujo claro que va de los datos de tu partida a un plan que sí puedes ejecutar la próxima vez.</p>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="num">01</div>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
+        <h3>Analiza</h3>
+        <p>Conecta tu Riot ID y Synapse lee tu partida: composición, objetos, decisiones clave y momentos de inflexión.</p>
+      </div>
+      <div class="pillar">
+        <div class="num">02</div>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+        <h3>Corrige</h3>
+        <p>La IA señala los errores con su porqué y la corrección concreta. Nada de tópicos: pasos que aplicas ya.</p>
+      </div>
+      <div class="pillar">
+        <div class="num">03</div>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg></div>
+        <h3>Mejora</h3>
+        <p>Recibes un objetivo para tu próxima sesión y sigues tu progreso con el Synapse Score a lo largo del tiempo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FUNCIONES -->
+<section class="block" id="funciones" style="background:var(--bg-soft)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker grad">Funciones</div>
+      <h2>Todo lo que necesitas para subir de nivel</h2>
+    </div>
+    <div class="bento">
+      <div class="card score-card">
+        <span class="tag">Tu rendimiento</span>
+        <h3>Synapse Score</h3>
+        <p>Una nota única derivada de tus decisiones, no solo del resultado.</p>
+        <div class="score-ring">
+          <div class="ring"><b>78<span>/100</span></b></div>
+          <ul>
+            <li>Economía <b>Buena</b></li>
+            <li>Posicionamiento <b>Mejorable</b></li>
+            <li>Lectura del tablero <b>Sólida</b></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card report col-3">
+        <span class="tag">Informe IA</span>
+        <h3>Coaching tras cada partida</h3>
+        <div class="row"><span class="badge b-err">!</span><div class="txt"><b>Error · </b><span>Forzaste un reroll a nivel 6 con la economía rota; perdiste la racha de oro.</span></div></div>
+        <div class="row"><span class="badge b-fix">+</span><div class="txt"><b>Corrige · </b><span>Sube a nivel 7 primero y reroll solo si tienes 50+ de oro de colchón.</span></div></div>
+        <div class="row"><span class="badge b-tip">i</span><div class="txt"><b>Consejo · </b><span>Tu comp Vanguardia rinde mejor abriendo con frontline; coloca al Místico detrás.</span></div></div>
+      </div>
+
+      <div class="card col-2">
+        <span class="tag">Chat</span>
+        <h3>Habla con tu coach</h3>
+        <p>Pregunta lo que quieras sobre la partida: por qué perdiste una pelea, qué objeto priorizar o cómo pivotar de comp.</p>
+      </div>
+      <div class="card col-2" id="stats">
+        <span class="tag">Estadísticas</span>
+        <h3>Tu progreso, claro</h3>
+        <p>Dashboard personal con tus tendencias, fortalezas y los puntos donde más pierdes elo.</p>
+      </div>
+      <div class="card col-2">
+        <span class="tag">Meta</span>
+        <h3>Tier list del parche</h3>
+        <p>Comps recomendadas con guías paso a paso, basadas en datos del ladder de alto elo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="wrap">
+    <div class="cta-inner">
+      <h2>Tu próxima partida puede ser tu mejor lección</h2>
+      <p>Únete a la beta cerrada de Synapse y empieza a mejorar con un plan claro después de cada juego.</p>
+      <div class="hero-actions">
+        <a href="#" class="btn btn-primary">Solicitar acceso</a>
+        <a href="#" class="btn btn-ghost">Ver una demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap foot-inner">
+    <div class="logo" style="font-size:18px"><span class="mark"></span> <span class="name">Synapse</span></div>
+    <div>Marca propia genérica · No afiliada a los titulares de los juegos.</div>
+    <div>© 2026 Synapse</div>
+  </div>
+</footer>
+
+</body>
+</html>
