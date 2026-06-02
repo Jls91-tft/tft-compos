@@ -8,7 +8,7 @@ import json
 from app.schemas.models import CoachingReport, ImprovementPlan
 
 PROMPT_VERSION = "report-v2.4-varianza-2026-06"   # sube esto al mejorar el prompt → invalida cachés
-PLAN_PROMPT_VERSION = "plan-v1-2026-06"
+PLAN_PROMPT_VERSION = "plan-v2-rigor-2026-06"
 
 # --- Voz del coach (system prompt) ---
 COACH_SYSTEM = (
@@ -385,14 +385,24 @@ def build_plan_prompt(game: str, aggregate: dict, lang: str = "es") -> str:
     )
     n = aggregate.get("n_matches", 0)
     if lang == "en":
-        return (f"AGGREGATED findings from the player's last {n} already-analyzed matches:\n{payload}\n\n"
-                f"Rules: in recurring_weaknesses include ONLY patterns present in >=30% of matches, each with its "
-                f"frequency. Roadmap in 3 horizons with concrete drills, a resource and a measurable success metric. "
-                f"Nothing generic; base everything on the data.\nReturn ONLY valid JSON with these keys (English):\n{schema}")
+        return (f"AGGREGATED findings from the player's last {n} ALREADY-ANALYZED matches:\n{payload}\n\n"
+                f"These are PATTERNS across matches, not one game — one match's variance is NOT a pattern. Rules: in "
+                f"recurring_weaknesses include ONLY what repeats in >=30% of matches and USE the REAL frequencies (pct) "
+                f"from the aggregate, never invent percentages. root_causes connects the weaknesses into a hypothesis "
+                f"(e.g. 'midgame passivity -> you don't read tempo'). roadmap in 3 horizons, each item with concrete drills, "
+                f"a resource (what to practice, in which mode, vs whom) and a MEASURABLE success metric. priority_order "
+                f"explains why to start with X before Y. With only {n} matches the plan is PRELIMINARY: say so and don't "
+                f"overstate. Nothing generic; if the data doesn't support a pattern, don't invent it.\n"
+                f"Return ONLY valid JSON with these keys (English):\n{schema}")
     return (f"Hallazgos AGREGADOS de las últimas {n} partidas YA analizadas del jugador:\n{payload}\n\n"
-            f"Reglas: en recurring_weaknesses incluye SOLO patrones presentes en >=30% de las partidas, cada uno con "
-            f"su frecuencia. Roadmap en 3 horizontes con drills concretos, un recurso y una métrica de éxito medible. "
-            f"Nada genérico; básate en los datos.\nDevuelve EXCLUSIVAMENTE un JSON válido con estas claves (en español):\n{schema}")
+            f"Esto son PATRONES de varias partidas, no una sola — la varianza de UNA partida NO es un patrón. Reglas: en "
+            f"recurring_weaknesses incluye SOLO lo que se repite en >=30% de las partidas y USA las frecuencias (pct) REALES "
+            f"del agregado, nunca inventes porcentajes. root_causes conecta las debilidades en una hipótesis (p. ej. "
+            f"«pasividad en midgame → no lees el tempo»). roadmap en 3 horizontes, cada ítem con drills concretos, un recurso "
+            f"(qué practicar, en qué modo, contra quién) y una métrica de éxito MEDIBLE. priority_order explica por qué "
+            f"empezar por X antes que por Y. Con solo {n} partidas el plan es PRELIMINAR: dilo y no exageres. Nada genérico; "
+            f"si el dato no soporta un patrón, no lo inventes.\n"
+            f"Devuelve EXCLUSIVAMENTE un JSON válido con estas claves (en español):\n{schema}")
 
 
 def validate_plan(raw: str, base: dict) -> ImprovementPlan:
