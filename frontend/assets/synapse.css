@@ -18,8 +18,9 @@
 html{scroll-behavior:smooth;}
 body{margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;
   background:
-    radial-gradient(900px 500px at 90% -12%,rgba(124,92,252,.10),transparent 60%),
-    radial-gradient(760px 460px at 2% 2%,rgba(34,184,207,.05),transparent 58%),
+    radial-gradient(1100px 620px at 86% -12%,rgba(124,92,252,.22),transparent 60%),
+    radial-gradient(940px 560px at -4% 0%,rgba(34,184,207,.15),transparent 58%),
+    radial-gradient(820px 820px at 50% 128%,rgba(124,92,252,.13),transparent 62%),
     var(--bg);
   background-attachment:fixed;}
 a{color:var(--accent);text-decoration:none;}

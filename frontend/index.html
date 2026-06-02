@@ -6,21 +6,7 @@
 <title>Synapse — Coaching IA para TFT y LoL</title>
 <link rel="stylesheet" href="assets/synapse.css">
 <style>
-  /* App shell: barra lateral + dashboard bento (tema Tenue, sin emojis) */
-  .app{display:grid;grid-template-columns:236px 1fr;min-height:100vh;}
-  .app main{max-width:1180px;margin:0;padding:24px 30px 80px;}
-  .side{position:sticky;top:0;height:100vh;background:var(--surface);border-right:1px solid var(--border);padding:18px 14px;display:flex;flex-direction:column;gap:3px;}
-  .side .brand{display:flex;align-items:center;gap:10px;padding:4px 8px 14px;}
-  .side .brand .name{font-size:19px;font-weight:850;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .side .game-switch{margin:0 4px 12px;}
-  .navi{display:flex;align-items:center;gap:12px;color:var(--muted);text-decoration:none;font:inherit;font-weight:700;font-size:14px;padding:11px 12px;border-radius:11px;border:0;background:transparent;cursor:pointer;width:100%;text-align:left;}
-  .navi:hover{color:var(--text);background:var(--surface-2);}
-  .navi[aria-current="page"]{color:var(--text);background:var(--accent-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 38%,transparent);}
-  .navi svg{width:18px;height:18px;flex-shrink:0;}
-  .navi .pill-ia{margin-left:auto;font-size:9px;font-weight:800;letter-spacing:.5px;color:#0A0C12;background:var(--grad);padding:2px 6px;border-radius:var(--r-pill);}
-  .side .foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--border);padding-top:12px;}
-  .side .riot-input{width:100%;}
-  .side .profile{justify-content:flex-start;}
+  /* Dashboard bento (tema Tenue, sin emojis). El shell/topbar viene de synapse.css */
   /* Bento */
   .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   .dcard{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow-sm);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;}
@@ -66,39 +52,34 @@
   .goal .g-rank{font-size:18px;font-weight:850;letter-spacing:-.3px;margin-bottom:2px;} .goal .g-sub{font-size:12.5px;color:var(--muted);margin-bottom:12px;}
   .goal .g-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:700;margin-top:8px;} .goal .g-row b{color:var(--text);}
   @media(max-width:1080px){ .bento{grid-template-columns:repeat(2,1fr);} .s2{grid-column:auto;} }
-  @media(max-width:860px){
-    .app{grid-template-columns:1fr;} .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px;}
-    .side .brand{padding:4px 8px;} .side .game-switch{margin:0;} .navi{width:auto;} .side .foot{margin:0 0 0 auto;flex-direction:row;border:0;padding:0;align-items:center;} .side .riot-input{width:150px;}
-    .app main{padding:22px 16px 70px;}
-  }
+  @media(max-width:860px){ main{padding:24px 16px 70px;} }
   @media(max-width:560px){ .bento{grid-template-columns:1fr;} .s2{grid-column:auto;} }
 </style>
 </head>
 <body>
   <a href="#main" class="skip">Saltar al contenido</a>
-  <div class="app">
-    <aside class="side">
-      <div class="brand" aria-label="Synapse, inicio">
-        <svg class="logo" width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="9" cy="11" r="3.4" fill="#7C5CFC"/><circle cx="23" cy="9" r="2.4" fill="#22B8CF"/><circle cx="22" cy="23" r="3" fill="#B0A0FF"/><circle cx="10" cy="23" r="2" fill="#7C5CFC"/><path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#7C5CFC" stroke-width="1.4" stroke-opacity=".55"/></svg>
-        <span class="name">Synapse</span>
-      </div>
-      <div class="game-switch" role="group" aria-label="Seleccionar juego">
-        <button id="btn-tft" aria-pressed="true" onclick="setGame('tft')">TFT</button>
-        <button id="btn-lol" aria-pressed="false" onclick="setGame('lol')">LoL</button>
-      </div>
-      <button class="navi" data-view="resumen" aria-current="page" onclick="showView('resumen')"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="15" width="7" height="6" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="6" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="2"/></svg> Resumen</button>
-      <button class="navi" data-view="coaching" onclick="showView('coaching')"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg> Coaching <span class="pill-ia">IA</span></button>
-      <button class="navi" data-view="stats" onclick="showView('stats')"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Estadísticas</button>
-      <button class="navi" data-view="meta" onclick="showView('meta')"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg> Meta</button>
-      <a class="navi" href="lab.html"><svg viewBox="0 0 24 24" fill="none"><path d="M9 3v6l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V3" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg> Lab</a>
-      <a class="navi" href="perfil.html"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="2"/></svg> Perfil</a>
-      <div class="foot">
-        <input class="riot-input" id="riot-input" placeholder="Tu Riot ID (Nombre#TAG)" aria-label="Tu Riot ID" autocomplete="off">
-        <span class="profile"><span class="avatar">N</span><span class="who"><b>Invocador</b><span>Oro II</span></span></span>
-      </div>
-    </aside>
+  <header class="topbar">
+    <div class="brand" aria-label="Synapse, inicio">
+      <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="9" cy="11" r="3.4" fill="#7C5CFC"/><circle cx="23" cy="9" r="2.4" fill="#22B8CF"/><circle cx="22" cy="23" r="3" fill="#B0A0FF"/><circle cx="10" cy="23" r="2" fill="#7C5CFC"/><path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#7C5CFC" stroke-width="1.4" stroke-opacity=".55"/></svg>
+      <span class="name">Synapse</span>
+    </div>
+    <div class="game-switch" role="group" aria-label="Seleccionar juego">
+      <button id="btn-tft" aria-pressed="true" onclick="setGame('tft')">TFT</button>
+      <button id="btn-lol" aria-pressed="false" onclick="setGame('lol')">LoL</button>
+    </div>
+    <nav class="main-nav" aria-label="Secciones">
+      <button class="navlink" data-view="resumen" aria-current="page" onclick="showView('resumen')">Resumen</button>
+      <button class="navlink is-primary" data-view="coaching" onclick="showView('coaching')">Coaching <span class="pill-ia">IA</span></button>
+      <button class="navlink" data-view="stats" onclick="showView('stats')">Estadísticas</button>
+      <button class="navlink" data-view="meta" onclick="showView('meta')">Meta</button>
+      <a class="navlink" href="lab.html">Lab</a>
+      <a class="navlink" href="perfil.html">Perfil</a>
+    </nav>
+    <input class="riot-input" id="riot-input" placeholder="Tu Riot ID (Nombre#TAG)" aria-label="Tu Riot ID" autocomplete="off">
+    <span class="avatar">N</span>
+  </header>
 
-    <main id="main">
+  <main id="main">
       <!-- RESUMEN (dashboard) -->
       <section id="view-resumen" class="view" aria-label="Resumen"></section>
 
@@ -128,7 +109,6 @@
         <div id="meta-body"></div>
       </section>
     </main>
-  </div>
 
   <div class="analyzing" id="analyzing" role="status" aria-live="polite">
     <div class="box">
@@ -175,7 +155,7 @@ function setGame(g) {
 function showView(v) {
   currentView = v;
   ["resumen", "coaching", "stats", "meta"].forEach(x => document.getElementById("view-" + x).hidden = (x !== v));
-  document.querySelectorAll(".navi[data-view]").forEach(b => {
+  document.querySelectorAll(".navlink[data-view]").forEach(b => {
     if (b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
   });
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -234,7 +214,7 @@ async function renderResumen() {
     return `<span class="badge ${r.cls}">${r.short}</span><div class="mid"><div class="when">Tu última partida</div>
       <div class="t">${last.title}</div><div class="v">${r.label} · ${metaLine(last, 3)}</div></div>
       <button class="btn btn-primary" onclick="openReport('${last.game}','${encodeURIComponent(last.id)}')">Ver coaching completo →</button>`;
-  })() : `<div class="mid"><div class="when">Tu última partida</div><div class="t">Aún no hay partidas</div><div class="v">Escribe tu Riot ID en la barra lateral para ver tu última partida y su coaching.</div></div>`;
+  })() : `<div class="mid"><div class="when">Tu última partida</div><div class="t">Aún no hay partidas</div><div class="v">Escribe tu Riot ID arriba para ver tu última partida y su coaching.</div></div>`;
   const sesHTML = matches.slice(0, 3).map(sessionRow).join("") || `<div class="empty">No hay partidas recientes.</div>`;
 
   host.innerHTML = `<div class="bento">
