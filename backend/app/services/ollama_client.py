@@ -71,7 +71,10 @@ class OllamaClient:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
         payload = {"model": model, "messages": messages, "temperature": settings.llm_temperature}
-        if json_mode:
+        # OpenRouter enruta a muchos proveedores; algunos modelos (Nemotron y otros de
+        # razonamiento) responden {} o fallan con response_format forzado. Confiamos en
+        # el prompt ("devuelve SOLO JSON") + el parser tolerante. En Groq sí lo usamos.
+        if json_mode and label != "OpenRouter":
             payload["response_format"] = {"type": "json_object"}
         headers = {"Authorization": f"Bearer {api_key}"}
         if extra_headers:

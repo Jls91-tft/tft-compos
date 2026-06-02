@@ -628,8 +628,24 @@ def _loads_lenient(raw: str) -> dict:
         raise
 
 
+def _report_is_empty(r: CoachingReport) -> bool:
+    """Un informe sin summary NI ningún hallazgo/comparación es señal de que el modelo no
+    siguió el esquema (Pydantic lo acepta porque todo tiene default). NO es un informe válido:
+    una partida real siempre tiene algo que decir (sobre todo si no es 1.º)."""
+    return not (
+        (r.summary or "").strip() or r.decision_errors or r.macro_issues or r.mechanical_issues
+        or r.mental_patterns or r.strengths or (r.comparison or "").strip() or r.top_3_actionable
+    )
+
+
 def validate_report(raw: str, base: dict) -> CoachingReport:
     """Valida el JSON del informe v2 contra el schema. Lanza si no valida (para reintento)."""
     data = _loads_lenient(raw)
     data.update(base)              # game, match_id, metrics (servidor)
-    return CoachingReport(**data)
+    report = CoachingReport(**data)
+    if _report_is_empty(report):
+        raise ValueError(
+            "el informe vino VACÍO (sin summary ni hallazgos). Rellena los campos del esquema con "
+            "hallazgos reales de los datos; NO devuelvas objetos vacíos ni cambies los nombres de las claves"
+        )
+    return report

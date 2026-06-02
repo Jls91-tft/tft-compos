@@ -57,7 +57,10 @@ async def generate_report(game: str, match_id: str, riot_id: str = "", lang: str
         except Exception as e:  # noqa: BLE001 — reintento con el error como feedback
             last_err = str(e)[:300]
     if report is None:
-        raise OllamaError("La IA no devolvió un informe válido tras 2 intentos. Inténtalo de nuevo.")
+        raise OllamaError(
+            "El modelo no devolvió un informe con contenido tras 2 intentos. Reinténtalo; si persiste, "
+            "prueba otro modelo en el .env (p. ej. OPENROUTER_MODEL=moonshotai/kimi-k2.6:free)."
+        )
 
     if user_key:
         return report_store.save_report(user_key, game, match_id, report.model_dump(), prompts.PROMPT_VERSION, model)
