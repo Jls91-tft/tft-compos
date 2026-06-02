@@ -16,13 +16,20 @@
 }
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;
+body{margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;position:relative;
   background:
-    radial-gradient(1100px 620px at 86% -12%,rgba(124,92,252,.22),transparent 60%),
-    radial-gradient(940px 560px at -4% 0%,rgba(34,184,207,.15),transparent 58%),
-    radial-gradient(820px 820px at 50% 128%,rgba(124,92,252,.13),transparent 62%),
+    radial-gradient(1100px 620px at 86% -12%,rgba(124,92,252,.24),transparent 60%),
+    radial-gradient(940px 560px at -4% 0%,rgba(34,184,207,.17),transparent 58%),
+    radial-gradient(1000px 700px at 50% 116%,rgba(124,92,252,.16),transparent 60%),
+    radial-gradient(1200px 900px at 50% 42%,transparent 58%,rgba(0,0,0,.35)),
     var(--bg);
   background-attachment:fixed;}
+/* Textura de puntos sutil (da "cuerpo" al fondo sin recargar) */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(170,180,220,.06) 1px,transparent 1.5px);
+  background-size:26px 26px;
+  -webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 38%,#000 35%,transparent 100%);
+          mask-image:radial-gradient(ellipse 80% 70% at 50% 38%,#000 35%,transparent 100%);}
 a{color:var(--accent);text-decoration:none;}
 ::selection{background:var(--accent-glow);color:#fff;}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
