@@ -29,6 +29,7 @@
     <div class="crumbs">
       <span class="path"><a href="index.html#coaching">Coaching</a> ▸ <b>Informe de partida</b></span>
       <a class="back-link" href="index.html#coaching">← Volver a mis partidas</a>
+      <button class="back-link" type="button" onclick="loadReport(true)" title="Vuelve a generar el análisis (consume una llamada a la IA)">↻ Regenerar análisis</button>
     </div>
     <div id="report-body"></div>
 
@@ -114,20 +115,26 @@ function reportHTML(report, match) {
      </div>`;
 }
 
-async function loadReport() {
+async function loadReport(regenerate = false) {
   const body = document.getElementById("report-body");
-  body.innerHTML = `<div class="loading"><span class="spinner"></span> Generando tu informe de coaching…</div>`;
+  body.innerHTML = `<div class="loading"><span class="spinner"></span> ${regenerate ? "Regenerando" : "Generando"} tu informe de coaching…</div>`;
   try {
     const [report, matches] = await Promise.all([
-      API.report(GAME, ID),
+      API.report(GAME, ID, regenerate),
       API.matches(GAME).catch(() => []),
     ]);
     const match = matches.find(m => m.id === ID) || null;
-    body.innerHTML = reportHTML(report, match);
+    body.innerHTML = staleHTML(report) + reportHTML(report, match);
     reportLang = API.lang();
     hideLangReload();
     initChat();
   } catch (e) { body.innerHTML = errorHTML(e); }
+}
+function staleHTML(report) {
+  if (!report || !report.stale) return "";
+  return `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 16px;padding:12px 16px;border:1px solid var(--warn);border-radius:12px;background:color-mix(in srgb,var(--warn) 12%,transparent);font-size:13.5px;">
+    Este análisis se generó con una versión anterior del coach.
+    <button type="button" class="btn btn-ghost btn-sm" onclick="loadReport(true)">Regenerar con la versión actual</button></div>`;
 }
 
 /* Si cambias el idioma con el informe ya generado, ofrecemos regenerarlo

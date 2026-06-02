@@ -41,7 +41,8 @@ const API = {
   },
 
   matches(game) { return this._get(`/coaching/matches?${this._q({ game })}`); },
-  report(game, id) { return this._get(`/coaching/report/${game}/${encodeURIComponent(id)}?${this._q({ lang: this.lang() })}`); },
+  report(game, id, regenerate = false) { return this._get(`/coaching/report/${game}/${encodeURIComponent(id)}?${this._q({ lang: this.lang(), regenerate })}`); },
+  plan(game, regenerate = false) { return this._get(`/coaching/plan/${game}?${this._q({ lang: this.lang(), regenerate })}`); },
   stats(game) { return this._get(`/stats?${this._q({ game })}`); },
   meta(game) { return this._get(`/meta?game=${game}`); },
   chat(game, id, question) {

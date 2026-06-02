@@ -89,6 +89,11 @@
         <h1 class="title">Mejora partida a partida</h1>
         <p class="subtitle">Analizamos cada partida terminada y te decimos qué hiciste bien, qué falló y qué hacer la próxima vez. Consejos accionables.</p>
         <div class="plan" id="plan"></div>
+        <div style="margin:18px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="loadPlan(false)">Analizar todas mis partidas</button>
+          <span id="plan-badge" style="font-size:13px;color:var(--muted);"></span>
+        </div>
+        <div id="plan-body" style="margin-bottom:26px;"></div>
         <h2 class="section-title">Tus partidas recientes <span style="font-size:13px;font-weight:500;color:var(--muted);">— elige una para ver su coaching</span></h2>
         <div class="match-grid" id="match-grid"></div>
       </section>
@@ -268,6 +273,37 @@ async function renderCoaching() {
     lastMatches = await API.matches(currentGame);
     host.innerHTML = lastMatches.length ? lastMatches.map(matchCardHTML).join("") : `<div class="empty">No hay partidas recientes.</div>`;
   } catch (e) { host.innerHTML = errorHTML(e); }
+}
+
+/* ---------- Plan de mejora global (multi-partida) ---------- */
+async function loadPlan(regenerate) {
+  const host = document.getElementById("plan-body");
+  document.getElementById("plan-badge").textContent = "";
+  host.innerHTML = loadingHTML(regenerate ? "Regenerando tu plan…" : "Analizando todas tus partidas analizadas…");
+  try {
+    const p = await API.plan(currentGame, !!regenerate);
+    host.innerHTML = planHTML(p);
+    if (p.new_matches > 0)
+      document.getElementById("plan-badge").innerHTML =
+        `${p.new_matches} partidas nuevas sin incluir · <a href="#" onclick="loadPlan(true);return false;">regenerar</a>`;
+  } catch (e) { host.innerHTML = errorHTML(e); }
+}
+function planHTML(p) {
+  const rw = (p.recurring_weaknesses || []).map(w =>
+    `<div class="insight warn"><div><div class="it">${w.title} <span style="color:var(--muted);font-weight:600">· ${w.frequency_pct}% · sev ${w.avg_severity}</span></div><div class="id">${w.evidence || ""}</div></div></div>`
+  ).join("") || `<div class="empty">Sin patrones recurrentes todavía. Genera coaching de varias partidas primero.</div>`;
+  const roots = (p.root_causes || []).map(r => `<li>${r}</li>`).join("");
+  const rm = p.roadmap || {};
+  const horizon = (title, items) => `<div class="panel"><h3>${title}</h3>${(items || []).map(it =>
+    `<div style="margin-bottom:12px"><b>${it.focus}</b>${it.drills && it.drills.length ? `<ul style="margin:6px 0">${it.drills.map(d => `<li>${d}</li>`).join("")}</ul>` : ""}${it.resource ? `<div style="color:var(--muted);font-size:12.5px">Recurso: ${it.resource}</div>` : ""}${it.success_metric ? `<div style="color:var(--accent);font-size:12.5px">Éxito: ${it.success_metric}</div>` : ""}</div>`
+  ).join("") || '<div style="color:var(--muted)">—</div>'}</div>`;
+  const prio = (p.priority_order || []).map(x => `<li>${x}</li>`).join("");
+  return `<div class="panel"><h3>Plan de mejora global</h3>
+      <p style="font-size:14.5px;margin:0 0 14px">${p.summary || ""}</p>
+      <div class="insights">${rw}</div>
+      ${roots ? `<div style="margin-top:12px"><b>Causas raíz</b><ul>${roots}</ul></div>` : ""}</div>
+    <div class="stat-grid">${horizon("Esta semana", rm.this_week)}${horizon("Este mes", rm.this_month)}</div>
+    <div class="stat-grid">${horizon("Próximos 3 meses", rm.next_3_months)}${prio ? `<div class="panel"><h3>Por dónde empezar</h3><ol>${prio}</ol></div>` : ""}</div>`;
 }
 
 /* ---------- Estadísticas ---------- */
