@@ -9,7 +9,7 @@ import asyncio
 
 from app.core.config import settings
 from app.data import mock
-from app.services import report_store, match_features, prompts
+from app.services import report_store, match_features, prompts, tft_names
 
 
 async def generate_report(game: str, match_id: str, riot_id: str = "", lang: str = "es", regenerate: bool = False):
@@ -39,6 +39,8 @@ async def generate_report(game: str, match_id: str, riot_id: str = "", lang: str
         except RiotApiError:
             timeline = None  # sin timeline degradamos a evidencia por stats
 
+    if game == "tft":
+        await tft_names.ensure_loaded()   # nombres reales de rasgos/unidades (cacheado)
     summary = prompts.extract_summary(game, match, puuid)
     payload = match_features.enrich(game, match, summary, puuid, timeline)
     base = {"game": game, "match_id": match_id, "metrics": match_features.metrics_for(game, summary)}
@@ -171,6 +173,8 @@ async def answer_question(game: str, match_id: str, question: str, riot_id: str 
     name, tag = riot_id.split("#", 1)
     puuid = await riot_client.get_puuid(name.strip(), tag.strip())
     match = await riot_client.get_match(match_id, game)
+    if game == "tft":
+        await tft_names.ensure_loaded()
     summary = prompts.extract_summary(game, match, puuid)
     return await ollama_client.generate(
         prompts.build_chat_prompt(game, summary, question, lang), system=prompts.system_for(lang)

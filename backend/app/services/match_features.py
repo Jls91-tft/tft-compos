@@ -9,6 +9,7 @@ añade HECHOS YA CALCULADOS para que el modelo no divague:
 También deriva los KPIs mostrables (`metrics`) del informe, sin depender del LLM.
 """
 from app.services.prompts import _damage_items, _unit_cost
+from app.services import tft_names
 
 
 def _phase(t_min: float) -> str:
@@ -33,6 +34,42 @@ def _lol_timeline(match, puuid, timeline):
                 deaths.append({"t": f"{int(tmin)}:{int((tmin % 1) * 60):02d}", "fase": ph,
                                "x": pos.get("x"), "y": pos.get("y")})
     return {"muertes": deaths, "kills_por_fase": kp, "muertes_por_fase": dp}
+
+
+def lol_comparison(match: dict, puuid: str) -> dict:
+    """Comparativa de LoL: rival de línea (mismo rol en el equipo rival) + contexto de equipo.
+    Sale del propio match-v5 (trae los 10 participantes), sin llamadas extra."""
+    info = match.get("info", {})
+    parts = info.get("participants", [])
+    me = next((p for p in parts if p.get("puuid") == puuid), {})
+    pos = me.get("teamPosition") or ""
+    cs = lambda p: (p.get("totalMinionsKilled", 0) or 0) + (p.get("neutralMinionsKilled", 0) or 0)  # noqa: E731
+
+    out = {"rival_de_linea": None, "diferencias_con_rival": None}
+    opp = None
+    if pos:
+        opp = next((p for p in parts if p.get("teamPosition") == pos and p.get("teamId") != me.get("teamId")), None)
+    if opp:
+        out["rival_de_linea"] = {
+            "campeon": opp.get("championName"),
+            "kda": f'{opp.get("kills", 0)}/{opp.get("deaths", 0)}/{opp.get("assists", 0)}',
+            "cs": cs(opp), "oro": opp.get("goldEarned"),
+            "dano_a_campeones": opp.get("totalDamageDealtToChampions"),
+            "nivel": opp.get("champLevel"), "vision": opp.get("visionScore"),
+        }
+        out["diferencias_con_rival"] = {
+            "cs": cs(me) - cs(opp),
+            "oro": (me.get("goldEarned") or 0) - (opp.get("goldEarned") or 0),
+            "dano_a_campeones": (me.get("totalDamageDealtToChampions") or 0) - (opp.get("totalDamageDealtToChampions") or 0),
+            "nivel": (me.get("champLevel") or 0) - (opp.get("champLevel") or 0),
+            "vision": (me.get("visionScore") or 0) - (opp.get("visionScore") or 0),
+        }
+    myteam = [p for p in parts if p.get("teamId") == me.get("teamId")]
+    team_dmg = sum(p.get("totalDamageDealtToChampions", 0) or 0 for p in myteam) or 1
+    team_kills = sum(p.get("kills", 0) or 0 for p in myteam) or 1
+    out["cuota_dano_equipo_pct"] = round(100 * (me.get("totalDamageDealtToChampions", 0) or 0) / team_dmg)
+    out["participacion_en_kills_pct"] = round(100 * ((me.get("kills", 0) or 0) + (me.get("assists", 0) or 0)) / team_kills)
+    return out
 
 
 def tft_signals(summary: dict) -> dict:
@@ -81,6 +118,7 @@ def tft_signals(summary: dict) -> dict:
         "reparto_items_dano": reparto,
         "items_dano_fuera_del_carry": items_fuera,
         "carry_detectado": carry_info,
+        "carry_completo": bool(carry and len(carry.get("items", []) or []) >= 3),
         "carry_sin_definir": carry is None,
         "rasgos_activos": summary.get("rasgos_activos", []),
         "augments": summary.get("aumentos", []),
@@ -104,7 +142,7 @@ def _tft_board_stats(p: dict, clean):
     if carry and _dmg_raw(carry, clean) > 0:
         carry_cid = carry.get("character_id")
         carry_info = {
-            "unidad": clean(carry_cid),
+            "unidad": tft_names.unit_display(carry_cid),
             "estrellas": carry.get("tier"),
             "coste": _unit_cost(carry.get("rarity")),
             "items_de_dano": _dmg_raw(carry, clean),
@@ -136,7 +174,7 @@ def tft_lobby(match: dict, puuid: str) -> dict:
     for cid in my_cids:
         rivals = sum(1 for p in parts if p is not me and any(u.get("character_id") == cid for u in p.get("units", [])))
         if rivals > 0:
-            contest.append({"unidad": clean(cid), "rivales_con_ella": rivals})
+            contest.append({"unidad": tft_names.unit_display(cid), "rivales_con_ella": rivals})
     contest.sort(key=lambda x: -x["rivales_con_ella"])
 
     me_stats, my_carry_cid = _tft_board_stats(me, clean)
@@ -148,7 +186,7 @@ def tft_lobby(match: dict, puuid: str) -> dict:
         ganador = {
             "nivel": win.get("level"),
             "carry": win_stats.get("carry"),
-            "rasgos": [clean(t.get("name")) for t in win.get("traits", []) if t.get("tier_current", 0) > 0][:6],
+            "rasgos": [tft_names.trait_display(t.get("name")) for t in win.get("traits", []) if t.get("tier_current", 0) > 0][:6],
         }
 
     niveles = sorted((p.get("level") or 0 for p in parts), reverse=True)
@@ -188,9 +226,10 @@ def tft_lobby(match: dict, puuid: str) -> dict:
 def enrich(game: str, match: dict, summary: dict, puuid: str, timeline: dict | None) -> dict:
     """summary (de extract_summary) + hechos calculados según el juego."""
     if game == "lol":
+        out = {**summary, "comparativa": lol_comparison(match, puuid)}
         if timeline:
-            return {**summary, "linea_temporal": _lol_timeline(match, puuid, timeline)}
-        return summary
+            out["linea_temporal"] = _lol_timeline(match, puuid, timeline)
+        return out
     # TFT: sin timeline; añadimos señales del estado final + señales del lobby (8 tableros)
     return {**summary, "señales": tft_signals(summary), "lobby": tft_lobby(match, puuid)}
 

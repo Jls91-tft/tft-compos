@@ -108,7 +108,7 @@ function reportHTML(report, match) {
       <div class="err-head"><h4>${m.pattern}</h4></div>
       <dl><dt>Detalle</dt><dd>${m.detail}</dd>${m.evidence ? `<dt>Evidencia</dt><dd style="color:var(--muted)">${m.evidence}</dd>` : ""}</dl></div>`).join("");
   const plan = (report.top_3_actionable || []).map((a, i) => `<li><span class="num">${i + 1}</span> ${a}</li>`).join("");
-  const comp = report.comparison ? `<div class="panel panel-compare"><h3>Comparación con el Top 1</h3><p style="margin:0;line-height:1.6">${report.comparison}</p></div>` : "";
+  const comp = report.comparison ? `<div class="panel panel-compare"><h3>${GAME === "tft" ? "Comparación con el Top 1" : "Comparación con tu rival de línea"}</h3><p style="margin:0;line-height:1.6">${report.comparison}</p></div>` : "";
   const strong = (report.strengths || []).map(s => `<li>${s}</li>`).join("");
   return heroHTML(report, match) +
     `<div class="kpi-row">${kpis}</div>

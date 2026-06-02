@@ -7,9 +7,10 @@ coaching sin tocar el resto del backend.
 import json
 import re
 from app.schemas.models import CoachingReport, ImprovementPlan
+from app.services import tft_names
 
-PROMPT_VERSION = "report-v3-analista-2026-06"   # sube esto al mejorar el prompt/motor → invalida cachés
-PLAN_PROMPT_VERSION = "plan-v4-analista-2026-06"
+PROMPT_VERSION = "report-v3.1-nombres-lol-2026-06"   # sube esto al mejorar el prompt/motor → invalida cachés
+PLAN_PROMPT_VERSION = "plan-v4.1-analista-2026-06"
 
 # --- Voz del coach (system prompt) ---
 COACH_SYSTEM = (
@@ -143,7 +144,7 @@ def _tft_summary(match: dict, puuid: str) -> dict:
     me = next(p for p in info["participants"] if p.get("puuid") == puuid)
     traits = [
         {
-            "rasgo": _clean_id(t.get("name")),
+            "rasgo": tft_names.trait_display(t.get("name")),
             "unidades": t.get("num_units"),
             "nivel": _TRAIT_STYLE_ES.get(t.get("style"), t.get("style")),
         }
@@ -151,7 +152,7 @@ def _tft_summary(match: dict, puuid: str) -> dict:
     ]
     units = [
         {
-            "unidad": _clean_id(u.get("character_id")),
+            "unidad": tft_names.unit_display(u.get("character_id")),
             "estrellas": u.get("tier"),
             "coste": _unit_cost(u.get("rarity")),     # 1-5 si se conoce, None si no
             "items": [_clean_id(n) for n in (u.get("itemNames") or [])],
@@ -264,9 +265,10 @@ _FRAMEWORK_TFT_ES = (
     "Quedarse corto de nivel en una comp de fast-8, o sobre-subir en una reroll, es un fallo de ritmo.\n"
     "2. FUERZA DE TABLERO: usa 'unidades_2_estrellas_o_mas', 'unidades_3_estrellas' y 'unidades_coste_alto_4_5'. "
     "Pocas 2★ a estas alturas = tablero débil. Compáralo SIEMPRE con la 'comparativa' del ganador.\n"
-    "3. ITEMIZACIÓN: usa 'carry_detectado' (items_de_dano, items_totales, le_faltan_items_para_3) e "
-    "'items_dano_fuera_del_carry'. Un carry sin sus 3 ítems, o ítems de daño en una unidad que no es el carry, "
-    "es de los mayores errores.\n"
+    "3. ITEMIZACIÓN: usa 'carry_detectado' (items_de_dano, items_totales, le_faltan_items_para_3), "
+    "'items_dano_fuera_del_carry' y 'carry_completo'. Un carry sin sus 3 ítems es un error grave. PERO si "
+    "'carry_completo' es true (ya tiene 3 ítems), los ítems de daño en una 2.ª unidad son un CARRY SECUNDARIO "
+    "legítimo, NO un error; solo es error dispersar si dejó al carry principal incompleto.\n"
     "4. RASGOS: ¿breakpoints altos activos o muchos rasgos flojos? Usa 'rasgos_activos' y su nivel.\n"
     "5. AUGMENTS: ¿encajan los 'augments' con la comp y el carry?\n"
     "6. CONTEST/VARIANZA: usa 'unidades_contestadas' y 'mi_carry_contestada_por_2_o_mas'. Si tu carry estaba "
@@ -284,8 +286,10 @@ _FRAMEWORK_TFT_EN = (
     "underleveled on a fast-8 comp, or over-leveling on a reroll, is a tempo mistake.\n"
     "2. BOARD STRENGTH: use 'unidades_2_estrellas_o_mas', 'unidades_3_estrellas' and 'unidades_coste_alto_4_5'. "
     "Few 2★ this late = weak board. ALWAYS compare against the winner via 'comparativa'.\n"
-    "3. ITEMIZATION: use 'carry_detectado' (items_de_dano, items_totales, le_faltan_items_para_3) and "
-    "'items_dano_fuera_del_carry'. A carry without its 3 items, or damage items on a non-carry unit, is a major error.\n"
+    "3. ITEMIZATION: use 'carry_detectado' (items_de_dano, items_totales, le_faltan_items_para_3), "
+    "'items_dano_fuera_del_carry' and 'carry_completo'. A carry without its 3 items is a major error. BUT if "
+    "'carry_completo' is true (already 3 items), damage items on a 2nd unit are a legitimate SECONDARY CARRY, "
+    "NOT an error; only spreading is an error if it left the main carry incomplete.\n"
     "4. TRAITS: high active breakpoints or many weak traits? Use 'rasgos_activos' and its tier.\n"
     "5. AUGMENTS: do the 'augments' fit the comp and the carry?\n"
     "6. CONTEST/VARIANCE: use 'unidades_contestadas' and 'mi_carry_contestada_por_2_o_mas'. If your carry was "
@@ -295,6 +299,38 @@ _FRAMEWORK_TFT_EN = (
     "with 3 items; you had 0 and 1 item, and one level lower'). This goes in 'comparison'.\n"
     "8. STRENGTHS: name 1-3 things you did well with their data → 'strengths'.\n"
     "The #1 lever (what would have changed the placement most) opens 'top_3_actionable' and is reflected in 'summary'."
+)
+_FRAMEWORK_LOL_ES = (
+    "MARCO DE ANÁLISIS LoL (razónalo EN ESTE ORDEN como un analista pro y vuelca el resultado en los campos; "
+    "NO recites el marco ni lo numeres en la salida):\n"
+    "1. FARMEO/ECONOMÍA: 'cs_por_min' frente al estándar del rol y vs tu rival ('comparativa.diferencias_con_rival.cs' "
+    "y '.oro'). Ir por detrás en cs/oro en tu línea es una desventaja real.\n"
+    "2. COMBATE/IMPACTO: KDA, 'comparativa.cuota_dano_equipo_pct' y 'participacion_en_kills_pct'. ¿Aportaste daño y "
+    "presencia o estuviste ausente de las peleas?\n"
+    "3. MUERTES: usa 'linea_temporal' (muertes por fase y posición x/y). Muertes tempranas repetidas o lejos de tu "
+    "carril = problemas de línea, mapa o sobre-extensión; di CUÁNDO y DÓNDE.\n"
+    "4. VISIÓN: 'vision_score' y vs el rival. Baja visión en tu rol (sobre todo support) es un fallo concreto.\n"
+    "5. OBJETIVOS: participación del equipo en dragones/heraldos/barones/torres ('objetivos_equipo').\n"
+    "6. BRECHA CON EL RIVAL: con 'comparativa.rival_de_linea' y las diferencias, di EXACTAMENTE en qué te superó o le "
+    "superaste (cs, oro, daño, nivel, visión). Esto va en 'comparison'.\n"
+    "7. ACIERTOS → 'strengths'.\n"
+    "La palanca #1 (lo que más habría cambiado la partida) abre 'top_3_actionable' y se refleja en 'summary'."
+)
+_FRAMEWORK_LOL_EN = (
+    "LoL ANALYSIS FRAMEWORK (reason THROUGH IT IN THIS ORDER like a pro and pour the result into the fields; do NOT "
+    "recite or number the framework in the output):\n"
+    "1. FARMING/ECONOMY: 'cs_por_min' vs the role standard and vs your opponent ('comparativa.diferencias_con_rival.cs'/"
+    "'.oro'). Falling behind in cs/gold in your lane is a real disadvantage.\n"
+    "2. COMBAT/IMPACT: KDA, 'comparativa.cuota_dano_equipo_pct' and 'participacion_en_kills_pct'. Did you bring damage "
+    "and presence, or were you absent from fights?\n"
+    "3. DEATHS: use 'linea_temporal' (deaths by phase and x/y position). Repeated early deaths or deaths far from your "
+    "lane = lane/map/overextension problems; say WHEN and WHERE.\n"
+    "4. VISION: 'vision_score' and vs opponent. Low vision for your role (especially support) is a concrete flaw.\n"
+    "5. OBJECTIVES: team participation in dragons/heralds/barons/towers ('objetivos_equipo').\n"
+    "6. GAP TO OPPONENT: with 'comparativa.rival_de_linea' and the diffs, say EXACTLY where they beat you or you beat "
+    "them (cs, gold, damage, level, vision). This goes in 'comparison'.\n"
+    "7. STRENGTHS → 'strengths'.\n"
+    "The #1 lever opens 'top_3_actionable' and is reflected in 'summary'."
 )
 
 
@@ -592,13 +628,17 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
             "specifically what they did differently that you didn't.")
     else:
         blocks.append(
-            "DATOS EN LoL: tienes el resumen + la línea temporal (muertes con timestamp y fase). Usa esos timestamps "
-            "REALES para anclar la evidencia; no inventes momentos que no estén en los datos."
+            "DATOS EN LoL: tienes el resumen, la 'comparativa' (rival de línea, diferencias contigo, cuota de daño y "
+            "participación en kills del equipo) y la 'linea_temporal' (muertes con timestamp, fase y posición). Usa esos "
+            "datos REALES para anclar la evidencia; no inventes momentos ni cifras que no estén en los datos."
             if es else
-            "DATA IN LoL: you have the summary + the timeline (deaths with timestamp and phase). Use those REAL "
-            "timestamps to anchor evidence; don't invent moments not present in the data.")
+            "DATA IN LoL: you have the summary, the 'comparativa' (lane opponent, diffs vs you, team damage share and kill "
+            "participation) and the 'linea_temporal' (deaths with timestamp, phase and position). Use those REAL data to "
+            "anchor evidence; never invent moments or numbers not present in the data.")
     if game == "tft":
         blocks.append(_FRAMEWORK_TFT_ES if es else _FRAMEWORK_TFT_EN)
+    else:
+        blocks.append(_FRAMEWORK_LOL_ES if es else _FRAMEWORK_LOL_EN)
     guide = "\n\n".join(blocks)
     if not es:
         return (f"Analyze THIS match and produce DEEP, specific coaching grounded ONLY in the data below.\n\n"
