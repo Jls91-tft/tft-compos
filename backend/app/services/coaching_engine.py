@@ -5,8 +5,6 @@ con esquema estructurado y evidencia → validación + reintento → persistenci
 Cache-first (no re-llama si ya existe; `regenerate` fuerza y versiona). Plan global:
 agrega los hallazgos de los informes YA cacheados en una sola llamada.
 """
-from collections import Counter
-
 from app.core.config import settings
 from app.data import mock
 from app.services import report_store, match_features, prompts
@@ -65,37 +63,52 @@ async def generate_report(game: str, match_id: str, riot_id: str = "", lang: str
 
 
 def _aggregate(reports: list[dict]) -> dict:
-    """Resume los hallazgos (v2) de los informes cacheados para el prompt del plan."""
-    n = len(reports)
-    de, mech, macro, mental = Counter(), Counter(), Counter(), Counter()
-    sev: dict[str, list] = {}
+    """Lista compacta de hallazgos por partida. NO los contamos por texto exacto (nunca
+    casa: cada informe los redacta distinto) — se los pasamos al LLM para que AGRUPE los
+    recurrentes por tema y calcule la frecuencia real."""
+    partidas = []
     for r in reports:
-        for x in r.get("decision_errors", []):
-            k = (x.get("what_happened") or "")[:90]
-            if k:
-                de[k] += 1
-                sev.setdefault(k, []).append(x.get("severity", 3))
-        for x in r.get("mechanical_issues", []):
-            if x.get("title"):
-                mech[x["title"][:90]] += 1
-        for x in r.get("macro_issues", []):
-            if x.get("title"):
-                macro[x["title"][:90]] += 1
-        for x in r.get("mental_patterns", []):
-            if x.get("pattern"):
-                mental[x["pattern"][:90]] += 1
+        partidas.append({
+            "decision": [e.get("what_happened") for e in r.get("decision_errors", []) if e.get("what_happened")][:3],
+            "macro": [i.get("title") for i in r.get("macro_issues", []) if i.get("title")][:3],
+            "mecanica": [i.get("title") for i in r.get("mechanical_issues", []) if i.get("title")][:3],
+            "mental": [m.get("pattern") for m in r.get("mental_patterns", []) if m.get("pattern")][:2],
+        })
+    return {"n_matches": len(reports), "partidas": partidas}
 
-    def top(c):
-        return [{"item": k, "count": v, "pct": round(100 * v / n) if n else 0} for k, v in c.most_common(10)]
-    return {"n_matches": n, "errores_decision": top(de), "problemas_mecanicos": top(mech),
-            "problemas_macro": top(macro), "patrones_mentales": top(mental),
-            "severidad_media": {k: round(sum(v) / len(v), 1) for k, v in sev.items()}}
+
+async def _ensure_recent_analyzed(game: str, riot_id: str, lang: str) -> list[dict]:
+    """Genera (en lote, reutilizando caché) los informes de las últimas partidas que aún
+    no estén analizados, hasta `plan_autoanalyze` por llamada. Devuelve los cacheados."""
+    user_key = report_store.norm_key(riot_id or settings.default_riot_id)
+    if settings.use_mock:
+        return report_store.latest_reports(user_key, game, settings.plan_match_window)
+    rid = riot_id or settings.default_riot_id
+    if not rid or "#" not in rid:
+        return report_store.latest_reports(user_key, game, settings.plan_match_window)
+    from app.services.riot_client import riot_client
+    name, tag = rid.split("#", 1)
+    puuid = await riot_client.get_puuid(name.strip(), tag.strip())
+    ids = await riot_client.get_match_ids(puuid, game, count=settings.plan_match_window)
+    generated = 0
+    for mid in ids:
+        if report_store.get_report(user_key, game, mid):
+            continue
+        if generated >= settings.plan_autoanalyze:
+            break
+        try:
+            await generate_report(game, mid, rid, lang)
+            generated += 1
+        except Exception:  # noqa: BLE001 — una partida que falle no debe tumbar el plan
+            continue
+    return report_store.latest_reports(user_key, game, settings.plan_match_window)
 
 
 async def build_improvement_plan(game: str, riot_id: str = "", lang: str = "es", regenerate: bool = False):
-    """Plan de mejora GLOBAL sobre los informes YA cacheados (1 sola llamada al LLM)."""
+    """Plan de mejora GLOBAL. Genera primero los informes que falten (en lote) y luego
+    agrega sus hallazgos en 1 sola llamada al LLM."""
     user_key = report_store.norm_key(riot_id or settings.default_riot_id)
-    reports = report_store.latest_reports(user_key, game, settings.plan_match_window)
+    reports = await _ensure_recent_analyzed(game, riot_id, lang)
     analyzed_ids = [r.get("match_id") for r in reports if r.get("match_id")]
 
     if not regenerate:
@@ -107,7 +120,7 @@ async def build_improvement_plan(game: str, riot_id: str = "", lang: str = "es",
 
     from app.services.riot_client import RiotApiError
     if not reports:
-        raise RiotApiError(400, "Aún no hay informes analizados. Genera coaching de algunas partidas primero.")
+        raise RiotApiError(400, "No hay partidas que analizar. Configura tu Riot ID (Nombre#TAG).")
 
     from app.services.ollama_client import ollama_client, OllamaError
     aggregate = _aggregate(reports)

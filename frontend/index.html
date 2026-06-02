@@ -279,7 +279,7 @@ async function renderCoaching() {
 async function loadPlan(regenerate) {
   const host = document.getElementById("plan-body");
   document.getElementById("plan-badge").textContent = "";
-  host.innerHTML = loadingHTML(regenerate ? "Regenerando tu plan…" : "Analizando todas tus partidas analizadas…");
+  host.innerHTML = loadingHTML(regenerate ? "Regenerando tu plan…" : "Analizando tus partidas… la primera vez puede tardar ~1 min");
   try {
     const p = await API.plan(currentGame, !!regenerate);
     host.innerHTML = planHTML(p);
