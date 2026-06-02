@@ -7,7 +7,7 @@ coaching sin tocar el resto del backend.
 import json
 from app.schemas.models import CoachingReport, ImprovementPlan
 
-PROMPT_VERSION = "report-v2.1-evidencia-2026-06"   # sube esto al mejorar el prompt → invalida cachés
+PROMPT_VERSION = "report-v2.2-rubrica-2026-06"   # sube esto al mejorar el prompt → invalida cachés
 PLAN_PROMPT_VERSION = "plan-v1-2026-06"
 
 # --- Voz del coach (system prompt) ---
@@ -446,27 +446,52 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
     schema = (
         '{\n'
         '  "summary": "1-2 frases: qué definió la partida (anclado a datos)",\n'
-        '  "decision_errors": [{"timestamp": "12:30 o Etapa 4-1", "phase": "early|mid|late", "what_happened": "...", "why_wrong": "...", "better_action": "...", "severity": 4, "evidence": "frase breve y clara con el dato; NO copies el JSON ni nombres de campos"}],\n'
+        '  "decision_errors": [{"timestamp": "min:seg solo en LoL; null en TFT", "phase": "early|mid|late", "what_happened": "...", "why_wrong": "...", "better_action": "...", "severity": 4, "evidence": "frase breve y clara con el dato; NO copies el JSON ni nombres de campos"}],\n'
         '  "mechanical_issues": [{"title": "...", "detail": "cs/trades/skillshots/cooldowns/itemización", "evidence": "frase clara con el dato", "severity": 3}],\n'
         '  "macro_issues": [{"title": "...", "detail": "rotaciones/visión/objetivos/tempo/nivel", "evidence": "frase clara con el dato o momento", "severity": 3}],\n'
         '  "mental_patterns": [{"pattern": "tilt|sobreextensión|pasividad", "detail": "...", "evidence": "solo si los datos lo soportan"}],\n'
         '  "top_3_actionable": ["3 cosas concretas a entrenar esta semana"]\n'
         '}'
     )
-    note = ""
+    es = lang != "en"
+    rubric = (_RUBRIC_TFT_ES if es else _RUBRIC_TFT_EN) if game == "tft" else (_RUBRIC_LOL_ES if es else _RUBRIC_LOL_EN)
+    blocks = [rubric]
     if game == "tft":
-        note = ("For TFT there are no ms timestamps: anchor evidence to stage/round, board, augments or leftover gold."
-                if lang == "en" else
-                "En TFT no hay timestamps en ms: ancla la evidencia a etapa/ronda, tablero, augments u oro sobrante.")
-    if lang == "en":
-        return (f"Analyze this match with the data below and produce DEEP, specific coaching.\n\n"
-                f"MATCH DATA (raw + carry detection + LoL timeline if present):\n{datos}\n\n"
-                f"Apply the system rules. {('NOTE: ' + note) if note else ''}\n\n"
+        blocks.append(_FUNDAMENTOS_TFT_ES if es else _FUNDAMENTOS_TFT_EN)
+        blocks.append(
+            "DATOS DISPONIBLES EN TFT: SOLO el ESTADO FINAL (tablero, ítems finales, rasgos, augments, colocación, "
+            "nivel, última ronda, oro final). NO tienes historial por rondas. Por tanto: NUNCA inventes etapas ni "
+            "rondas ('4-1', '6-1') ni afirmes CUÁNDO conseguiste una unidad o un ítem (que una unidad tenga o no "
+            "ítems es el estado final, no un evento con hora). En 'timestamp' pon null. Los augments SOLO existen en "
+            "2-1, 3-2 y 4-2; si 'aumentos' está vacío puede ser un modo sin augments — NO es un fallo. Ancla cada "
+            "hallazgo a un hecho VERIFICABLE del tablero final (unidad y sus estrellas/ítems, rasgo y su nivel, "
+            "augments, nivel frente al arquetipo)."
+            if es else
+            "DATA AVAILABLE IN TFT: ONLY the FINAL state (board, final items, traits, augments, placement, level, "
+            "last round, final gold). You have NO per-round history. Therefore: NEVER invent stages or rounds "
+            "('4-1', '6-1') nor claim WHEN you got a unit or item (whether a unit has items is the final state, not "
+            "a timed event). Set 'timestamp' to null. Augments ONLY exist at 2-1, 3-2 and 4-2; if 'augments' is empty "
+            "it may be a no-augment mode — NOT a mistake. Anchor every finding to a VERIFIABLE fact of the final board "
+            "(unit and its stars/items, trait and its tier, augments, level vs archetype).")
+    else:
+        blocks.append(
+            "DATOS EN LoL: tienes el resumen + la línea temporal (muertes con timestamp y fase). Usa esos timestamps "
+            "REALES para anclar la evidencia; no inventes momentos que no estén en los datos."
+            if es else
+            "DATA IN LoL: you have the summary + the timeline (deaths with timestamp and phase). Use those REAL "
+            "timestamps to anchor evidence; don't invent moments not present in the data.")
+    guide = "\n\n".join(blocks)
+    if not es:
+        return (f"Analyze THIS match and produce DEEP, specific coaching grounded ONLY in the data below.\n\n"
+                f"MATCH DATA:\n{datos}\n\n{guide}\n\n"
+                f"Name the REAL units/traits/items/values from the data. If you can't point to a concrete, verifiable "
+                f"flaw, say the game was solid and name the single factor that kept it from a better placement. "
                 f"Return ONLY valid JSON with EXACTLY these keys (values in English):\n{schema}")
-    return (f"Analiza esta partida con los datos de abajo y genera un coaching PROFUNDO y concreto.\n\n"
-            f"DATOS DE LA PARTIDA (crudos + carry detectado + línea temporal en LoL si la hay):\n{datos}\n\n"
-            f"Aplica las reglas del sistema. {('NOTA: ' + note) if note else ''}\n\n"
-            f"Devuelve EXCLUSIVAMENTE un JSON válido con EXACTAMENTE estas claves (textos en español):\n{schema}")
+    return (f"Analiza ESTA partida y genera un coaching PROFUNDO y concreto, basado SOLO en los datos de abajo.\n\n"
+            f"DATOS DE LA PARTIDA:\n{datos}\n\n{guide}\n\n"
+            f"Menciona las unidades/rasgos/ítems/valores REALES de los datos. Si no puedes señalar un fallo concreto "
+            f"y verificable, di que la partida fue sólida y nombra el único factor que la separó de una mejor "
+            f"colocación. Devuelve EXCLUSIVAMENTE un JSON válido con EXACTAMENTE estas claves (textos en español):\n{schema}")
 
 
 def validate_report(raw: str, base: dict) -> CoachingReport:
