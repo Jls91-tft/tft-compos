@@ -85,32 +85,41 @@ function heroHTML(report, match) {
     <div class="placement"><span class="big" style="color:${color}">${big}</span><span class="lbl">${lbl}</span>${tag ? `<span class="tag ${tagcls}">${tag}</span>` : ""}</div>
     <div class="verdict-wrap">
       <span class="ai-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#C4B5FD"/></svg> Análisis generado por Synapse IA</span>
-      <p class="verdict">${report.verdict || ""}</p>
+      <p class="verdict">${report.summary || ""}</p>
       ${match ? `<div class="match-facts">${facts}</div>` : ""}
-      ${report.focus ? `<div class="focus-callout"><div><div class="t">Foco para tu próxima partida</div><div class="d">${report.focus}</div></div></div>` : ""}
     </div>
   </section>`;
 }
 
 function reportHTML(report, match) {
   const kpis = (report.metrics || []).map(m => `<div class="kpi ${m.status || ""}"><div class="v">${m.value}</div><div class="k">${m.label}</div>${m.benchmark ? `<div class="bench">${m.benchmark}</div>` : ""}</div>`).join("");
-  const good = (report.did_well || []).map(d => `<li><span class="mk">✓</span> ${d}</li>`).join("");
-  const errs = (report.errors || []).map(e => `<div class="err">
-      <div class="err-head"><h4>${e.title}</h4><span class="sev sev-${e.severity}">${e.severity === "major" ? "Mayor" : "Menor"}</span></div>
-      <dl><dt>Qué pasó</dt><dd>${e.what}</dd><dt>Por qué te costó</dt><dd>${e.why}</dd>
-      <dt class="fix">Cómo subsanarlo</dt><dd class="fix">${e.fix}</dd><dt>El momento</dt><dd>${e.when}</dd></dl>
+  const sevTag = (s) => { const n = +s || 0; return `<span class="sev ${n >= 4 ? "sev-major" : "sev-minor"}">Sev ${n || "?"}</span>`; };
+  const phaseTag = (p) => p ? `<span class="tag tag-neutral" style="font-size:11px">${({ early: "Early", mid: "Mid", late: "Late" })[p] || p}</span>` : "";
+  const dec = (report.decision_errors || []).map(e => `<div class="err">
+      <div class="err-head"><h4>${e.timestamp ? `<span style="color:var(--accent-2)">${e.timestamp}</span> · ` : ""}${e.what_happened}</h4><span style="display:flex;gap:6px;align-items:center">${phaseTag(e.phase)}${sevTag(e.severity)}</span></div>
+      <dl><dt>Por qué falló</dt><dd>${e.why_wrong}</dd><dt class="fix">Qué hacer</dt><dd class="fix">${e.better_action}</dd><dt>Evidencia</dt><dd style="color:var(--muted)">${e.evidence || ""}</dd></dl>
     </div>`).join("");
-  const plan = (report.action_plan || []).map((a, i) => `<li><span class="num">${i + 1}</span> ${a}</li>`).join("");
+  const issuesHTML = (arr) => (arr || []).map(i => `<div class="err">
+      <div class="err-head"><h4>${i.title}</h4>${i.severity ? sevTag(i.severity) : ""}</div>
+      <dl><dt>Detalle</dt><dd>${i.detail}</dd><dt>Evidencia</dt><dd style="color:var(--muted)">${i.evidence || ""}</dd></dl></div>`).join("");
+  const macro = issuesHTML(report.macro_issues);
+  const mech = issuesHTML(report.mechanical_issues);
+  const mental = (report.mental_patterns || []).map(m => `<div class="err">
+      <div class="err-head"><h4>${m.pattern}</h4></div>
+      <dl><dt>Detalle</dt><dd>${m.detail}</dd><dt>Evidencia</dt><dd style="color:var(--muted)">${m.evidence || ""}</dd></dl></div>`).join("");
+  const plan = (report.top_3_actionable || []).map((a, i) => `<li><span class="num">${i + 1}</span> ${a}</li>`).join("");
   return heroHTML(report, match) +
     `<div class="kpi-row">${kpis}</div>
      <div class="report-grid">
        <div class="col-main">
-         ${good ? `<div class="panel"><h3><span class="ic ic-good">✓</span> Lo que hiciste bien</h3><ul class="good-list">${good}</ul></div>` : ""}
-         ${errs ? `<div class="panel"><h3>Errores clave</h3>${errs}</div>` : ""}
-         ${report.corrective ? `<div class="panel"><h3>Qué deberías haber hecho</h3><div class="corrective"><span class="lead">El ajuste clave</span>${report.corrective}</div></div>` : ""}
+         ${dec ? `<div class="panel"><h3>Errores de decisión</h3>${dec}</div>` : ""}
+         ${macro ? `<div class="panel"><h3>Macro (rotaciones, objetivos, tempo)</h3>${macro}</div>` : ""}
+         ${mech ? `<div class="panel"><h3>Mecánica (cs, trades, itemización)</h3>${mech}</div>` : ""}
+         ${mental ? `<div class="panel"><h3>Patrones mentales</h3>${mental}</div>` : ""}
+         ${!dec && !macro && !mech && !mental ? `<div class="panel"><p style="margin:0;color:var(--muted)">Partida limpia: la IA no detectó errores con evidencia suficiente.</p></div>` : ""}
        </div>
        <div class="col-side">
-         ${plan ? `<div class="panel"><h3>Plan de acción</h3><ol class="action-list">${plan}</ol></div>` : ""}
+         ${plan ? `<div class="panel"><h3>Para entrenar esta semana</h3><ol class="action-list">${plan}</ol></div>` : ""}
        </div>
      </div>`;
 }

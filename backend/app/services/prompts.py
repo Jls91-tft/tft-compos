@@ -7,7 +7,7 @@ coaching sin tocar el resto del backend.
 import json
 from app.schemas.models import CoachingReport, ImprovementPlan
 
-PROMPT_VERSION = "report-rigor-2026-06"   # sube esto al mejorar el prompt → invalida cachés
+PROMPT_VERSION = "report-v2-estructurado-2026-06"   # sube esto al mejorar el prompt → invalida cachés
 PLAN_PROMPT_VERSION = "plan-v1-2026-06"
 
 # --- Voz del coach (system prompt) ---
@@ -400,3 +400,71 @@ def validate_plan(raw: str, base: dict) -> ImprovementPlan:
     data = json.loads(raw)
     data.update(base)              # game, based_on_match_ids, new_matches
     return ImprovementPlan(**data)
+
+
+# ====================== Informe ESTRUCTURADO v2 (anclado a evidencia) ======================
+REPORT_SYSTEM = (
+    "Eres Synapse, analista de TFT y League of Legends de nivel Challenger. Exigente, específico y honesto. "
+    "Hablas español, directo y sin paja.\n"
+    "REGLAS INNEGOCIABLES:\n"
+    "1. CADA hallazgo se apoya en un dato concreto del payload (unidad, rasgo y su nivel, augment, ítem, ronda, "
+    "oro, nivel, o un timestamp de la línea temporal) citado LITERALMENTE en su campo 'evidence'. Sin evidencia → no se incluye.\n"
+    "2. PROHIBIDO el consejo genérico ('mejora tu visión', 'gestiona recursos') si no va con un dato y una acción medible.\n"
+    "3. El rol de una unidad lo definen sus ÍTEMS: nunca trates a un tanque como carry. En TFT el carry es la unidad "
+    "con ítems de daño; si ninguna los lleva, ESO es el hallazgo.\n"
+    "4. El oro_sobrante es el del FINAL de la partida: terminar con poco oro es NORMAL y no es un fallo de economía.\n"
+    "5. Sé crítico aunque la colocación sea buena: di qué la separó del 1.º. No fabriques errores para rellenar; listas vacías son válidas.\n"
+    "Devuelves SIEMPRE JSON válido conforme al esquema pedido y NADA más."
+)
+REPORT_SYSTEM_EN = (
+    "You are Synapse, a Challenger-level TFT and League of Legends analyst. Demanding, specific and honest. "
+    "You speak English, direct and with no filler.\n"
+    "NON-NEGOTIABLE RULES:\n"
+    "1. EVERY finding is backed by a concrete data point from the payload (unit, trait and its tier, augment, item, "
+    "round, gold, level, or a timeline timestamp) quoted LITERALLY in its 'evidence' field. No evidence → don't include it.\n"
+    "2. FORBIDDEN: generic advice ('improve your vision', 'manage resources') without a data point and a measurable action.\n"
+    "3. A unit's role is defined by its ITEMS: never treat a tank as a carry. In TFT the carry is the unit with damage "
+    "items; if none carry them, THAT is the finding.\n"
+    "4. leftover gold is the END-of-game value: finishing with little gold is NORMAL, not an economy mistake.\n"
+    "5. Be critical even if the placement is good: say what separated it from 1st. Don't fabricate errors; empty lists are fine.\n"
+    "You ALWAYS reply with valid JSON matching the requested schema and NOTHING else."
+)
+
+
+def system_report(lang: str = "es") -> str:
+    return REPORT_SYSTEM_EN if lang == "en" else REPORT_SYSTEM
+
+
+def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
+    datos = json.dumps(payload, ensure_ascii=False, indent=2)
+    schema = (
+        '{\n'
+        '  "summary": "1-2 frases: qué definió la partida (anclado a datos)",\n'
+        '  "decision_errors": [{"timestamp": "12:30 o Etapa 4-1", "phase": "early|mid|late", "what_happened": "...", "why_wrong": "...", "better_action": "...", "severity": 4, "evidence": "cita un timestamp o stat del payload"}],\n'
+        '  "mechanical_issues": [{"title": "...", "detail": "cs/trades/skillshots/cooldowns/itemización", "evidence": "stat concreto", "severity": 3}],\n'
+        '  "macro_issues": [{"title": "...", "detail": "rotaciones/visión/objetivos/tempo/nivel", "evidence": "stat o timestamp", "severity": 3}],\n'
+        '  "mental_patterns": [{"pattern": "tilt|sobreextensión|pasividad", "detail": "...", "evidence": "solo si los datos lo soportan"}],\n'
+        '  "top_3_actionable": ["3 cosas concretas a entrenar esta semana"]\n'
+        '}'
+    )
+    note = ""
+    if game == "tft":
+        note = ("For TFT there are no ms timestamps: anchor evidence to stage/round, board, augments or leftover gold."
+                if lang == "en" else
+                "En TFT no hay timestamps en ms: ancla la evidencia a etapa/ronda, tablero, augments u oro sobrante.")
+    if lang == "en":
+        return (f"Analyze this match with the data below and produce DEEP, specific coaching.\n\n"
+                f"MATCH DATA (raw + carry detection + LoL timeline if present):\n{datos}\n\n"
+                f"Apply the system rules. {('NOTE: ' + note) if note else ''}\n\n"
+                f"Return ONLY valid JSON with EXACTLY these keys (values in English):\n{schema}")
+    return (f"Analiza esta partida con los datos de abajo y genera un coaching PROFUNDO y concreto.\n\n"
+            f"DATOS DE LA PARTIDA (crudos + carry detectado + línea temporal en LoL si la hay):\n{datos}\n\n"
+            f"Aplica las reglas del sistema. {('NOTA: ' + note) if note else ''}\n\n"
+            f"Devuelve EXCLUSIVAMENTE un JSON válido con EXACTAMENTE estas claves (textos en español):\n{schema}")
+
+
+def validate_report(raw: str, base: dict) -> CoachingReport:
+    """Valida el JSON del informe v2 contra el schema. Lanza si no valida (para reintento)."""
+    data = json.loads(raw)
+    data.update(base)              # game, match_id, metrics (servidor)
+    return CoachingReport(**data)

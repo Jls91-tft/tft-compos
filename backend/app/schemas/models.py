@@ -36,17 +36,40 @@ class CoachingError(BaseModel):
     when: str                    # el momento
 
 
+class DecisionError(BaseModel):
+    timestamp: Optional[str] = None                       # "12:30" (LoL) o "Etapa 4-1" (TFT)
+    phase: Optional[Literal["early", "mid", "late"]] = None
+    what_happened: str
+    why_wrong: str
+    better_action: str
+    severity: int = 3                                      # 1-5
+    evidence: str                                          # cita un timestamp/stat concreto
+
+
+class CoachingIssue(BaseModel):                            # micro (mecánica) y macro
+    title: str
+    detail: str
+    evidence: str
+    severity: Optional[int] = None
+
+
+class MentalPattern(BaseModel):
+    pattern: str
+    detail: str
+    evidence: str
+
+
 class CoachingReport(BaseModel):
     game: Game
     match_id: str
-    verdict: str
-    focus: str                   # foco para la próxima partida
-    metrics: list[CoachingMetric]
-    did_well: list[str]
-    errors: list[CoachingError]
-    corrective: str
-    action_plan: list[str]
-    # meta de caché (opcionales; las rellena el servidor, no rompen el contrato)
+    summary: str = ""                                      # veredicto en 1-2 frases
+    metrics: list[CoachingMetric] = []                     # KPIs derivados (servidor, sin LLM)
+    decision_errors: list[DecisionError] = []
+    mechanical_issues: list[CoachingIssue] = []
+    macro_issues: list[CoachingIssue] = []
+    mental_patterns: list[MentalPattern] = []
+    top_3_actionable: list[str] = []
+    # meta de caché (opcionales; las rellena el servidor)
     prompt_version: str = ""
     model: str = ""
     generated_at: str = ""

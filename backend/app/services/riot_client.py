@@ -90,6 +90,17 @@ class RiotClient:
         _match_cache.set(match_id, data, ttl=86400)
         return data
 
+    async def get_match_timeline(self, match_id: str) -> dict:
+        """Timeline de una partida de LoL (eventos + frames; inmutable, cacheado)."""
+        key = match_id + ":tl"
+        cached = _match_cache.get(key)
+        if cached is not None:
+            return cached
+        url = f"{self._regional}/lol/match/v5/matches/{match_id}/timeline"
+        data = await self._get(url)
+        _match_cache.set(key, data, ttl=86400)
+        return data
+
     # ---------------------- Ladder alto (worker de meta) ----------------------
     async def get_challenger(self, game: str, platform: str | None = None,
                              queue: str = "RANKED_SOLO_5x5") -> list[dict]:

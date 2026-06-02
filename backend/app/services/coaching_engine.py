@@ -1,19 +1,19 @@
-"""Motor de coaching — Riot + IA, con CACHÉ en BD y plan de mejora global.
+"""Motor de coaching — Riot + IA, informe ESTRUCTURADO v2, con CACHÉ y plan global.
 
-Informe por partida: cache-first (no re-llama al LLM si ya existe; `regenerate`
-fuerza una nueva generación y VERSIONA, no sobrescribe). Plan global: agrega los
-informes YA cacheados en una sola llamada. Reutiliza el pipeline de prompts
-existente (rúbrica/rigor) sin cambiar su schema.
+Informe por partida: payload enriquecido (extract_summary + timeline LoL) → LLM v2
+con esquema estructurado y evidencia → validación + reintento → persistencia.
+Cache-first (no re-llama si ya existe; `regenerate` fuerza y versiona). Plan global:
+agrega los hallazgos de los informes YA cacheados en una sola llamada.
 """
 from collections import Counter
 
 from app.core.config import settings
 from app.data import mock
-from app.services import report_store, prompts
+from app.services import report_store, match_features, prompts
 
 
 async def generate_report(game: str, match_id: str, riot_id: str = "", lang: str = "es", regenerate: bool = False):
-    """Informe de coaching de una partida (cache-first + persistencia)."""
+    """Informe de coaching estructurado (cache-first + persistencia)."""
     if settings.use_mock:
         return mock.report(game, match_id)
 
@@ -25,43 +25,70 @@ async def generate_report(game: str, match_id: str, riot_id: str = "", lang: str
             return cached
 
     from app.services.riot_client import riot_client, RiotApiError
-    from app.services.ollama_client import ollama_client
+    from app.services.ollama_client import ollama_client, OllamaError
 
     if not riot_id or "#" not in riot_id:
         raise RiotApiError(400, "Riot ID requerido (Nombre#TAG) para el coaching real")
     name, tag = riot_id.split("#", 1)
     puuid = await riot_client.get_puuid(name.strip(), tag.strip())
     match = await riot_client.get_match(match_id, game)
-    summary = prompts.extract_summary(game, match, puuid)
-    raw = await ollama_client.generate(
-        prompts.build_report_prompt(game, summary, lang), system=prompts.system_for(lang), json_mode=True
-    )
-    report = prompts.parse_report(raw, game, match_id)
+    timeline = None
+    if game == "lol":
+        try:
+            timeline = await riot_client.get_match_timeline(match_id)
+        except RiotApiError:
+            timeline = None  # sin timeline degradamos a evidencia por stats
 
+    summary = prompts.extract_summary(game, match, puuid)
+    payload = match_features.enrich(game, match, summary, puuid, timeline)
+    base = {"game": game, "match_id": match_id, "metrics": match_features.metrics_for(game, summary)}
     model = settings.groq_model if settings.llm_provider == "groq" else settings.ollama_model
+    system = prompts.system_report(lang)
+    prompt = prompts.build_report_prompt_v2(game, payload, lang)
+
+    report, last_err = None, ""
+    for attempt in range(2):
+        p = prompt if attempt == 0 else (
+            prompt + f"\n\nTu respuesta anterior NO validó ({last_err}). Devuelve SOLO el JSON con el esquema exacto.")
+        raw = await ollama_client.generate(p, system=system, json_mode=True)
+        try:
+            report = prompts.validate_report(raw, base)
+            break
+        except Exception as e:  # noqa: BLE001 — reintento con el error como feedback
+            last_err = str(e)[:300]
+    if report is None:
+        raise OllamaError("La IA no devolvió un informe válido tras 2 intentos. Inténtalo de nuevo.")
+
     if user_key:
         return report_store.save_report(user_key, game, match_id, report.model_dump(), prompts.PROMPT_VERSION, model)
     return report
 
 
 def _aggregate(reports: list[dict]) -> dict:
-    """Resume errores y focos recurrentes de los informes cacheados (schema actual)."""
+    """Resume los hallazgos (v2) de los informes cacheados para el prompt del plan."""
     n = len(reports)
-    errs, foci = Counter(), Counter()
+    de, mech, macro, mental = Counter(), Counter(), Counter(), Counter()
     sev: dict[str, list] = {}
     for r in reports:
-        for e in r.get("errors", []):
-            t = (e.get("title") or "")[:90]
-            if t:
-                errs[t] += 1
-                sev.setdefault(t, []).append(2 if e.get("severity") == "major" else 1)
-        f = (r.get("focus") or "")[:120]
-        if f:
-            foci[f] += 1
+        for x in r.get("decision_errors", []):
+            k = (x.get("what_happened") or "")[:90]
+            if k:
+                de[k] += 1
+                sev.setdefault(k, []).append(x.get("severity", 3))
+        for x in r.get("mechanical_issues", []):
+            if x.get("title"):
+                mech[x["title"][:90]] += 1
+        for x in r.get("macro_issues", []):
+            if x.get("title"):
+                macro[x["title"][:90]] += 1
+        for x in r.get("mental_patterns", []):
+            if x.get("pattern"):
+                mental[x["pattern"][:90]] += 1
 
     def top(c):
         return [{"item": k, "count": v, "pct": round(100 * v / n) if n else 0} for k, v in c.most_common(10)]
-    return {"n_matches": n, "errores_frecuentes": top(errs), "focos_repetidos": top(foci),
+    return {"n_matches": n, "errores_decision": top(de), "problemas_mecanicos": top(mech),
+            "problemas_macro": top(macro), "patrones_mentales": top(mental),
             "severidad_media": {k: round(sum(v) / len(v), 1) for k, v in sev.items()}}
 
 
@@ -96,7 +123,7 @@ async def build_improvement_plan(game: str, riot_id: str = "", lang: str = "es",
         try:
             plan = prompts.validate_plan(raw, base)
             break
-        except Exception as e:  # noqa: BLE001 — reintento con el error como feedback
+        except Exception as e:  # noqa: BLE001
             last_err = str(e)[:300]
     if plan is None:
         raise OllamaError("La IA no devolvió un plan válido tras 2 intentos. Inténtalo de nuevo.")

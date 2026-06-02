@@ -257,9 +257,78 @@ def matches(game: str):
     return _MATCHES.get(game, [])
 
 
+_REPORTS_V2 = {
+    "tft": {
+        "game": "tft", "match_id": "TFT_0002",
+        "summary": "Buen pilotaje y Top 4, pero perdiste el Top 2 por subir tarde a nivel 8 y un posicionamiento que costó tu mejor combate.",
+        "metrics": [
+            {"value": "4.º", "label": "Colocación", "status": "good", "benchmark": "Top 4"},
+            {"value": "9", "label": "Nivel final", "status": "", "benchmark": ""},
+            {"value": "18", "label": "Oro sobrante", "status": "", "benchmark": "al final"},
+        ],
+        "decision_errors": [
+            {"timestamp": "Etapa 3-2", "phase": "mid", "what_happened": "Mantuviste >50 de oro sin subir a nivel 8 entre 3-2 y 3-5.",
+             "why_wrong": "Llegaste tarde a tus unidades clave y perdiste 3 rondas seguidas.",
+             "better_action": "Con ≥50 de oro y >50 de vida en 3-2, sube a 8 esa ronda y rollea después.",
+             "severity": 4, "evidence": "oro_sobrante=18; racha perdedora en etapa 3"},
+            {"timestamp": "Etapa 4-1", "phase": "late", "what_happened": "Portador en el borde, al alcance del asesino, sin cobertura.",
+             "why_wrong": "Cayó en los primeros segundos; tu mayor daño apenas disparó.",
+             "better_action": "Coloca al portador en la esquina opuesta a la amenaza, tras tu frontline.",
+             "severity": 4, "evidence": "tablero: portador en fila frontal"},
+        ],
+        "mechanical_issues": [
+            {"title": "Ítems del carry completados tarde", "detail": "Dos de tres componentes de daño llegaron pasada la etapa 3.",
+             "evidence": "unidades con ítems incompletos en mid", "severity": 2}],
+        "macro_issues": [
+            {"title": "Economía sobre-conservadora", "detail": "Acumulaste oro en vez de convertir tempo en tablero.",
+             "evidence": "oro_sobrante=18", "severity": 3}],
+        "mental_patterns": [],
+        "top_3_actionable": [
+            "Con vida >50 en la etapa 3, prioriza subir de nivel sobre acumular oro.",
+            "Reposiciona al carry a la esquina opuesta a la amenaza antes de cada ronda.",
+            "Cierra los ítems del carry antes del final de la etapa 3.",
+        ],
+    },
+    "lol": {
+        "game": "lol", "match_id": "LOL_0002",
+        "summary": "La derrota se decidió en el mapa, no en los duelos: cediste objetivos con prioridad y moriste repetidamente en jungla rival sin visión.",
+        "metrics": [
+            {"value": "Derrota", "label": "Resultado", "status": "bad", "benchmark": ""},
+            {"value": "4/7/6", "label": "KDA", "status": "", "benchmark": ""},
+            {"value": "5.9", "label": "CS/min", "status": "warn", "benchmark": "Obj. ~7.5"},
+            {"value": "2", "label": "Dragones equipo", "status": "", "benchmark": ""},
+        ],
+        "decision_errors": [
+            {"timestamp": "8:00", "phase": "early", "what_happened": "Estabas en el campamento opuesto cuando salió el primer drake.",
+             "why_wrong": "Regalaste tempo y alma; el rival escaló sin oposición.",
+             "better_action": "A 30 s del spawn, deja el campamento y colócate cerca del foso con visión previa.",
+             "severity": 4, "evidence": "objetivos_equipo: dragones rival > propios"},
+            {"timestamp": "12:00", "phase": "mid", "what_happened": "4 de 7 muertes en jungla enemiga, sin guardianes y con oleadas en contra.",
+             "why_wrong": "Cada muerte dio oro, prioridad y un objetivo gratis al rival.",
+             "better_action": "No entres a la jungla rival sin guardián de control y sin ver a 3 enemigos.",
+             "severity": 5, "evidence": "linea_temporal: muertes_por_fase mid alto en zona rival"},
+        ],
+        "mechanical_issues": [
+            {"title": "CS por minuto bajo", "detail": "5.9 cs/min, por debajo del objetivo del rol.",
+             "evidence": "cs_por_min=5.9", "severity": 3}],
+        "macro_issues": [
+            {"title": "Objetivos cedidos con prioridad", "detail": "Dos drakes perdidos estando vivo y cerca.",
+             "evidence": "muertes a 8:00 y 14:00", "severity": 4}],
+        "mental_patterns": [
+            {"pattern": "sobreextensión", "detail": "Entradas repetidas a zona rival sin condiciones.",
+             "evidence": "4 muertes en jungla enemiga"}],
+        "top_3_actionable": [
+            "A 30 s de un drake, abandona el farm y agrúpate cerca del objetivo.",
+            "No entres a la jungla rival sin un guardián de control si vas por detrás.",
+            "Sube tu CS/min repasando oleadas en la fase de líneas.",
+        ],
+    },
+}
+
+
 def report(game: str, match_id: str):
-    # En mock ignoramos match_id y devolvemos el informe de ejemplo del juego.
-    return _REPORTS.get(game)
+    # En mock ignoramos match_id y devolvemos el informe de ejemplo (schema v2) del juego.
+    return _REPORTS_V2.get(game)
 
 
 def stats(game: str):
