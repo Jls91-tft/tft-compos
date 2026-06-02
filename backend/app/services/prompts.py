@@ -5,7 +5,10 @@ resumen que la IA pueda analizar. Centralizarlo facilita iterar la calidad del
 coaching sin tocar el resto del backend.
 """
 import json
-from app.schemas.models import CoachingReport
+from app.schemas.models import CoachingReport, ImprovementPlan
+
+PROMPT_VERSION = "report-rigor-2026-06"   # sube esto al mejorar el prompt → invalida cachés
+PLAN_PROMPT_VERSION = "plan-v1-2026-06"
 
 # --- Voz del coach (system prompt) ---
 COACH_SYSTEM = (
@@ -350,3 +353,50 @@ def parse_report(raw: str, game: str, match_id: str) -> CoachingReport:
             return CoachingReport(**data)
         except Exception:
             return _fallback_report(raw, game, match_id)
+
+
+# ====================== Plan de mejora global (multi-partida) ======================
+PLAN_SYSTEM = (
+    "Eres Synapse, coach de élite de TFT y League of Legends. Sintetizas patrones a partir de los "
+    "hallazgos de varias partidas YA analizadas. No inventas: solo agregas lo que viene en los datos. "
+    "Eres concreto y exigente. Devuelves SIEMPRE JSON válido conforme al esquema y NADA más."
+)
+PLAN_SYSTEM_EN = (
+    "You are Synapse, an elite TFT and League of Legends coach. You synthesize patterns from the findings "
+    "of several already-analyzed matches. You do not invent: you only aggregate what the data shows. "
+    "Concrete and demanding. You ALWAYS reply with valid JSON per the schema and NOTHING else."
+)
+
+
+def system_plan(lang: str = "es") -> str:
+    return PLAN_SYSTEM_EN if lang == "en" else PLAN_SYSTEM
+
+
+def build_plan_prompt(game: str, aggregate: dict, lang: str = "es") -> str:
+    payload = json.dumps(aggregate, ensure_ascii=False, indent=2)
+    schema = (
+        '{\n'
+        '  "summary": "diagnóstico global en 1-2 frases",\n'
+        '  "recurring_weaknesses": [{"title": "...", "frequency_pct": 40, "avg_severity": 1.6, "evidence": "en cuántas de las N partidas aparece"}],\n'
+        '  "root_causes": ["hipótesis de causa raíz"],\n'
+        '  "roadmap": {"this_week": [{"focus": "...", "drills": ["..."], "resource": "qué practicar/modo/oponente", "success_metric": "medible"}], "this_month": [], "next_3_months": []},\n'
+        '  "priority_order": ["por qué empezar por X antes que por Y"]\n'
+        '}'
+    )
+    n = aggregate.get("n_matches", 0)
+    if lang == "en":
+        return (f"AGGREGATED findings from the player's last {n} already-analyzed matches:\n{payload}\n\n"
+                f"Rules: in recurring_weaknesses include ONLY patterns present in >=30% of matches, each with its "
+                f"frequency. Roadmap in 3 horizons with concrete drills, a resource and a measurable success metric. "
+                f"Nothing generic; base everything on the data.\nReturn ONLY valid JSON with these keys (English):\n{schema}")
+    return (f"Hallazgos AGREGADOS de las últimas {n} partidas YA analizadas del jugador:\n{payload}\n\n"
+            f"Reglas: en recurring_weaknesses incluye SOLO patrones presentes en >=30% de las partidas, cada uno con "
+            f"su frecuencia. Roadmap en 3 horizontes con drills concretos, un recurso y una métrica de éxito medible. "
+            f"Nada genérico; básate en los datos.\nDevuelve EXCLUSIVAMENTE un JSON válido con estas claves (en español):\n{schema}")
+
+
+def validate_plan(raw: str, base: dict) -> ImprovementPlan:
+    """Valida el JSON del plan global. Lanza si no valida (para reintento)."""
+    data = json.loads(raw)
+    data.update(base)              # game, based_on_match_ids, new_matches
+    return ImprovementPlan(**data)

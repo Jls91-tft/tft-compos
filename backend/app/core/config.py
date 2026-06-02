@@ -43,5 +43,9 @@ class Settings(BaseSettings):
     meta_top_n: int = 24                         # entradas por explorador
     meta_min_games: int = 5                      # mínimo de apariciones para listar
 
+    # --- Coaching IA: persistencia (SQLite stdlib) + plan global ---
+    reports_db: str = "app/data/generated/synapse.db"   # informes y planes cacheados
+    plan_match_window: int = 20                          # nº de partidas para el plan global
+
 
 settings = Settings()

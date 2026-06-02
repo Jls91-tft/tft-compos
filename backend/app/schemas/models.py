@@ -46,6 +46,46 @@ class CoachingReport(BaseModel):
     errors: list[CoachingError]
     corrective: str
     action_plan: list[str]
+    # meta de caché (opcionales; las rellena el servidor, no rompen el contrato)
+    prompt_version: str = ""
+    model: str = ""
+    generated_at: str = ""
+    stale: bool = False
+
+
+# ---------- Plan de mejora global (multi-partida) ----------
+class RecurringWeakness(BaseModel):
+    title: str
+    frequency_pct: int = 0
+    avg_severity: float = 0
+    evidence: str = ""
+
+
+class RoadmapItem(BaseModel):
+    focus: str
+    drills: list[str] = []
+    resource: str = ""           # qué practicar, modo, tipo de oponente
+    success_metric: str = ""     # métrica de éxito medible
+
+
+class Roadmap(BaseModel):
+    this_week: list[RoadmapItem] = []
+    this_month: list[RoadmapItem] = []
+    next_3_months: list[RoadmapItem] = []
+
+
+class ImprovementPlan(BaseModel):
+    game: Game
+    summary: str = ""
+    recurring_weaknesses: list[RecurringWeakness] = []
+    root_causes: list[str] = []
+    roadmap: Roadmap = Roadmap()
+    priority_order: list[str] = []
+    based_on_match_ids: list[str] = []
+    new_matches: int = 0
+    prompt_version: str = ""
+    model: str = ""
+    generated_at: str = ""
 
 
 # ---------- Chat con el coach ----------
