@@ -5,6 +5,8 @@ con esquema estructurado y evidencia → validación + reintento → persistenci
 Cache-first (no re-llama si ya existe; `regenerate` fuerza y versiona). Plan global:
 agrega los hallazgos de los informes YA cacheados en una sola llamada.
 """
+import asyncio
+
 from app.core.config import settings
 from app.data import mock
 from app.services import report_store, match_features, prompts
@@ -90,6 +92,7 @@ async def _ensure_recent_analyzed(game: str, riot_id: str, lang: str) -> list[di
     name, tag = rid.split("#", 1)
     puuid = await riot_client.get_puuid(name.strip(), tag.strip())
     ids = await riot_client.get_match_ids(puuid, game, count=settings.plan_match_window)
+    from app.services.ollama_client import OllamaError
     generated = 0
     for mid in ids:
         if report_store.get_report(user_key, game, mid):
@@ -99,7 +102,10 @@ async def _ensure_recent_analyzed(game: str, riot_id: str, lang: str) -> list[di
         try:
             await generate_report(game, mid, rid, lang)
             generated += 1
-        except Exception:  # noqa: BLE001 — una partida que falle no debe tumbar el plan
+            await asyncio.sleep(0.8)   # suaviza la ráfaga para el rate limit de Groq
+        except OllamaError:
+            break   # IA saturada (429) tras reintentos: paramos el lote y seguimos con lo cacheado
+        except Exception:  # noqa: BLE001 — una partida concreta que falle no para el plan
             continue
     return report_store.latest_reports(user_key, game, settings.plan_match_window)
 

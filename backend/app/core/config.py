@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     # --- Coaching IA: persistencia (SQLite stdlib) + plan global ---
     reports_db: str = "app/data/generated/synapse.db"   # informes y planes cacheados
     plan_match_window: int = 20                          # nº de partidas que mira el plan global
-    plan_autoanalyze: int = 10                           # informes que genera el plan por clic (las que falten)
+    plan_autoanalyze: int = 5                            # informes que genera el plan por clic (suave con el rate limit)
 
 
 settings = Settings()

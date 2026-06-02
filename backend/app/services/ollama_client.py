@@ -5,6 +5,8 @@ Se elige con LLM_PROVIDER (ollama | groq). Se mantiene el nombre del módulo y d
 - Ollama  → privado/local (la VM lo aguanta; lento en CPU).
 - Groq    → gratis y muy rápido (ideal para la beta). API estilo OpenAI.
 """
+import asyncio
+
 import httpx
 from app.core.config import settings
 
@@ -51,13 +53,24 @@ class OllamaClient:
         if json_mode:
             payload["response_format"] = {"type": "json_object"}
         headers = {"Authorization": f"Bearer {settings.groq_api_key}"}
-        try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                r = await client.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
-                r.raise_for_status()
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            for attempt in range(4):
+                try:
+                    r = await client.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
+                except httpx.HTTPError as e:
+                    raise OllamaError(f"No se pudo contactar con Groq. Revisa GROQ_API_KEY / el modelo. Detalle: {e}")
+                if r.status_code == 429:  # rate limit del free tier → espera (Retry-After) y reintenta
+                    if attempt < 3:
+                        wait = min(float(r.headers.get("retry-after", 2 ** attempt)), 20)
+                        await asyncio.sleep(wait)
+                        continue
+                    raise OllamaError(
+                        "Límite de Groq (free tier) alcanzado (429). Espera ~1 min y reintenta, "
+                        "o analiza menos partidas de golpe."
+                    )
+                if r.status_code >= 400:
+                    raise OllamaError(f"Groq devolvió {r.status_code}. Revisa GROQ_API_KEY / el modelo. Detalle: {r.text[:200]}")
                 return r.json()["choices"][0]["message"]["content"]
-        except httpx.HTTPError as e:
-            raise OllamaError(f"No se pudo contactar con Groq. Revisa GROQ_API_KEY / el modelo. Detalle: {e}")
 
 
 ollama_client = OllamaClient()
