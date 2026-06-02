@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     # OpenRouter (https://openrouter.ai): acceso free a DeepSeek V4 Flash, Nemotron, etc.
     # Copia el slug EXACTO del modelo desde https://openrouter.ai/models (varía con el tiempo).
     openrouter_api_key: str = ""
-    openrouter_model: str = "deepseek/deepseek-chat-v3-0324:free"
+    openrouter_model: str = "deepseek/deepseek-v4-flash:free"
     llm_temperature: float = 0.4
 
     # --- Aplicación ---
