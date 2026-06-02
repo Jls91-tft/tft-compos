@@ -7,8 +7,8 @@ coaching sin tocar el resto del backend.
 import json
 from app.schemas.models import CoachingReport, ImprovementPlan
 
-PROMPT_VERSION = "report-v2.6-motor70b-2026-06"   # sube esto al mejorar el prompt/motor → invalida cachés
-PLAN_PROMPT_VERSION = "plan-v3.1-motor70b-2026-06"
+PROMPT_VERSION = "report-v3-analista-2026-06"   # sube esto al mejorar el prompt/motor → invalida cachés
+PLAN_PROMPT_VERSION = "plan-v4-analista-2026-06"
 
 # --- Voz del coach (system prompt) ---
 COACH_SYSTEM = (
@@ -113,6 +113,15 @@ def _damage_items(items: list) -> int:
     return sum(1 for it in items if (it or "").lower() in _DAMAGE_ITEMS)
 
 
+# Mapa rareza→coste de TFT (estable entre sets recientes). Si una rareza no está aquí
+# (unidades especiales/invocadas) devolvemos None: NUNCA inventamos el coste.
+_RARITY_TO_COST = {0: 1, 1: 2, 2: 3, 4: 4, 6: 5}
+
+
+def _unit_cost(rarity) -> int | None:
+    return _RARITY_TO_COST.get(rarity)
+
+
 def _pick_carry(units: list) -> dict | None:
     """El carry es la unidad con más ítems de DAÑO (desempate: estrellas, nº ítems).
 
@@ -143,6 +152,7 @@ def _tft_summary(match: dict, puuid: str) -> dict:
         {
             "unidad": _clean_id(u.get("character_id")),
             "estrellas": u.get("tier"),
+            "coste": _unit_cost(u.get("rarity")),     # 1-5 si se conoce, None si no
             "items": [_clean_id(n) for n in (u.get("itemNames") or [])],
         }
         for u in me.get("units", [])
@@ -242,6 +252,48 @@ _FUNDAMENTOS_TFT_EN = (
 _RUBRIC_LOL_EN = (
     "ASSESS specifically (cite the data): cs per minute vs the role standard, the KDA and damage to "
     "champions, the vision score, and team objective participation."
+)
+
+# Marco de análisis: el ORDEN de razonamiento de un analista pro, anclado a los campos
+# YA CALCULADOS (señales + comparativa). El modelo lo recorre y vuelca el resultado.
+_FRAMEWORK_TFT_ES = (
+    "MARCO DE ANÁLISIS (razónalo EN ESTE ORDEN como un analista profesional y vuelca el resultado en los "
+    "campos del informe; NO recites el marco ni lo numeres en la salida):\n"
+    "1. TEMPO: ¿el 'nivel' final encaja con el arquetipo de la comp? Cruza 'tempo' con los rasgos/unidades. "
+    "Quedarse corto de nivel en una comp de fast-8, o sobre-subir en una reroll, es un fallo de ritmo.\n"
+    "2. FUERZA DE TABLERO: usa 'unidades_2_estrellas_o_mas', 'unidades_3_estrellas' y 'unidades_coste_alto_4_5'. "
+    "Pocas 2★ a estas alturas = tablero débil. Compáralo SIEMPRE con la 'comparativa' del ganador.\n"
+    "3. ITEMIZACIÓN: usa 'carry_detectado' (items_de_dano, items_totales, le_faltan_items_para_3) e "
+    "'items_dano_fuera_del_carry'. Un carry sin sus 3 ítems, o ítems de daño en una unidad que no es el carry, "
+    "es de los mayores errores.\n"
+    "4. RASGOS: ¿breakpoints altos activos o muchos rasgos flojos? Usa 'rasgos_activos' y su nivel.\n"
+    "5. AUGMENTS: ¿encajan los 'augments' con la comp y el carry?\n"
+    "6. CONTEST/VARIANZA: usa 'unidades_contestadas' y 'mi_carry_contestada_por_2_o_mas'. Si tu carry estaba "
+    "contestada por 2+, NO subió de estrellas POR ESO (varianza/contest), no por una mala decisión; la lección "
+    "es leer el contest y pivotar a tiempo.\n"
+    "7. BRECHA CON EL 1.º: con la 'comparativa', di EXACTAMENTE cuánto te faltó (p. ej. «el 1.º tenía 2 unidades "
+    "de coste alto y su carry con 3 ítems; tú 0 y 1 ítem, y un nivel por debajo»). Esto va en 'comparison'.\n"
+    "8. ACIERTOS: nombra 1-3 cosas que hiciste bien con su dato → 'strengths'.\n"
+    "La palanca #1 (lo que más habría cambiado el puesto) abre 'top_3_actionable' y se refleja en 'summary'."
+)
+_FRAMEWORK_TFT_EN = (
+    "ANALYSIS FRAMEWORK (reason THROUGH IT IN THIS ORDER like a pro analyst and pour the result into the report "
+    "fields; do NOT recite or number the framework in the output):\n"
+    "1. TEMPO: does the final 'nivel' fit the comp's archetype? Cross 'tempo' with traits/units. Being "
+    "underleveled on a fast-8 comp, or over-leveling on a reroll, is a tempo mistake.\n"
+    "2. BOARD STRENGTH: use 'unidades_2_estrellas_o_mas', 'unidades_3_estrellas' and 'unidades_coste_alto_4_5'. "
+    "Few 2★ this late = weak board. ALWAYS compare against the winner via 'comparativa'.\n"
+    "3. ITEMIZATION: use 'carry_detectado' (items_de_dano, items_totales, le_faltan_items_para_3) and "
+    "'items_dano_fuera_del_carry'. A carry without its 3 items, or damage items on a non-carry unit, is a major error.\n"
+    "4. TRAITS: high active breakpoints or many weak traits? Use 'rasgos_activos' and its tier.\n"
+    "5. AUGMENTS: do the 'augments' fit the comp and the carry?\n"
+    "6. CONTEST/VARIANCE: use 'unidades_contestadas' and 'mi_carry_contestada_por_2_o_mas'. If your carry was "
+    "contested by 2+, it didn't star up FOR THAT REASON (variance/contest), not a bad decision; the lesson is to "
+    "read the contest and pivot in time.\n"
+    "7. GAP TO 1ST: with 'comparativa', say EXACTLY what you lacked (e.g. '1st had 2 high-cost units and a carry "
+    "with 3 items; you had 0 and 1 item, and one level lower'). This goes in 'comparison'.\n"
+    "8. STRENGTHS: name 1-3 things you did well with their data → 'strengths'.\n"
+    "The #1 lever (what would have changed the placement most) opens 'top_3_actionable' and is reflected in 'summary'."
 )
 
 
@@ -435,6 +487,14 @@ REPORT_SYSTEM = (
     "7. 'summary' explica la CAUSA RAÍZ de la colocación como cadena causal con datos reales (p. ej. «subiste a nivel 9 con "
     "4 de oro pero tu carry seguía a 1★: llegaste tarde y sin daño»). 'top_3_actionable' va ordenado por impacto: el primero "
     "es la palanca #1, la que más habría cambiado el resultado.\n"
+    "8. 'comparison' compara TU partida con la del 1.º usando los números de la 'comparativa' del lobby "
+    "(diferencia de nivel, 2★/3★, unidades de coste alto, ítems del carry): di en concreto cuánto te faltó y "
+    "dónde. Si no hay 'comparativa' en los datos, deja comparison en \"\".\n"
+    "9. 'strengths' lista 1-3 aciertos REALES con su dato (hasta en una derrota los hay: un 2★ clave, buena "
+    "itemización del carry, un breakpoint fuerte); solo vacío si de verdad no hay nada destacable.\n"
+    "10. La PROFUNDIDAD se logra CUBRIENDO cada dimensión real (tempo, fuerza de tablero, itemización, rasgos, "
+    "augments, contest, brecha con el 1.º), NUNCA inventando errores. Recorre el MARCO DE ANÁLISIS del prompt y "
+    "pronúnciate en cada dimensión donde haya algo verificable que decir.\n"
     "Devuelves SIEMPRE JSON válido conforme al esquema pedido y NADA más."
 )
 REPORT_SYSTEM_EN = (
@@ -457,6 +517,14 @@ REPORT_SYSTEM_EN = (
     "7. 'summary' explains the ROOT CAUSE of the placement as a causal chain with real data (e.g. 'you leveled to 9 with 4 "
     "gold but your carry was still 1-star: you arrived late and without damage'). 'top_3_actionable' is ordered by impact: "
     "the first is the #1 lever, the one that would have changed the result most.\n"
+    "8. 'comparison' contrasts YOUR game with 1st place using the lobby 'comparativa' numbers (level diff, "
+    "2★/3★, high-cost units, carry items): say specifically how much you lacked and where. If there is no "
+    "'comparativa' in the data, leave comparison as \"\".\n"
+    "9. 'strengths' lists 1-3 REAL things you did well with their data (even a loss has some: a key 2★, good "
+    "carry itemization, a strong breakpoint); only empty if there is genuinely nothing notable.\n"
+    "10. DEPTH comes from COVERING every real dimension (tempo, board strength, itemization, traits, augments, "
+    "contest, gap to 1st), NEVER from inventing errors. Walk the ANALYSIS FRAMEWORK in the prompt and speak to "
+    "each dimension where there is something verifiable to say.\n"
     "You ALWAYS reply with valid JSON matching the requested schema and NOTHING else."
 )
 
@@ -474,6 +542,8 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
         '  "mechanical_issues": [{"title": "...", "detail": "cs/trades/skillshots/cooldowns/itemización", "evidence": "frase clara con el dato", "severity": 3}],\n'
         '  "macro_issues": [{"title": "...", "detail": "rotaciones/visión/objetivos/tempo/nivel", "evidence": "frase clara con el dato o momento", "severity": 3}],\n'
         '  "mental_patterns": [{"pattern": "tilt|sobreextensión|pasividad", "detail": "...", "evidence": "solo si los datos lo soportan"}],\n'
+        '  "strengths": ["1-3 cosas que hiciste BIEN, cada una con su dato (no lo dejes vacío salvo que de verdad no haya nada)"],\n'
+        '  "comparison": "comparación CONCRETA con el Top 1 usando los números de comparativa (nivel, 2★/3★, unidades de coste alto, ítems del carry); en LoL, frente al estándar del rol",\n'
         '  "top_3_actionable": ["3 cosas concretas a entrenar esta semana"]\n'
         '}'
     )
@@ -526,6 +596,8 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
             if es else
             "DATA IN LoL: you have the summary + the timeline (deaths with timestamp and phase). Use those REAL "
             "timestamps to anchor evidence; don't invent moments not present in the data.")
+    if game == "tft":
+        blocks.append(_FRAMEWORK_TFT_ES if es else _FRAMEWORK_TFT_EN)
     guide = "\n\n".join(blocks)
     if not es:
         return (f"Analyze THIS match and produce DEEP, specific coaching grounded ONLY in the data below.\n\n"

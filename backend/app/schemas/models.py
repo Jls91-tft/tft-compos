@@ -68,6 +68,8 @@ class CoachingReport(BaseModel):
     mechanical_issues: list[CoachingIssue] = []
     macro_issues: list[CoachingIssue] = []
     mental_patterns: list[MentalPattern] = []
+    strengths: list[str] = []                             # qué hiciste bien (con dato concreto)
+    comparison: str = ""                                  # comparación con el Top 1 (TFT) / referencia del rol (LoL)
     top_3_actionable: list[str] = []
     # meta de caché (opcionales; las rellena el servidor)
     prompt_version: str = ""

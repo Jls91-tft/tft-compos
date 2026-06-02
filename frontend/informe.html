@@ -108,17 +108,21 @@ function reportHTML(report, match) {
       <div class="err-head"><h4>${m.pattern}</h4></div>
       <dl><dt>Detalle</dt><dd>${m.detail}</dd>${m.evidence ? `<dt>Evidencia</dt><dd style="color:var(--muted)">${m.evidence}</dd>` : ""}</dl></div>`).join("");
   const plan = (report.top_3_actionable || []).map((a, i) => `<li><span class="num">${i + 1}</span> ${a}</li>`).join("");
+  const comp = report.comparison ? `<div class="panel panel-compare"><h3>Comparación con el Top 1</h3><p style="margin:0;line-height:1.6">${report.comparison}</p></div>` : "";
+  const strong = (report.strengths || []).map(s => `<li>${s}</li>`).join("");
   return heroHTML(report, match) +
     `<div class="kpi-row">${kpis}</div>
      <div class="report-grid">
        <div class="col-main">
+         ${comp}
          ${dec ? `<div class="panel"><h3>Errores de decisión</h3>${dec}</div>` : ""}
          ${macro ? `<div class="panel"><h3>Macro (rotaciones, objetivos, tempo)</h3>${macro}</div>` : ""}
          ${mech ? `<div class="panel"><h3>Mecánica (cs, trades, itemización)</h3>${mech}</div>` : ""}
          ${mental ? `<div class="panel"><h3>Patrones mentales</h3>${mental}</div>` : ""}
-         ${!dec && !macro && !mech && !mental ? `<div class="panel"><p style="margin:0;color:var(--muted)">Partida limpia: la IA no detectó errores con evidencia suficiente.</p></div>` : ""}
+         ${!dec && !macro && !mech && !mental && !comp ? `<div class="panel"><p style="margin:0;color:var(--muted)">Partida limpia: la IA no detectó errores con evidencia suficiente.</p></div>` : ""}
        </div>
        <div class="col-side">
+         ${strong ? `<div class="panel"><h3>Lo que hiciste bien</h3><ul class="win-list">${strong}</ul></div>` : ""}
          ${plan ? `<div class="panel"><h3>Para entrenar esta semana</h3><ol class="action-list">${plan}</ol></div>` : ""}
        </div>
      </div>`;
