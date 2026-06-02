@@ -7,7 +7,7 @@ coaching sin tocar el resto del backend.
 import json
 from app.schemas.models import CoachingReport, ImprovementPlan
 
-PROMPT_VERSION = "report-v2.4-varianza-2026-06"   # sube esto al mejorar el prompt → invalida cachés
+PROMPT_VERSION = "report-v2.5-lobby-2026-06"   # sube esto al mejorar el prompt → invalida cachés
 PLAN_PROMPT_VERSION = "plan-v2-rigor-2026-06"
 
 # --- Voz del coach (system prompt) ---
@@ -494,7 +494,11 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
             "el jugador SÍ gastó recursos rolando/subiendo: NUNCA le acuses de 'no priorizar' ni de 'pasividad'. Una carry "
             "clave a 1★ con poco oro final suele ser VARIANZA o unidad contestada, NO un error de decisión; en ese caso da "
             "la lección de FUTURO (cuándo cortar pérdidas y estabilizar, transición alternativa, no sobre-rolar a nivel 9), "
-            "no un reproche."
+            "no un reproche. "
+            "LOBBY (úsalo SIEMPRE): 'unidades_contestadas' dice cuántos rivales jugaban tus mismas unidades — si tu carry "
+            "estaba contestada por 2 o más, ESA es la causa real de que no subiera de estrellas, y el aprendizaje es "
+            "reconocer el contest pronto y pivotar. 'ganador' es la comp del 1.º: compárate (nivel, carry y sus estrellas, "
+            "rasgos) y di en concreto qué hizo distinto que tú no."
             if es else
             "DATA AVAILABLE IN TFT: ONLY the FINAL state (board, final items, traits, augments, placement, level, "
             "last round, final gold). You have NO per-round history. Therefore: NEVER invent stages or rounds "
@@ -508,7 +512,11 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
             "high, the player DID spend resources rolling/leveling: NEVER accuse them of 'not prioritizing' or 'passivity'. "
             "A key carry at 1-star with low final gold is usually VARIANCE or a contested unit, NOT a decision error; give "
             "the FORWARD lesson (when to cut losses and stabilize, alternative transition, don't over-roll to level 9), not "
-            "a reproach.")
+            "a reproach. "
+            "LOBBY (always use it): 'unidades_contestadas' tells how many opponents fielded your same units — if your carry "
+            "was contested by 2+, THAT is the real reason it didn't star up, and the lesson is to recognize the contest early "
+            "and pivot. 'ganador' is the 1st-place comp: compare yourself (level, carry and its stars, traits) and say "
+            "specifically what they did differently that you didn't.")
     else:
         blocks.append(
             "DATOS EN LoL: tienes el resumen + la línea temporal (muertes con timestamp y fase). Usa esos timestamps "

@@ -41,7 +41,7 @@ async def list_matches(game: Game = "tft", riot_id: str = Query(default="", desc
     name, tag = _parse_riot_id(rid)
     try:
         puuid = await riot_client.get_puuid(name, tag)
-        ids = await riot_client.get_match_ids(puuid, game, count=8)
+        ids = await riot_client.get_match_ids(puuid, game, count=20)
         cards: list[MatchCard] = []
         for mid in ids:
             raw = await riot_client.get_match(mid, game)

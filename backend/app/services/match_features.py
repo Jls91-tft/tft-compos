@@ -69,14 +69,45 @@ def tft_signals(summary: dict) -> dict:
     }
 
 
+def tft_lobby(match: dict, puuid: str) -> dict:
+    """Señales del LOBBY (los 8 tableros finales): contest de tus unidades y comp del 1.º.
+
+    No cuesta llamadas extra (ya viene en el match). El contest explica por qué una
+    unidad no subió (la jugaban otros), y la comp del ganador es una referencia real.
+    """
+    clean = lambda s: (s or "").split("_")[-1]  # noqa: E731
+    parts = match.get("info", {}).get("participants", [])
+    me = next((p for p in parts if p.get("puuid") == puuid), {})
+    my_cids = {(u.get("character_id") or "") for u in me.get("units", []) if u.get("character_id")}
+    contest = []
+    for cid in my_cids:
+        rivals = sum(1 for p in parts if p is not me and any(u.get("character_id") == cid for u in p.get("units", [])))
+        if rivals > 0:
+            contest.append({"unidad": clean(cid), "rivales_con_ella": rivals})
+    contest.sort(key=lambda x: -x["rivales_con_ella"])
+    win = next((p for p in parts if p.get("placement") == 1), None)
+    ganador = None
+    if win:
+        wunits = win.get("units", [])
+        wcarry = max(wunits, key=lambda u: len(u.get("itemNames") or []), default=None)
+        ganador = {
+            "nivel": win.get("level"),
+            "carry": (None if not wcarry else {"unidad": clean(wcarry.get("character_id")),
+                                               "estrellas": wcarry.get("tier"),
+                                               "items": [clean(i) for i in (wcarry.get("itemNames") or [])]}),
+            "rasgos": [clean(t.get("name")) for t in win.get("traits", []) if t.get("tier_current", 0) > 0][:6],
+        }
+    return {"tamano_lobby": len(parts), "unidades_contestadas": contest[:6], "ganador": ganador}
+
+
 def enrich(game: str, match: dict, summary: dict, puuid: str, timeline: dict | None) -> dict:
     """summary (de extract_summary) + hechos calculados según el juego."""
     if game == "lol":
         if timeline:
             return {**summary, "linea_temporal": _lol_timeline(match, puuid, timeline)}
         return summary
-    # TFT: sin timeline; añadimos señales derivadas del estado final
-    return {**summary, "señales": tft_signals(summary)}
+    # TFT: sin timeline; añadimos señales del estado final + señales del lobby (8 tableros)
+    return {**summary, "señales": tft_signals(summary), "lobby": tft_lobby(match, puuid)}
 
 
 def metrics_for(game: str, summary: dict) -> list[dict]:
