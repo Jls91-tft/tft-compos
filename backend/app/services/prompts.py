@@ -7,7 +7,7 @@ coaching sin tocar el resto del backend.
 import json
 from app.schemas.models import CoachingReport, ImprovementPlan
 
-PROMPT_VERSION = "report-v2.2-rubrica-2026-06"   # sube esto al mejorar el prompt → invalida cachés
+PROMPT_VERSION = "report-v2.3-senales-2026-06"   # sube esto al mejorar el prompt → invalida cachés
 PLAN_PROMPT_VERSION = "plan-v1-2026-06"
 
 # --- Voz del coach (system prompt) ---
@@ -417,6 +417,12 @@ REPORT_SYSTEM = (
     "con ítems de daño; si ninguna los lleva, ESO es el hallazgo.\n"
     "4. El oro_sobrante es el del FINAL de la partida: terminar con poco oro es NORMAL y no es un fallo de economía.\n"
     "5. Sé crítico aunque la colocación sea buena: di qué la separó del 1.º. No fabriques errores para rellenar; listas vacías son válidas.\n"
+    "6. decision_errors, macro_issues y mechanical_issues deben ser hallazgos DISTINTOS: NUNCA repitas el mismo problema "
+    "en varias secciones. Si solo hay un problema real, repórtalo UNA vez en la sección que mejor encaje y deja vacías las "
+    "demás. Profundidad sobre rellenar secciones.\n"
+    "7. 'summary' explica la CAUSA RAÍZ de la colocación como cadena causal con datos reales (p. ej. «subiste a nivel 9 con "
+    "4 de oro pero tu carry seguía a 1★: llegaste tarde y sin daño»). 'top_3_actionable' va ordenado por impacto: el primero "
+    "es la palanca #1, la que más habría cambiado el resultado.\n"
     "Devuelves SIEMPRE JSON válido conforme al esquema pedido y NADA más."
 )
 REPORT_SYSTEM_EN = (
@@ -433,6 +439,12 @@ REPORT_SYSTEM_EN = (
     "items; if none carry them, THAT is the finding.\n"
     "4. leftover gold is the END-of-game value: finishing with little gold is NORMAL, not an economy mistake.\n"
     "5. Be critical even if the placement is good: say what separated it from 1st. Don't fabricate errors; empty lists are fine.\n"
+    "6. decision_errors, macro_issues and mechanical_issues must be DISTINCT findings: NEVER repeat the same problem across "
+    "sections. If there's only one real problem, report it ONCE in the section that fits best and leave the others empty. "
+    "Depth over filling sections.\n"
+    "7. 'summary' explains the ROOT CAUSE of the placement as a causal chain with real data (e.g. 'you leveled to 9 with 4 "
+    "gold but your carry was still 1-star: you arrived late and without damage'). 'top_3_actionable' is ordered by impact: "
+    "the first is the #1 lever, the one that would have changed the result most.\n"
     "You ALWAYS reply with valid JSON matching the requested schema and NOTHING else."
 )
 
@@ -465,14 +477,16 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
             "ítems es el estado final, no un evento con hora). En 'timestamp' pon null. Los augments SOLO existen en "
             "2-1, 3-2 y 4-2; si 'aumentos' está vacío puede ser un modo sin augments — NO es un fallo. Ancla cada "
             "hallazgo a un hecho VERIFICABLE del tablero final (unidad y sus estrellas/ítems, rasgo y su nivel, "
-            "augments, nivel frente al arquetipo)."
+            "augments, nivel frente al arquetipo). Tienes un bloque 'señales' con hechos YA CALCULADOS (reparto de ítems "
+            "de daño, estrellas, huecos de tablero, carry detectado): ÚSALO para ser concreto y no divagar."
             if es else
             "DATA AVAILABLE IN TFT: ONLY the FINAL state (board, final items, traits, augments, placement, level, "
             "last round, final gold). You have NO per-round history. Therefore: NEVER invent stages or rounds "
             "('4-1', '6-1') nor claim WHEN you got a unit or item (whether a unit has items is the final state, not "
             "a timed event). Set 'timestamp' to null. Augments ONLY exist at 2-1, 3-2 and 4-2; if 'augments' is empty "
             "it may be a no-augment mode — NOT a mistake. Anchor every finding to a VERIFIABLE fact of the final board "
-            "(unit and its stars/items, trait and its tier, augments, level vs archetype).")
+            "(unit and its stars/items, trait and its tier, augments, level vs archetype). You have a 'señales' block with "
+            "PRECOMPUTED facts (damage-item spread, stars, empty board slots, detected carry): USE IT to be concrete.")
     else:
         blocks.append(
             "DATOS EN LoL: tienes el resumen + la línea temporal (muertes con timestamp y fase). Usa esos timestamps "
