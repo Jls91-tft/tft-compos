@@ -309,38 +309,39 @@ async function loadPlan(regenerate) {
   const badge = document.getElementById("plan-badge");
   badge.textContent = "";
   if (!lastMatches.length) { try { lastMatches = await API.matches(currentGame); } catch (e) {} }
-  let pending = await refreshAnalyzed();
+  await refreshAnalyzed();
 
-  // Todo al día y no forzamos: plan cacheado directo, sin re-llamar al LLM.
-  if (pending <= 0 && !regenerate) {
-    host.innerHTML = loadingHTML("Cargando tu plan…");
-    try {
-      const p = await API.plan(currentGame, false);
-      host.innerHTML = planHTML(p);
-      if (p.new_matches > 0)
-        badge.innerHTML = `${p.new_matches} partidas nuevas sin incluir · <a href="#" onclick="loadPlan(true);return false;">regenerar</a>`;
-    } catch (e) { host.innerHTML = errorHTML(e); }
-    return;
-  }
-
-  // Hay partidas sin analizar o con análisis antiguo: las completamos POR TANDAS
-  // (cada llamada al backend regenera unas pocas, suave con el rate limit del motor gratis).
-  let plan = null, round = 0;
-  const maxRounds = 12;
-  while (round < maxRounds) {
-    round++;
-    const before = pending, total = lastMatches.length;
+  // Partidas pendientes (sin informe o con análisis antiguo). Las generamos DE UNA EN
+  // UNA: cada informe es una petición HTTP corta, así nunca disparamos el 504 del proxy
+  // (un solo /plan que generase varias a la vez se pasaba del límite de tiempo).
+  const pend = lastMatches.filter(m => { const s = analyzedMap[m.id]; return !s || s.stale; });
+  let done = 0, stopped = false, stopMsg = "";
+  for (const m of pend) {
     host.innerHTML = loadingHTML(
-      `Analizando tus partidas con el motor nuevo… ${total - pending}/${total} al día. ` +
-      `Con el modelo grande en gratis esto puede tardar varios minutos; no cierres la página.`);
-    try { plan = await API.plan(currentGame, true); }
-    catch (e) { host.innerHTML = errorHTML(e); return; }
-    pending = await refreshAnalyzed();
-    if (pending <= 0 || pending >= before) break;   // terminado, o tanda sin avance (motor saturado)
+      `Analizando partida ${done + 1} de ${pend.length} con el motor nuevo… ` +
+      `cada informe tarda unos segundos; puedes dejar esto en segundo plano.`);
+    try {
+      await API.report(currentGame, m.id, true);
+      done++;
+      await refreshAnalyzed();
+    } catch (e) {
+      stopped = true; stopMsg = e.message || ""; break;   // saturado/timeout: paramos y montamos el plan con lo que haya
+    }
   }
-  if (plan) host.innerHTML = planHTML(plan);
-  if (pending > 0)
-    badge.innerHTML = `Quedan ${pending} por actualizar (límite del motor gratis). ` +
+
+  // Plan global: a estas alturas los informes ya están cacheados → 1 sola llamada corta.
+  const needsFreshPlan = done > 0 || regenerate;
+  host.innerHTML = loadingHTML("Montando tu plan de mejora global…");
+  try {
+    const p = await API.plan(currentGame, needsFreshPlan);
+    host.innerHTML = planHTML(p);
+    if (!needsFreshPlan && p.new_matches > 0)
+      badge.innerHTML = `${p.new_matches} partidas nuevas sin incluir · <a href="#" onclick="loadPlan(true);return false;">regenerar</a>`;
+  } catch (e) { host.innerHTML = errorHTML(e); return; }
+
+  const remaining = pendingCount();
+  if (remaining > 0)
+    badge.innerHTML = `Quedan ${remaining} por actualizar${stopped ? " (motor gratis saturado, espera ~1 min)" : ""}. ` +
       `<a href="#" onclick="loadPlan(true);return false;">continuar</a>`;
   else
     badge.textContent = "Todas al día ✓";

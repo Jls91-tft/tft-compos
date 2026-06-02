@@ -77,15 +77,17 @@ class OllamaClient:
         if extra_headers:
             headers.update(extra_headers)
         # 70B/DeepSeek razonan más despacio: timeout amplio.
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            for attempt in range(4):
+        async with httpx.AsyncClient(timeout=90.0) as client:
+            for attempt in range(3):
                 try:
                     r = await client.post(url, json=payload, headers=headers)
                 except httpx.HTTPError as e:
                     raise OllamaError(f"No se pudo contactar con {label}. Revisa la API key / el modelo. Detalle: {e}")
-                if r.status_code == 429:  # rate limit del free tier → espera (Retry-After) y reintenta
-                    if attempt < 3:
-                        wait = min(float(r.headers.get("retry-after", 2 ** attempt)), 20)
+                if r.status_code == 429:  # rate limit del free tier → espera un poco y reintenta
+                    # Backoff CORTO a propósito: si está saturado preferimos fallar rápido con un
+                    # mensaje claro (502) antes que arrastrar la petición hasta un 504 del proxy.
+                    if attempt < 2:
+                        wait = min(float(r.headers.get("retry-after", 2 ** attempt)), 8)
                         await asyncio.sleep(wait)
                         continue
                     raise OllamaError(
