@@ -5,6 +5,7 @@ resumen que la IA pueda analizar. Centralizarlo facilita iterar la calidad del
 coaching sin tocar el resto del backend.
 """
 import json
+import re
 from app.schemas.models import CoachingReport, ImprovementPlan
 
 PROMPT_VERSION = "report-v3-analista-2026-06"   # sube esto al mejorar el prompt/motor → invalida cachés
@@ -616,6 +617,8 @@ def _loads_lenient(raw: str) -> dict:
     """json.loads tolerante: algunos modelos (DeepSeek, Nemotron…) envuelven el JSON en
     ```json ... ``` o anteponen texto. Caemos al primer objeto { ... } del texto."""
     s = (raw or "").strip()
+    # modelos "reasoning" (Nemotron, R1…) a veces anteponen <think>...</think>
+    s = re.sub(r"<think>.*?</think>", "", s, flags=re.DOTALL).strip()
     try:
         return json.loads(s)
     except Exception:
