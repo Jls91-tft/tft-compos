@@ -95,12 +95,15 @@ async def _ensure_recent_analyzed(game: str, riot_id: str, lang: str) -> list[di
     from app.services.ollama_client import OllamaError
     generated = 0
     for mid in ids:
-        if report_store.get_report(user_key, game, mid):
-            continue
         if generated >= settings.plan_autoanalyze:
             break
+        existing = report_store.get_report(user_key, game, mid)
+        # Al día (versión de prompt/motor actual) → no lo tocamos. Sin informe o
+        # con un análisis ANTIGUO (otra versión) → lo (re)generamos con el motor nuevo.
+        if existing and existing.get("prompt_version") == prompts.PROMPT_VERSION:
+            continue
         try:
-            await generate_report(game, mid, rid, lang)
+            await generate_report(game, mid, rid, lang, regenerate=bool(existing))
             generated += 1
             await asyncio.sleep(0.8)   # suaviza la ráfaga para el rate limit de Groq
         except OllamaError:

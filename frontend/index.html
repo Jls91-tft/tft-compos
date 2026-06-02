@@ -280,25 +280,70 @@ async function renderCoaching() {
   try {
     lastMatches = await API.matches(currentGame);
     try { analyzedMap = await API.analyzed(currentGame); } catch (e) { analyzedMap = {}; }
-    const done = lastMatches.filter(m => analyzedMap[m.id]).length;
-    const counter = document.getElementById("match-counter");
-    if (counter) counter.textContent = lastMatches.length ? `${done}/${lastMatches.length} analizadas` : "";
+    updateMatchCounter();
     host.innerHTML = lastMatches.length ? lastMatches.map(matchCardHTML).join("") : `<div class="empty">No hay partidas recientes.</div>`;
   } catch (e) { host.innerHTML = errorHTML(e); }
+}
+/* Partidas pendientes = sin informe o con análisis antiguo (otra versión del motor). */
+function pendingCount() {
+  return lastMatches.filter(m => { const s = analyzedMap[m.id]; return !s || s.stale; }).length;
+}
+function updateMatchCounter() {
+  const counter = document.getElementById("match-counter");
+  if (!counter) return;
+  const total = lastMatches.length;
+  counter.textContent = total ? `${total - pendingCount()}/${total} al día` : "";
+}
+/* Re-lee el estado de análisis y repinta tarjetas + contador. Devuelve nº pendientes. */
+async function refreshAnalyzed() {
+  try { analyzedMap = await API.analyzed(currentGame); } catch (e) {}
+  const host = document.getElementById("match-grid");
+  if (host && lastMatches.length) host.innerHTML = lastMatches.map(matchCardHTML).join("");
+  updateMatchCounter();
+  return pendingCount();
 }
 
 /* ---------- Plan de mejora global (multi-partida) ---------- */
 async function loadPlan(regenerate) {
   const host = document.getElementById("plan-body");
-  document.getElementById("plan-badge").textContent = "";
-  host.innerHTML = loadingHTML(regenerate ? "Regenerando tu plan…" : "Analizando tus partidas… la primera vez puede tardar ~1 min");
-  try {
-    const p = await API.plan(currentGame, !!regenerate);
-    host.innerHTML = planHTML(p);
-    if (p.new_matches > 0)
-      document.getElementById("plan-badge").innerHTML =
-        `${p.new_matches} partidas nuevas sin incluir · <a href="#" onclick="loadPlan(true);return false;">regenerar</a>`;
-  } catch (e) { host.innerHTML = errorHTML(e); }
+  const badge = document.getElementById("plan-badge");
+  badge.textContent = "";
+  if (!lastMatches.length) { try { lastMatches = await API.matches(currentGame); } catch (e) {} }
+  let pending = await refreshAnalyzed();
+
+  // Todo al día y no forzamos: plan cacheado directo, sin re-llamar al LLM.
+  if (pending <= 0 && !regenerate) {
+    host.innerHTML = loadingHTML("Cargando tu plan…");
+    try {
+      const p = await API.plan(currentGame, false);
+      host.innerHTML = planHTML(p);
+      if (p.new_matches > 0)
+        badge.innerHTML = `${p.new_matches} partidas nuevas sin incluir · <a href="#" onclick="loadPlan(true);return false;">regenerar</a>`;
+    } catch (e) { host.innerHTML = errorHTML(e); }
+    return;
+  }
+
+  // Hay partidas sin analizar o con análisis antiguo: las completamos POR TANDAS
+  // (cada llamada al backend regenera unas pocas, suave con el rate limit del motor gratis).
+  let plan = null, round = 0;
+  const maxRounds = 12;
+  while (round < maxRounds) {
+    round++;
+    const before = pending, total = lastMatches.length;
+    host.innerHTML = loadingHTML(
+      `Analizando tus partidas con el motor nuevo… ${total - pending}/${total} al día. ` +
+      `Con el modelo grande en gratis esto puede tardar varios minutos; no cierres la página.`);
+    try { plan = await API.plan(currentGame, true); }
+    catch (e) { host.innerHTML = errorHTML(e); return; }
+    pending = await refreshAnalyzed();
+    if (pending <= 0 || pending >= before) break;   // terminado, o tanda sin avance (motor saturado)
+  }
+  if (plan) host.innerHTML = planHTML(plan);
+  if (pending > 0)
+    badge.innerHTML = `Quedan ${pending} por actualizar (límite del motor gratis). ` +
+      `<a href="#" onclick="loadPlan(true);return false;">continuar</a>`;
+  else
+    badge.textContent = "Todas al día ✓";
 }
 function planHTML(p) {
   const rw = (p.recurring_weaknesses || []).map(w =>
