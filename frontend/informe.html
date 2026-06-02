@@ -97,16 +97,16 @@ function reportHTML(report, match) {
   const phaseTag = (p) => p ? `<span class="tag tag-neutral" style="font-size:11px">${({ early: "Early", mid: "Mid", late: "Late" })[p] || p}</span>` : "";
   const dec = (report.decision_errors || []).map(e => `<div class="err">
       <div class="err-head"><h4>${e.timestamp ? `<span style="color:var(--accent-2)">${e.timestamp}</span> · ` : ""}${e.what_happened}</h4><span style="display:flex;gap:6px;align-items:center">${phaseTag(e.phase)}${sevTag(e.severity)}</span></div>
-      <dl><dt>Por qué falló</dt><dd>${e.why_wrong}</dd><dt class="fix">Qué hacer</dt><dd class="fix">${e.better_action}</dd><dt>Evidencia</dt><dd style="color:var(--muted)">${e.evidence || ""}</dd></dl>
+      <dl><dt>Por qué falló</dt><dd>${e.why_wrong}</dd><dt class="fix">Qué hacer</dt><dd class="fix">${e.better_action}</dd>${e.evidence ? `<dt>Evidencia</dt><dd style="color:var(--muted)">${e.evidence}</dd>` : ""}</dl>
     </div>`).join("");
   const issuesHTML = (arr) => (arr || []).map(i => `<div class="err">
       <div class="err-head"><h4>${i.title}</h4>${i.severity ? sevTag(i.severity) : ""}</div>
-      <dl><dt>Detalle</dt><dd>${i.detail}</dd><dt>Evidencia</dt><dd style="color:var(--muted)">${i.evidence || ""}</dd></dl></div>`).join("");
+      <dl><dt>Detalle</dt><dd>${i.detail}</dd>${i.evidence ? `<dt>Evidencia</dt><dd style="color:var(--muted)">${i.evidence}</dd>` : ""}</dl></div>`).join("");
   const macro = issuesHTML(report.macro_issues);
   const mech = issuesHTML(report.mechanical_issues);
   const mental = (report.mental_patterns || []).map(m => `<div class="err">
       <div class="err-head"><h4>${m.pattern}</h4></div>
-      <dl><dt>Detalle</dt><dd>${m.detail}</dd><dt>Evidencia</dt><dd style="color:var(--muted)">${m.evidence || ""}</dd></dl></div>`).join("");
+      <dl><dt>Detalle</dt><dd>${m.detail}</dd>${m.evidence ? `<dt>Evidencia</dt><dd style="color:var(--muted)">${m.evidence}</dd>` : ""}</dl></div>`).join("");
   const plan = (report.top_3_actionable || []).map((a, i) => `<li><span class="num">${i + 1}</span> ${a}</li>`).join("");
   return heroHTML(report, match) +
     `<div class="kpi-row">${kpis}</div>

@@ -7,7 +7,7 @@ coaching sin tocar el resto del backend.
 import json
 from app.schemas.models import CoachingReport, ImprovementPlan
 
-PROMPT_VERSION = "report-v2-estructurado-2026-06"   # sube esto al mejorar el prompt → invalida cachés
+PROMPT_VERSION = "report-v2.1-evidencia-2026-06"   # sube esto al mejorar el prompt → invalida cachés
 PLAN_PROMPT_VERSION = "plan-v1-2026-06"
 
 # --- Voz del coach (system prompt) ---
@@ -408,7 +408,10 @@ REPORT_SYSTEM = (
     "Hablas español, directo y sin paja.\n"
     "REGLAS INNEGOCIABLES:\n"
     "1. CADA hallazgo se apoya en un dato concreto del payload (unidad, rasgo y su nivel, augment, ítem, ronda, "
-    "oro, nivel, o un timestamp de la línea temporal) citado LITERALMENTE en su campo 'evidence'. Sin evidencia → no se incluye.\n"
+    "oro, nivel o un timestamp). El campo 'evidence' es una FRASE BREVE y CLARA en lenguaje natural que nombra ese dato y su valor "
+    "(p. ej. «terminaste sin augments» o «tu carry Fizz no llevaba ítems de daño»); PROHIBIDO copiar el JSON crudo o nombres de campos "
+    "como 'aumentos: []' o 'unidades: [...]'. Sin evidencia clara → no incluyas el hallazgo. Un campo vacío puede significar que ese "
+    "dato no existe en este modo: no lo conviertas en error sin más.\n"
     "2. PROHIBIDO el consejo genérico ('mejora tu visión', 'gestiona recursos') si no va con un dato y una acción medible.\n"
     "3. El rol de una unidad lo definen sus ÍTEMS: nunca trates a un tanque como carry. En TFT el carry es la unidad "
     "con ítems de daño; si ninguna los lleva, ESO es el hallazgo.\n"
@@ -421,7 +424,10 @@ REPORT_SYSTEM_EN = (
     "You speak English, direct and with no filler.\n"
     "NON-NEGOTIABLE RULES:\n"
     "1. EVERY finding is backed by a concrete data point from the payload (unit, trait and its tier, augment, item, "
-    "round, gold, level, or a timeline timestamp) quoted LITERALLY in its 'evidence' field. No evidence → don't include it.\n"
+    "round, gold, level or a timeline timestamp). The 'evidence' field is a SHORT, CLEAR natural-language phrase naming that data and "
+    "its value (e.g. 'you finished with no augments' or 'your carry Fizz had no damage items'); FORBIDDEN: copying raw JSON or field "
+    "names like 'augments: []'. No clear evidence → don't include the finding. An empty field may mean that data doesn't exist in this "
+    "mode: don't turn it into a mistake on its own.\n"
     "2. FORBIDDEN: generic advice ('improve your vision', 'manage resources') without a data point and a measurable action.\n"
     "3. A unit's role is defined by its ITEMS: never treat a tank as a carry. In TFT the carry is the unit with damage "
     "items; if none carry them, THAT is the finding.\n"
@@ -440,9 +446,9 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
     schema = (
         '{\n'
         '  "summary": "1-2 frases: qué definió la partida (anclado a datos)",\n'
-        '  "decision_errors": [{"timestamp": "12:30 o Etapa 4-1", "phase": "early|mid|late", "what_happened": "...", "why_wrong": "...", "better_action": "...", "severity": 4, "evidence": "cita un timestamp o stat del payload"}],\n'
-        '  "mechanical_issues": [{"title": "...", "detail": "cs/trades/skillshots/cooldowns/itemización", "evidence": "stat concreto", "severity": 3}],\n'
-        '  "macro_issues": [{"title": "...", "detail": "rotaciones/visión/objetivos/tempo/nivel", "evidence": "stat o timestamp", "severity": 3}],\n'
+        '  "decision_errors": [{"timestamp": "12:30 o Etapa 4-1", "phase": "early|mid|late", "what_happened": "...", "why_wrong": "...", "better_action": "...", "severity": 4, "evidence": "frase breve y clara con el dato; NO copies el JSON ni nombres de campos"}],\n'
+        '  "mechanical_issues": [{"title": "...", "detail": "cs/trades/skillshots/cooldowns/itemización", "evidence": "frase clara con el dato", "severity": 3}],\n'
+        '  "macro_issues": [{"title": "...", "detail": "rotaciones/visión/objetivos/tempo/nivel", "evidence": "frase clara con el dato o momento", "severity": 3}],\n'
         '  "mental_patterns": [{"pattern": "tilt|sobreextensión|pasividad", "detail": "...", "evidence": "solo si los datos lo soportan"}],\n'
         '  "top_3_actionable": ["3 cosas concretas a entrenar esta semana"]\n'
         '}'
