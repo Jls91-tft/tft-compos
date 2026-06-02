@@ -41,6 +41,7 @@ const API = {
   },
 
   matches(game) { return this._get(`/coaching/matches?${this._q({ game })}`); },
+  analyzed(game) { return this._get(`/coaching/analyzed/${game}?${this._q({})}`); },
   report(game, id, regenerate = false) { return this._get(`/coaching/report/${game}/${encodeURIComponent(id)}?${this._q({ lang: this.lang(), regenerate })}`); },
   plan(game, regenerate = false) { return this._get(`/coaching/plan/${game}?${this._q({ lang: this.lang(), regenerate })}`); },
   stats(game) { return this._get(`/stats?${this._q({ game })}`); },

@@ -6,7 +6,7 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.models import MatchCard, CoachingReport, ImprovementPlan, Game
-from app.services import coaching_engine, riot_parser
+from app.services import coaching_engine, riot_parser, report_store, prompts
 from app.services.riot_client import riot_client, RiotApiError
 from app.services.ollama_client import OllamaError
 from app.core.config import settings
@@ -50,6 +50,25 @@ async def list_matches(game: Game = "tft", riot_id: str = Query(default="", desc
         return cards
     except RiotApiError as e:
         raise _riot_error(e)
+
+
+@router.get("/analyzed/{game}")
+async def analyzed(game: Game, riot_id: str = Query(default="", description="Nombre#TAG")):
+    """Estado de análisis por partida: {match_id: {analyzed, stale, model, generated_at}}.
+    Permite al frontend marcar qué partidas ya tienen informe (y cuáles están caducadas)."""
+    if settings.use_mock:
+        return {}
+    rid = riot_id or settings.default_riot_id
+    status = report_store.analyzed_status(report_store.norm_key(rid), game)
+    return {
+        mid: {
+            "analyzed": True,
+            "stale": meta.get("prompt_version") != prompts.PROMPT_VERSION,
+            "model": meta.get("model", ""),
+            "generated_at": meta.get("generated_at", ""),
+        }
+        for mid, meta in status.items()
+    }
 
 
 @router.get("/report/{game}/{match_id}", response_model=CoachingReport)

@@ -25,7 +25,7 @@ async def generate_report(game: str, match_id: str, riot_id: str = "", lang: str
             return cached
 
     from app.services.riot_client import riot_client, RiotApiError
-    from app.services.ollama_client import ollama_client, OllamaError
+    from app.services.ollama_client import ollama_client, OllamaError, current_model
 
     if not riot_id or "#" not in riot_id:
         raise RiotApiError(400, "Riot ID requerido (Nombre#TAG) para el coaching real")
@@ -42,7 +42,7 @@ async def generate_report(game: str, match_id: str, riot_id: str = "", lang: str
     summary = prompts.extract_summary(game, match, puuid)
     payload = match_features.enrich(game, match, summary, puuid, timeline)
     base = {"game": game, "match_id": match_id, "metrics": match_features.metrics_for(game, summary)}
-    model = settings.groq_model if settings.llm_provider == "groq" else settings.ollama_model
+    model = current_model()
     system = prompts.system_report(lang)
     prompt = prompts.build_report_prompt_v2(game, payload, lang)
 
@@ -128,9 +128,9 @@ async def build_improvement_plan(game: str, riot_id: str = "", lang: str = "es",
     if not reports:
         raise RiotApiError(400, "No hay partidas que analizar. Configura tu Riot ID (Nombre#TAG).")
 
-    from app.services.ollama_client import ollama_client, OllamaError
+    from app.services.ollama_client import ollama_client, OllamaError, current_model
     aggregate = _aggregate(reports)
-    model = settings.groq_model if settings.llm_provider == "groq" else settings.ollama_model
+    model = current_model()
     base = {"game": game, "based_on_match_ids": analyzed_ids, "new_matches": 0}
 
     plan, last_err = None, ""

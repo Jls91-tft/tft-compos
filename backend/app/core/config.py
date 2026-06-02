@@ -20,12 +20,19 @@ class Settings(BaseSettings):
     http_timeout: float = 15.0
     riot_max_concurrency: int = 5
 
-    # --- IA: proveedor configurable (ollama local | groq API) ---
-    llm_provider: str = "ollama"      # "ollama" | "groq"
+    # --- IA: proveedor configurable (ollama local | groq | openrouter) ---
+    # Todos hablan API estilo OpenAI salvo Ollama. Cambia LLM_PROVIDER en el .env.
+    llm_provider: str = "ollama"      # "ollama" | "groq" | "openrouter"
     ollama_host: str = "http://ollama:11434"
     ollama_model: str = "llama3.1:8b"
-    groq_api_key: str = ""            # clave gratuita en https://console.groq.com
-    groq_model: str = "llama-3.1-8b-instant"
+    # Groq (https://console.groq.com): 8b-instant = rápido; 70b-versatile = mucha más calidad (free).
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.3-70b-versatile"
+    # OpenRouter (https://openrouter.ai): acceso free a DeepSeek V4 Flash, Nemotron, etc.
+    # Copia el slug EXACTO del modelo desde https://openrouter.ai/models (varía con el tiempo).
+    openrouter_api_key: str = ""
+    openrouter_model: str = "deepseek/deepseek-chat-v3-0324:free"
+    llm_temperature: float = 0.4
 
     # --- Aplicación ---
     cors_origins: list[str] = [

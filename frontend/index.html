@@ -94,7 +94,7 @@
           <span id="plan-badge" style="font-size:13px;color:var(--muted);"></span>
         </div>
         <div id="plan-body" style="margin-bottom:26px;"></div>
-        <h2 class="section-title">Tus partidas recientes <span style="font-size:13px;font-weight:500;color:var(--muted);">— elige una para ver su coaching</span></h2>
+        <h2 class="section-title">Tus partidas recientes <span style="font-size:13px;font-weight:500;color:var(--muted);">— elige una para ver su coaching</span> <span id="match-counter" class="match-counter"></span></h2>
         <div class="match-grid" id="match-grid"></div>
       </section>
 
@@ -255,14 +255,22 @@ function renderPlan(game) {
         <div class="prog"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><div class="lbl">Aplicado en <b>${f.done}/${f.total}</b> partidas</div></div></div>`;
     }).join("");
 }
+let analyzedMap = {};
+function analyzeBadge(m) {
+  const st = analyzedMap[m.id];
+  if (!st) return `<span class="an-badge an-no" title="Aún no has generado el coaching de esta partida">Sin analizar</span>`;
+  if (st.stale) return `<span class="an-badge an-stale" title="Analizada con una versión anterior del coach. Regenera para el análisis nuevo.">Análisis antiguo</span>`;
+  return `<span class="an-badge an-ok" title="Coaching ya generado">Analizada</span>`;
+}
 function matchCardHTML(m) {
   const r = resultInfo(m);
   const pill = { gold: "res-gold", good: "res-win", mid: "res-mid", bad: "res-loss" }[r.cls];
   const body = `<h3>${m.title}</h3><div class="match-meta">${Object.entries(m.meta || {}).map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>`;
-  return `<div class="match-card">
-    <div class="match-top"><span class="result-pill ${pill}">${r.label}</span></div>
+  const analyzed = !!analyzedMap[m.id];
+  return `<div class="match-card${analyzed ? " is-analyzed" : ""}">
+    <div class="match-top"><span class="result-pill ${pill}">${r.label}</span>${analyzeBadge(m)}</div>
     <div class="match-body">${body}</div>
-    <button class="btn btn-ghost btn-sm" onclick="openReport('${m.game}','${encodeURIComponent(m.id)}')">Ver coaching →</button>
+    <button class="btn btn-ghost btn-sm" onclick="openReport('${m.game}','${encodeURIComponent(m.id)}')">${analyzed ? "Ver coaching →" : "Generar coaching →"}</button>
   </div>`;
 }
 async function renderCoaching() {
@@ -271,6 +279,10 @@ async function renderCoaching() {
   host.innerHTML = loadingHTML("Cargando tus partidas…");
   try {
     lastMatches = await API.matches(currentGame);
+    try { analyzedMap = await API.analyzed(currentGame); } catch (e) { analyzedMap = {}; }
+    const done = lastMatches.filter(m => analyzedMap[m.id]).length;
+    const counter = document.getElementById("match-counter");
+    if (counter) counter.textContent = lastMatches.length ? `${done}/${lastMatches.length} analizadas` : "";
     host.innerHTML = lastMatches.length ? lastMatches.map(matchCardHTML).join("") : `<div class="empty">No hay partidas recientes.</div>`;
   } catch (e) { host.innerHTML = errorHTML(e); }
 }

@@ -107,6 +107,28 @@ def latest_reports(user_key, game, limit: int) -> list[dict]:
     return out
 
 
+def analyzed_status(user_key, game) -> dict[str, dict]:
+    """Mapa {match_id: {prompt_version, model, generated_at}} de los informes ya
+    generados (el más reciente por partida). Ligero: NO carga el JSON del informe."""
+    with _lock:
+        rows = _db().execute(
+            """SELECT r.match_id, r.prompt_version, r.model, r.generated_at
+               FROM match_reports r
+               JOIN (SELECT match_id, MAX(id) AS mid FROM match_reports
+                     WHERE user_key=? AND game=? AND status='ok' GROUP BY match_id) m
+               ON r.id = m.mid""",
+            (user_key, game),
+        ).fetchall()
+    return {
+        row["match_id"]: {
+            "prompt_version": row["prompt_version"] or "",
+            "model": row["model"] or "",
+            "generated_at": row["generated_at"] or "",
+        }
+        for row in rows
+    }
+
+
 # ----------------------------- Planes -----------------------------
 def get_plan(user_key, game) -> dict | None:
     with _lock:

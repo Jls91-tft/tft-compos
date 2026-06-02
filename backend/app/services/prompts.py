@@ -7,8 +7,8 @@ coaching sin tocar el resto del backend.
 import json
 from app.schemas.models import CoachingReport, ImprovementPlan
 
-PROMPT_VERSION = "report-v2.5-lobby-2026-06"   # sube esto al mejorar el prompt → invalida cachés
-PLAN_PROMPT_VERSION = "plan-v3-cluster-2026-06"
+PROMPT_VERSION = "report-v2.6-motor70b-2026-06"   # sube esto al mejorar el prompt/motor → invalida cachés
+PLAN_PROMPT_VERSION = "plan-v3.1-motor70b-2026-06"
 
 # --- Voz del coach (system prompt) ---
 COACH_SYSTEM = (
