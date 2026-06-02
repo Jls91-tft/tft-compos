@@ -7,7 +7,7 @@ coaching sin tocar el resto del backend.
 import json
 from app.schemas.models import CoachingReport, ImprovementPlan
 
-PROMPT_VERSION = "report-v2.3-senales-2026-06"   # sube esto al mejorar el prompt → invalida cachés
+PROMPT_VERSION = "report-v2.4-varianza-2026-06"   # sube esto al mejorar el prompt → invalida cachés
 PLAN_PROMPT_VERSION = "plan-v1-2026-06"
 
 # --- Voz del coach (system prompt) ---
@@ -478,7 +478,13 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
             "2-1, 3-2 y 4-2; si 'aumentos' está vacío puede ser un modo sin augments — NO es un fallo. Ancla cada "
             "hallazgo a un hecho VERIFICABLE del tablero final (unidad y sus estrellas/ítems, rasgo y su nivel, "
             "augments, nivel frente al arquetipo). Tienes un bloque 'señales' con hechos YA CALCULADOS (reparto de ítems "
-            "de daño, estrellas, huecos de tablero, carry detectado): ÚSALO para ser concreto y no divagar."
+            "de daño, estrellas, huecos de tablero, carry detectado): ÚSALO para ser concreto. "
+            "REGLA DE VARIANZA (clave): NO tienes datos de tienda, oro gastado ni rivales, así que NO puedes saber si una "
+            "unidad quedó a 1★ por no rolar o porque NO salió o estaba contestada. Si el oro_final es bajo y el nivel alto, "
+            "el jugador SÍ gastó recursos rolando/subiendo: NUNCA le acuses de 'no priorizar' ni de 'pasividad'. Una carry "
+            "clave a 1★ con poco oro final suele ser VARIANZA o unidad contestada, NO un error de decisión; en ese caso da "
+            "la lección de FUTURO (cuándo cortar pérdidas y estabilizar, transición alternativa, no sobre-rolar a nivel 9), "
+            "no un reproche."
             if es else
             "DATA AVAILABLE IN TFT: ONLY the FINAL state (board, final items, traits, augments, placement, level, "
             "last round, final gold). You have NO per-round history. Therefore: NEVER invent stages or rounds "
@@ -486,7 +492,13 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
             "a timed event). Set 'timestamp' to null. Augments ONLY exist at 2-1, 3-2 and 4-2; if 'augments' is empty "
             "it may be a no-augment mode — NOT a mistake. Anchor every finding to a VERIFIABLE fact of the final board "
             "(unit and its stars/items, trait and its tier, augments, level vs archetype). You have a 'señales' block with "
-            "PRECOMPUTED facts (damage-item spread, stars, empty board slots, detected carry): USE IT to be concrete.")
+            "PRECOMPUTED facts (damage-item spread, stars, empty board slots, detected carry): USE IT to be concrete. "
+            "VARIANCE RULE (key): you have NO shop/gold-spent/opponent data, so you CANNOT know if a unit stayed 1-star "
+            "because the player didn't roll or because it didn't show up / was contested. If final gold is low and level is "
+            "high, the player DID spend resources rolling/leveling: NEVER accuse them of 'not prioritizing' or 'passivity'. "
+            "A key carry at 1-star with low final gold is usually VARIANCE or a contested unit, NOT a decision error; give "
+            "the FORWARD lesson (when to cut losses and stabilize, alternative transition, don't over-roll to level 9), not "
+            "a reproach.")
     else:
         blocks.append(
             "DATOS EN LoL: tienes el resumen + la línea temporal (muertes con timestamp y fase). Usa esos timestamps "
