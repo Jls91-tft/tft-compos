@@ -31,9 +31,10 @@ class Settings(BaseSettings):
     # OpenRouter (https://openrouter.ai): acceso free a DeepSeek V4 Flash, Nemotron, etc.
     # Copia el slug EXACTO del modelo desde https://openrouter.ai/models (varía con el tiempo).
     openrouter_api_key: str = ""
-    # DeepSeek V4 Flash NO tiene tier gratis (solo de pago). El modelo gratis más potente
-    # verificado en OpenRouter es Nemotron 3 Super (120B, con razonamiento).
-    openrouter_model: str = "nvidia/nemotron-3-super-120b-a12b:free"
+    # Modelo gratis para coaching. OJO al límite de 100s de Cloudflare: el 120B de Nemotron
+    # (razonamiento) iba demasiado lento → 524. Kimi K2.6 da buena calidad y es más rápido.
+    # Alternativa aún más rápida si hiciera falta: google/gemma-4-31b-it:free.
+    openrouter_model: str = "moonshotai/kimi-k2.6:free"
     llm_temperature: float = 0.4
 
     # --- Aplicación ---
