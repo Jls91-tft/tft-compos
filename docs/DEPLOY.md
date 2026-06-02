@@ -61,6 +61,22 @@ TUNNEL_TOKEN=...            # del paso 5
 2. **Policy** *Allow* → regla **Emails** con los correos de tus beta testers.
 3. Login por One-time PIN (email) o Google. Solo esos correos entran.
 
+### 6.1 Home pública + app protegida (estructura actual)
+La home (`/`, `index.html`) es **pública** (marketing). El dashboard y las funcionalidades
+viven en `app.html` y el resto de páginas, y van **detrás de Access**. Por eso, en lugar de
+proteger todo el dominio (como en el paso 1 de arriba), en la aplicación de Access añade
+**solo estas rutas** y deja `/` y `/assets/` fuera (públicas):
+
+```
+/app.html   /informe.html   /perfil.html   /lab.html   /lol-campeon.html   /guia-comp.html
+/api/        ← IMPORTANTE: protégela también o la API queda abierta
+```
+
+- La **policy Allow con los emails** de quien paga sigue igual. Cuando alguien pague → añades su correo.
+- El botón **"Acceder"** de la home apunta a `app.html`: al pulsarlo, Access pide el login.
+- Requisitos para usar Access: un **dominio gestionado en Cloudflare** + **túnel con nombre**
+  (el quick tunnel `trycloudflare.com` NO soporta Access; solo vale para pruebas sin login).
+
 ## 7. Riot API Key
 - Registra el producto en https://developer.riotgames.com y solicita la **Production API Key** (gratis; no caduca como la *dev key*).
 

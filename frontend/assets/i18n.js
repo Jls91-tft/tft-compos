@@ -29,6 +29,56 @@
     "Secciones": "Sections",
     "Juego": "Game",
     "Idioma / Language": "Language",
+
+    // ───────── Home / Landing ─────────
+    "Funciones": "Features",
+    "Cómo funciona": "How it works",
+    "Acceso": "Access",
+    "Acceder": "Sign in",
+    "Coaching IA · TFT y LoL": "AI Coaching · TFT & LoL",
+    "Tu coach personal de IA,": "Your personal AI coach,",
+    "partida a partida": "game by game",
+    "Synapse analiza cada partida que juegas, te dice exactamente qué falló, lo compara con quien ganó y te da un plan accionable para subir. Deja de adivinar por qué pierdes.":
+      "Synapse analyzes every game you play, tells you exactly what went wrong, compares it with the winner and gives you an actionable plan to climb. Stop guessing why you lose.",
+    "Empezar ahora": "Get started",
+    "Ver cómo funciona": "See how it works",
+    "Análisis tras cada partida · Comparación con el Top 1 · Plan de mejora global":
+      "Analysis after every game · Comparison with 1st place · Global improvement plan",
+    "Lo que hace Synapse": "What Synapse does",
+    "El coaching tras cada partida es el diferencial. Las estadísticas y la meta son el complemento.":
+      "Per-match coaching is the differentiator. Stats and meta are the complement.",
+    "Coaching tras cada partida": "Coaching after every game",
+    "Errores de decisión, fallos de macro y mecánica, y la causa raíz real de tu resultado — anclado a los datos de TU partida, no a consejos genéricos.":
+      "Decision errors, macro and mechanics mistakes, and the real root cause of your result — anchored to YOUR match data, not generic advice.",
+    "Comparación con quien ganó": "Comparison with the winner",
+    "Te decimos en concreto cuánto te faltó: nivel, fuerza de tablero e itemización en TFT; o frente a tu rival de línea en LoL.":
+      "We tell you exactly what you lacked: level, board strength and itemization in TFT; or vs your lane opponent in LoL.",
+    "Plan de mejora global": "Global improvement plan",
+    "Cruzamos todas tus partidas para detectar tus patrones recurrentes y darte un roadmap medible: esta semana, este mes y los próximos meses.":
+      "We cross all your games to detect recurring patterns and give you a measurable roadmap: this week, this month and the coming months.",
+    "Estadísticas y meta": "Stats and meta",
+    "Tu rendimiento de un vistazo y la meta del parche, para tomar decisiones con datos en lugar de intuición.":
+      "Your performance at a glance and the patch meta, to make data-driven decisions instead of guessing.",
+    "Conecta tu Riot ID": "Connect your Riot ID",
+    "Introduce tu Nombre#TAG. Leemos tus partidas con la API oficial de Riot.":
+      "Enter your Name#TAG. We read your games with the official Riot API.",
+    "La IA analiza cada partida": "The AI analyzes every game",
+    "Genera un informe profundo con tus errores, la comparación con el ganador y tus aciertos.":
+      "It generates a deep report with your mistakes, the comparison with the winner and what you did well.",
+    "Aplicas el plan y subes": "Apply the plan and climb",
+    "Entrenas lo que de verdad mueve la aguja, partida a partida.":
+      "You train what actually moves the needle, game by game.",
+    "Acceso a la beta": "Beta access",
+    "Estamos en beta cerrada, afinando el coaching con jugadores reales.":
+      "We're in closed beta, refining the coaching with real players.",
+    "Beta cerrada": "Closed beta",
+    "Por invitación": "Invite only",
+    "Coaching IA tras cada partida, sin límite": "AI coaching after every game, unlimited",
+    "Comparación con el Top 1 y plan de mejora global": "Comparison with 1st place and global improvement plan",
+    "Estadísticas de tu rendimiento y meta del parche": "Your performance stats and the patch meta",
+    "Acceso prioritario a las novedades": "Priority access to new features",
+    "Si aún no tienes acceso, escríbenos para entrar en la beta.":
+      "Don't have access yet? Write to us to join the beta.",
     "Marca propia, no afiliada a los titulares de los juegos.":
       "Own brand, not affiliated with the games' owners.",
     "Arquetipos, objetos y runas genéricos en la maqueta. Marca propia, no afiliada a los titulares de los juegos.":

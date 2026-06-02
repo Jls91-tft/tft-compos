@@ -7,7 +7,8 @@ App de producción. Reutiliza el diseño validado en la Etapa 1 y consume la API
 ## Estructura
 ```
 frontend/
-├── index.html        # App: Coaching (partidas) · Estadísticas · Meta
+├── index.html        # Home pública (landing/marketing) — sin login
+├── app.html          # App (tras Cloudflare Access): Coaching · Estadísticas · Meta
 ├── informe.html      # Informe de coaching (?game=&id=) + chat del coach
 ├── guia-comp.html    # Guía de comp (con tablero de posicionamiento)
 └── assets/

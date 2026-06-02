@@ -4,56 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Synapse — Coaching IA para TFT y LoL</title>
+<meta name="description" content="Synapse analiza cada partida de TFT y LoL con IA: te dice qué falló, lo compara con quien ganó y te da un plan para subir.">
 <link rel="stylesheet" href="assets/synapse.css">
 <style>
-  /* Dashboard bento (tema Tenue, sin emojis). El shell/topbar viene de synapse.css */
-  /* Bento */
-  .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-  .dcard{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow-sm);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;}
-  .dcard::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:var(--grad);opacity:0;transition:opacity .2s ease;}
-  .dcard:hover{transform:translateY(-3px);border-color:var(--border-soft);box-shadow:var(--shadow-lg);}
-  .dcard:hover::before{opacity:1;}
-  .dcard h3{margin:0 0 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);}
-  .s2{grid-column:span 2;}
-  /* Hero última partida */
-  .last{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
-  .last .badge{width:60px;height:60px;border-radius:15px;display:grid;place-items:center;font-weight:800;font-size:20px;flex-shrink:0;}
-  .badge.gold{color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,transparent);}
-  .badge.good{color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent);}
-  .badge.mid{color:var(--warn);background:color-mix(in srgb,var(--warn) 15%,transparent);}
-  .badge.bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,transparent);}
-  .last .mid{flex:1;min-width:200px;} .last .when{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
-  .last .t{font-size:16px;font-weight:800;margin-top:3px;} .last .v{font-size:13.5px;color:var(--muted);margin-top:4px;line-height:1.5;}
-  /* Score */
-  .score{display:flex;align-items:center;gap:16px;}
-  .ring{position:relative;width:108px;height:108px;flex-shrink:0;}
-  .ring .n{position:absolute;inset:0;display:grid;place-content:center;text-align:center;}
-  .ring .n b{font-size:34px;font-weight:850;letter-spacing:-1px;} .ring .n small{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;}
-  .delta{display:inline-block;font-size:12.5px;font-weight:800;padding:4px 10px;border-radius:999px;}
-  .delta.up{color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent);}
-  .delta.down{color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,transparent);}
-  /* Foco */
-  .dfocus .ft{font-size:17px;font-weight:850;margin-bottom:4px;letter-spacing:-.3px;}
-  .dfocus .d{color:var(--muted);font-size:13px;margin-bottom:12px;}
-  .dprog{height:11px;border-radius:99px;background:var(--bg);border:1px solid var(--border);overflow:hidden;} .dprog i{display:block;height:100%;background:var(--grad);}
-  .dfocus small{color:var(--muted);font-size:12.5px;display:block;margin-top:10px;} .dfocus small b{color:var(--text);}
-  /* Radar */
-  .radar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
-  .radar svg{flex-shrink:0;}
-  .radar .legend .k{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);margin-bottom:7px;} .radar .legend .sw{width:13px;height:4px;border-radius:2px;}
-  .radar .weak{font-size:12.5px;margin-top:6px;} .radar .weak b{color:var(--warn);}
-  /* Sesiones */
-  .ses{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border-soft);} .ses:last-child{border-bottom:0;}
-  .ses .res{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-weight:800;font-size:15px;flex-shrink:0;}
-  .res.gold{color:var(--gold);background:color-mix(in srgb,var(--gold) 15%,transparent);} .res.good{color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent);} .res.mid{color:var(--warn);background:color-mix(in srgb,var(--warn) 15%,transparent);} .res.bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,transparent);}
-  .ses .info{flex:1;min-width:0;} .ses .info b{font-size:14px;font-weight:700;} .ses .info small{display:block;color:var(--muted);font-size:12.5px;}
-  .ses .go{border:1px solid var(--border);background:transparent;color:var(--accent);font:inherit;font-weight:800;font-size:12.5px;padding:8px 13px;border-radius:10px;cursor:pointer;} .ses .go:hover{border-color:var(--accent);}
-  /* Objetivo */
-  .goal .g-rank{font-size:18px;font-weight:850;letter-spacing:-.3px;margin-bottom:2px;} .goal .g-sub{font-size:12.5px;color:var(--muted);margin-bottom:12px;}
-  .goal .g-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:700;margin-top:8px;} .goal .g-row b{color:var(--text);}
-  @media(max-width:1080px){ .bento{grid-template-columns:repeat(2,1fr);} .s2{grid-column:auto;} }
-  @media(max-width:860px){ main{padding:24px 16px 70px;} }
-  @media(max-width:560px){ .bento{grid-template-columns:1fr;} .s2{grid-column:auto;} }
+  /* Landing (tema Tenue, sin emojis). Reutiliza tokens y .btn de synapse.css */
+  .btn-lg{padding:14px 26px;font-size:15px;border-radius:14px;}
+  main{max-width:1120px;margin:0 auto;padding:0 20px 80px;}
+  .lp-hero{text-align:center;padding:80px 0 56px;}
+  .lp-eyebrow{display:inline-block;font-size:12.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);padding:6px 14px;border-radius:var(--r-pill);}
+  .lp-hero h1{font-size:clamp(34px,6vw,58px);font-weight:850;letter-spacing:-1.5px;line-height:1.05;margin:22px auto 0;max-width:760px;}
+  .lp-hero h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .lp-sub{font-size:clamp(16px,2.2vw,19px);color:var(--muted);line-height:1.6;max-width:620px;margin:20px auto 0;}
+  .lp-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:32px;}
+  .lp-trust{margin-top:30px;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.2px;}
+  .lp-section{padding:56px 0;}
+  .lp-alt{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:var(--r-lg);}
+  .lp-h2{text-align:center;font-size:clamp(26px,4vw,36px);font-weight:850;letter-spacing:-.8px;margin:0 0 8px;}
+  .lp-h2-sub{text-align:center;color:var(--muted);font-size:15px;margin:0 auto 40px;max-width:560px;line-height:1.6;}
+  .lp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:36px;}
+  .lp-card{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:26px;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;}
+  .lp-card::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:var(--grad);opacity:0;transition:opacity .2s ease;}
+  .lp-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:var(--shadow-lg);}
+  .lp-card:hover::before{opacity:1;}
+  .lp-card h3{margin:0 0 10px;font-size:19px;font-weight:800;letter-spacing:-.3px;}
+  .lp-card p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.6;}
+  .lp-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px;}
+  .lp-step{text-align:center;padding:10px;}
+  .lp-num{display:inline-grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--grad);color:#0A0C12;font-weight:850;font-size:19px;margin-bottom:14px;}
+  .lp-step h3{margin:0 0 8px;font-size:17px;font-weight:800;}
+  .lp-step p{margin:0;color:var(--muted);font-size:14px;line-height:1.55;}
+  .lp-pricing{display:flex;justify-content:center;margin-top:36px;}
+  .lp-plan{position:relative;width:min(420px,100%);background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 8%,var(--surface)),var(--surface));border:1px solid color-mix(in srgb,var(--accent) 35%,var(--border));border-radius:20px;padding:32px;text-align:center;box-shadow:var(--shadow-lg);}
+  .lp-plan-tag{display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);padding:5px 13px;border-radius:var(--r-pill);}
+  .lp-price{font-size:30px;font-weight:850;letter-spacing:-.5px;margin:16px 0 6px;}
+  .lp-feat{list-style:none;margin:18px 0 24px;padding:0;text-align:left;display:flex;flex-direction:column;gap:11px;}
+  .lp-feat li{position:relative;padding-left:26px;font-size:14.5px;color:var(--text);line-height:1.45;}
+  .lp-feat li::before{content:"✓";position:absolute;left:0;top:0;color:#22B86B;font-weight:800;}
+  .lp-note{margin:16px 0 0;font-size:13px;color:var(--muted);line-height:1.5;}
+  .lp-footer{max-width:1120px;margin:0 auto;padding:32px 20px 48px;border-top:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;}
+  .lp-footer .brand{margin-bottom:4px;}
+  .lp-footer p{margin:0;color:var(--muted);font-size:12.5px;}
+  @media(max-width:780px){ .lp-grid{grid-template-columns:1fr;} .lp-steps{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
@@ -63,397 +54,99 @@
       <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="9" cy="11" r="3.4" fill="#7C5CFC"/><circle cx="23" cy="9" r="2.4" fill="#22B8CF"/><circle cx="22" cy="23" r="3" fill="#B0A0FF"/><circle cx="10" cy="23" r="2" fill="#7C5CFC"/><path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#7C5CFC" stroke-width="1.4" stroke-opacity=".55"/></svg>
       <span class="name">Synapse</span>
     </div>
-    <div class="game-switch" role="group" aria-label="Seleccionar juego">
-      <button id="btn-tft" aria-pressed="true" onclick="setGame('tft')">TFT</button>
-      <button id="btn-lol" aria-pressed="false" onclick="setGame('lol')">LoL</button>
-    </div>
     <nav class="main-nav" aria-label="Secciones">
-      <button class="navlink" data-view="resumen" aria-current="page" onclick="showView('resumen')">Resumen</button>
-      <button class="navlink is-primary" data-view="coaching" onclick="showView('coaching')">Coaching <span class="pill-ia">IA</span></button>
-      <button class="navlink" data-view="stats" onclick="showView('stats')">Estadísticas</button>
-      <button class="navlink" data-view="meta" onclick="showView('meta')">Meta</button>
-      <a class="navlink" href="lab.html">Lab</a>
-      <a class="navlink" href="perfil.html">Perfil</a>
+      <a class="navlink" href="#features">Funciones</a>
+      <a class="navlink" href="#como">Cómo funciona</a>
+      <a class="navlink" href="#acceso">Acceso</a>
     </nav>
-    <input class="riot-input" id="riot-input" placeholder="Tu Riot ID (Nombre#TAG)" aria-label="Tu Riot ID" autocomplete="off">
-    <span class="avatar">N</span>
+    <a class="btn btn-primary" href="app.html">Acceder</a>
   </header>
 
   <main id="main">
-      <!-- RESUMEN (dashboard) -->
-      <section id="view-resumen" class="view" aria-label="Resumen"></section>
+    <section class="lp-hero">
+      <span class="lp-eyebrow">Coaching IA · TFT y LoL</span>
+      <h1>Tu coach personal de IA, <span class="grad">partida a partida</span></h1>
+      <p class="lp-sub">Synapse analiza cada partida que juegas, te dice exactamente qué falló, lo compara con quien ganó y te da un plan accionable para subir. Deja de adivinar por qué pierdes.</p>
+      <div class="lp-cta">
+        <a class="btn btn-primary btn-lg" href="app.html">Empezar ahora</a>
+        <a class="btn btn-ghost btn-lg" href="#como">Ver cómo funciona</a>
+      </div>
+      <div class="lp-trust">Análisis tras cada partida · Comparación con el Top 1 · Plan de mejora global</div>
+    </section>
 
-      <!-- COACHING -->
-      <section id="view-coaching" class="view" aria-label="Coaching" hidden>
-        <p class="eyebrow">Coaching IA · lo que nos diferencia</p>
-        <h1 class="title">Mejora partida a partida</h1>
-        <p class="subtitle">Analizamos cada partida terminada y te decimos qué hiciste bien, qué falló y qué hacer la próxima vez. Consejos accionables.</p>
-        <div class="plan" id="plan"></div>
-        <div style="margin:18px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="loadPlan(false)">Analizar todas mis partidas</button>
-          <span id="plan-badge" style="font-size:13px;color:var(--muted);"></span>
+    <section id="features" class="lp-section">
+      <h2 class="lp-h2">Lo que hace Synapse</h2>
+      <p class="lp-h2-sub">El coaching tras cada partida es el diferencial. Las estadísticas y la meta son el complemento.</p>
+      <div class="lp-grid">
+        <article class="lp-card">
+          <h3>Coaching tras cada partida</h3>
+          <p>Errores de decisión, fallos de macro y mecánica, y la causa raíz real de tu resultado — anclado a los datos de TU partida, no a consejos genéricos.</p>
+        </article>
+        <article class="lp-card">
+          <h3>Comparación con quien ganó</h3>
+          <p>Te decimos en concreto cuánto te faltó: nivel, fuerza de tablero e itemización en TFT; o frente a tu rival de línea en LoL.</p>
+        </article>
+        <article class="lp-card">
+          <h3>Plan de mejora global</h3>
+          <p>Cruzamos todas tus partidas para detectar tus patrones recurrentes y darte un roadmap medible: esta semana, este mes y los próximos meses.</p>
+        </article>
+        <article class="lp-card">
+          <h3>Estadísticas y meta</h3>
+          <p>Tu rendimiento de un vistazo y la meta del parche, para tomar decisiones con datos en lugar de intuición.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="como" class="lp-section lp-alt">
+      <h2 class="lp-h2">Cómo funciona</h2>
+      <div class="lp-steps">
+        <div class="lp-step">
+          <span class="lp-num">1</span>
+          <h3>Conecta tu Riot ID</h3>
+          <p>Introduce tu Nombre#TAG. Leemos tus partidas con la API oficial de Riot.</p>
         </div>
-        <div id="plan-body" style="margin-bottom:26px;"></div>
-        <h2 class="section-title">Tus partidas recientes <span style="font-size:13px;font-weight:500;color:var(--muted);">— elige una para ver su coaching</span> <span id="match-counter" class="match-counter"></span></h2>
-        <div class="match-grid" id="match-grid"></div>
-      </section>
+        <div class="lp-step">
+          <span class="lp-num">2</span>
+          <h3>La IA analiza cada partida</h3>
+          <p>Genera un informe profundo con tus errores, la comparación con el ganador y tus aciertos.</p>
+        </div>
+        <div class="lp-step">
+          <span class="lp-num">3</span>
+          <h3>Aplicas el plan y subes</h3>
+          <p>Entrenas lo que de verdad mueve la aguja, partida a partida.</p>
+        </div>
+      </div>
+    </section>
 
-      <!-- ESTADÍSTICAS -->
-      <section id="view-stats" class="view" aria-label="Estadísticas personales" hidden>
-        <p class="eyebrow" id="stats-eyebrow">Sección complementaria · TFT</p>
-        <h1 class="title">Estadísticas personales</h1>
-        <p class="subtitle">Tu rendimiento de un vistazo: tendencias, comps favoritas y dónde ganas (o pierdes) puntos.</p>
-        <div id="stats-body"></div>
-      </section>
+    <section id="acceso" class="lp-section">
+      <h2 class="lp-h2">Acceso a la beta</h2>
+      <p class="lp-h2-sub">Estamos en beta cerrada, afinando el coaching con jugadores reales.</p>
+      <div class="lp-pricing">
+        <div class="lp-plan">
+          <span class="lp-plan-tag">Beta cerrada</span>
+          <div class="lp-price">Por invitación</div>
+          <ul class="lp-feat">
+            <li>Coaching IA tras cada partida, sin límite</li>
+            <li>Comparación con el Top 1 y plan de mejora global</li>
+            <li>Estadísticas de tu rendimiento y meta del parche</li>
+            <li>Acceso prioritario a las novedades</li>
+          </ul>
+          <a class="btn btn-primary btn-lg" href="app.html">Acceder</a>
+          <p class="lp-note">Si aún no tienes acceso, escríbenos para entrar en la beta.</p>
+        </div>
+      </div>
+    </section>
+  </main>
 
-      <!-- META -->
-      <section id="view-meta" class="view" aria-label="Meta del parche" hidden>
-        <p class="eyebrow" id="meta-eyebrow">Sección complementaria · TFT</p>
-        <h1 class="title">Meta del parche</h1>
-        <p class="subtitle">Las comps con mejor rendimiento ahora mismo, ordenadas por tier. Filtra y abre la guía de cada una.</p>
-        <div id="meta-body"></div>
-      </section>
-    </main>
-
-  <div class="analyzing" id="analyzing" role="status" aria-live="polite">
-    <div class="box">
-      <div class="ai-orb" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#7C5CFC"/></svg></div>
-      <h3>Analizando tu partida…</h3>
-      <ul class="an-steps" id="an-steps">
-        <li><span class="mk">1</span> Leyendo el desarrollo del combate</li>
-        <li><span class="mk">2</span> Detectando errores y aciertos</li>
-        <li><span class="mk">3</span> Redactando tu informe</li>
-      </ul>
+  <footer class="lp-footer">
+    <div class="brand" aria-label="Synapse">
+      <svg class="logo" width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="9" cy="11" r="3.4" fill="#7C5CFC"/><circle cx="23" cy="9" r="2.4" fill="#22B8CF"/><circle cx="22" cy="23" r="3" fill="#B0A0FF"/><circle cx="10" cy="23" r="2" fill="#7C5CFC"/><path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#7C5CFC" stroke-width="1.4" stroke-opacity=".55"/></svg>
+      <span class="name">Synapse</span>
     </div>
-  </div>
-
-  <footer>
-    <div>Synapse — Coaching IA y estadísticas para auto-battler y MOBA</div>
-    <div class="legal">Marca propia genérica. No está afiliada, asociada ni respaldada por los titulares de los juegos.</div>
+    <p>Marca propia, no afiliada a los titulares de los juegos.</p>
+    <p>© 2026 Synapse</p>
   </footer>
 
-<script src="assets/charts.js"></script>
-<script src="assets/api.js"></script>
-<script>
-let currentGame = "tft", currentView = "resumen", lastMatches = [];
-
-const PLAN = {
-  tft: { updated: "Actualizado tras tu última partida", focuses: [
-    { t: "Subir de nivel a tiempo en la etapa 3", b: "Marcado en 3 de tus últimos informes.", done: 4, total: 6 },
-    { t: "Proteger al portador del asesino", b: "Foco nuevo desde tu partida de hoy.", done: 1, total: 5 }]},
-  lol: { updated: "Actualizado tras tu última partida", focuses: [
-    { t: "Jugar alrededor de los timers de objetivos", b: "Foco recurrente en jungla.", done: 3, total: 6 },
-    { t: "No entrar sin visión a la jungla rival", b: "Foco nuevo desde tu derrota de hoy.", done: 2, total: 5 }]},
-};
-const COST = { 1: "#9AA4B2", 2: "#3FB950", 3: "#58A6FF", 4: "#B061FF", 5: "#E3B341" };
-
-const loadingHTML = (t) => `<div class="loading"><span class="spinner"></span> ${t}</div>`;
-const errorHTML = (e) => `<div class="error-box"><b>No se pudieron cargar los datos.</b><br>${e.message}<br><span style="color:var(--muted)">Comprueba el backend, o que <code>USE_MOCK=true</code> / tu Riot ID esté configurado.</span></div>`;
-
-/* ---------- Navegación ---------- */
-function setGame(g) {
-  currentGame = g;
-  document.getElementById("btn-tft").setAttribute("aria-pressed", g === "tft");
-  document.getElementById("btn-lol").setAttribute("aria-pressed", g === "lol");
-  loadView(currentView);
-}
-function showView(v) {
-  currentView = v;
-  ["resumen", "coaching", "stats", "meta"].forEach(x => document.getElementById("view-" + x).hidden = (x !== v));
-  document.querySelectorAll(".navlink[data-view]").forEach(b => {
-    if (b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
-  });
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  loadView(v);
-}
-function loadView(v) {
-  if (v === "resumen") renderResumen();
-  else if (v === "coaching") renderCoaching();
-  else if (v === "stats") renderStats();
-  else renderMeta();
-}
-
-/* ---------- Resumen (dashboard) ---------- */
-function resultInfo(m) {
-  if (m.game === "tft") {
-    const pl = parseInt(m.result, 10);
-    if (pl === 1) return { short: "1º", label: "1.er puesto", cls: "gold" };
-    if (pl <= 4) return { short: pl + "º", label: "Top 4", cls: "good" };
-    return { short: pl + "º", label: pl + ".º puesto", cls: "mid" };
-  }
-  return m.result === "win" ? { short: "V", label: "Victoria", cls: "good" } : { short: "L", label: "Derrota", cls: "bad" };
-}
-const metaLine = (m, n) => Object.entries(m.meta || {}).slice(0, n).map(([k, v]) => `${k} ${v}`).join(" · ");
-function sessionRow(m) {
-  const r = resultInfo(m);
-  return `<div class="ses"><span class="res ${r.cls}">${r.short}</span><div class="info"><b>${m.title}</b><small>${metaLine(m, 2)}</small></div>
-    <button class="go" onclick="openReport('${m.game}','${encodeURIComponent(m.id)}')">Ver coaching →</button></div>`;
-}
-function renderRadar(hostId, axes, you, avg) {
-  const cx = 90, cy = 84, R = 64, n = axes.length;
-  const pt = (i, v) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n, r = R * v / 100; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
-  let g = "";
-  [50, 100].forEach(f => { g += `<polygon points="${axes.map((_, i) => pt(i, f).join(",")).join(" ")}" fill="none" stroke="var(--border)"/>`; });
-  axes.forEach((_, i) => { const [x, y] = pt(i, 100); g += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--border)"/>`; });
-  g += `<polygon points="${avg.map((v, i) => pt(i, v).join(",")).join(" ")}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
-  g += `<polygon points="${you.map((v, i) => pt(i, v).join(",")).join(" ")}" fill="rgba(124,92,252,.22)" stroke="var(--accent)" stroke-width="2.5"/>`;
-  const el = document.getElementById(hostId);
-  if (el) el.innerHTML = `<svg viewBox="0 0 180 168" width="170" height="158" xmlns="http://www.w3.org/2000/svg">${g}</svg>`;
-}
-async function renderResumen() {
-  const host = document.getElementById("view-resumen");
-  host.innerHTML = loadingHTML("Cargando tu resumen…");
-  let matches = [], gpi = null;
-  try { matches = await API.matches(currentGame); } catch (e) {}
-  try { gpi = await API.labGpi(currentGame); } catch (e) {}
-  lastMatches = matches;
-  const you = (gpi && gpi.you) || [], avg = (gpi && gpi.avg) || [], axes = (gpi && gpi.axes) || [];
-  const mean = (a) => a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length) : 0;
-  const score = mean(you) || 72, delta = (mean(you) || 72) - (mean(avg) || 63);
-  const circ = 2 * Math.PI * 46, dash = Math.round(circ * score / 100);
-  let weakTxt = "";
-  if (you.length) { let wi = 0; you.forEach((v, i) => { if (v < you[wi]) wi = i; }); weakTxt = `${axes[wi]} (${you[wi]})`; }
-  const f = PLAN[currentGame].focuses[0], pct = Math.round(f.done / f.total * 100);
-  const last = matches[0];
-  const heroHTML = last ? (() => { const r = resultInfo(last);
-    return `<span class="badge ${r.cls}">${r.short}</span><div class="mid"><div class="when">Tu última partida</div>
-      <div class="t">${last.title}</div><div class="v">${r.label} · ${metaLine(last, 3)}</div></div>
-      <button class="btn btn-primary" onclick="openReport('${last.game}','${encodeURIComponent(last.id)}')">Ver coaching completo →</button>`;
-  })() : `<div class="mid"><div class="when">Tu última partida</div><div class="t">Aún no hay partidas</div><div class="v">Escribe tu Riot ID arriba para ver tu última partida y su coaching.</div></div>`;
-  const sesHTML = matches.slice(0, 3).map(sessionRow).join("") || `<div class="empty">No hay partidas recientes.</div>`;
-
-  host.innerHTML = `<div class="bento">
-    <div class="dcard last s2">${heroHTML}</div>
-    <div class="dcard"><h3>Synapse Score</h3>
-      <div class="score">
-        <div class="ring"><svg width="108" height="108" viewBox="0 0 108 108"><circle cx="54" cy="54" r="46" fill="none" stroke="var(--bg)" stroke-width="11"/><circle cx="54" cy="54" r="46" fill="none" stroke="url(#sg)" stroke-width="11" stroke-linecap="round" stroke-dasharray="${dash} ${Math.round(circ)}" transform="rotate(-90 54 54)"/><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C5CFC"/><stop offset="1" stop-color="#22B8CF"/></linearGradient></defs></svg><div class="n"><b>${score}</b><small>/100</small></div></div>
-        <div><span class="delta ${delta >= 0 ? "up" : "down"}">${delta >= 0 ? "+" : ""}${delta} vs media</span></div>
-      </div></div>
-    <div class="dcard dfocus s2"><h3>Foco de la semana</h3>
-      <div class="ft">${f.t}</div><div class="d">${f.b}</div>
-      <div class="dprog"><i style="width:${pct}%"></i></div>
-      <small>Aplicado en <b>${f.done} de ${f.total}</b> partidas</small></div>
-    <div class="dcard"><h3>Perfil de habilidades</h3>
-      <div class="radar"><div class="radar-host" id="rs-radar"></div>
-        <div><div class="legend"><span class="k"><span class="sw" style="background:var(--accent)"></span> Tú</span><span class="k"><span class="sw" style="background:var(--muted)"></span> Media rango</span></div>
-        ${weakTxt ? `<div class="weak">Punto débil: <b>${weakTxt}</b></div>` : ""}</div></div></div>
-    <div class="dcard s2"><h3>Sesiones recientes</h3>${sesHTML}</div>
-    <div class="dcard goal"><h3>Tu objetivo</h3><div class="g-rank">Platino IV</div><div class="g-sub">Tu progreso hacia el siguiente rango.</div>
-      <div class="dprog"><i style="width:64%"></i></div><div class="g-row"><span>Oro II</span><b>64%</b><span>Platino IV</span></div></div>
-  </div>`;
-  if (you.length && axes.length) renderRadar("rs-radar", axes, you, avg);
-}
-
-/* ---------- Coaching ---------- */
-function renderPlan(game) {
-  const p = PLAN[game];
-  document.getElementById("plan").innerHTML =
-    `<div class="plan-head"><h2>Tu plan de mejora</h2><span class="tag">${p.updated}</span></div>` +
-    p.focuses.map(f => {
-      const pct = Math.round(f.done / f.total * 100);
-      return `<div class="focus-item"><div class="focus-txt"><div class="ft">${f.t}</div><div class="fb">${f.b}</div></div>
-        <div class="prog"><div class="bar"><div class="fill" style="width:${pct}%"></div></div><div class="lbl">Aplicado en <b>${f.done}/${f.total}</b> partidas</div></div></div>`;
-    }).join("");
-}
-let analyzedMap = {};
-function analyzeBadge(m) {
-  const st = analyzedMap[m.id];
-  if (!st) return `<span class="an-badge an-no" title="Aún no has generado el coaching de esta partida">Sin analizar</span>`;
-  if (st.stale) return `<span class="an-badge an-stale" title="Analizada con una versión anterior del coach. Regenera para el análisis nuevo.">Análisis antiguo</span>`;
-  return `<span class="an-badge an-ok" title="Coaching ya generado">Analizada</span>`;
-}
-function matchCardHTML(m) {
-  const r = resultInfo(m);
-  const pill = { gold: "res-gold", good: "res-win", mid: "res-mid", bad: "res-loss" }[r.cls];
-  const body = `<h3>${m.title}</h3><div class="match-meta">${Object.entries(m.meta || {}).map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>`;
-  const analyzed = !!analyzedMap[m.id];
-  return `<div class="match-card${analyzed ? " is-analyzed" : ""}">
-    <div class="match-top"><span class="result-pill ${pill}">${r.label}</span>${analyzeBadge(m)}</div>
-    <div class="match-body">${body}</div>
-    <button class="btn btn-ghost btn-sm" onclick="openReport('${m.game}','${encodeURIComponent(m.id)}')">${analyzed ? "Ver coaching →" : "Generar coaching →"}</button>
-  </div>`;
-}
-async function renderCoaching() {
-  renderPlan(currentGame);
-  const host = document.getElementById("match-grid");
-  host.innerHTML = loadingHTML("Cargando tus partidas…");
-  try {
-    lastMatches = await API.matches(currentGame);
-    try { analyzedMap = await API.analyzed(currentGame); } catch (e) { analyzedMap = {}; }
-    updateMatchCounter();
-    host.innerHTML = lastMatches.length ? lastMatches.map(matchCardHTML).join("") : `<div class="empty">No hay partidas recientes.</div>`;
-  } catch (e) { host.innerHTML = errorHTML(e); }
-}
-/* Partidas pendientes = sin informe o con análisis antiguo (otra versión del motor). */
-function pendingCount() {
-  return lastMatches.filter(m => { const s = analyzedMap[m.id]; return !s || s.stale; }).length;
-}
-function updateMatchCounter() {
-  const counter = document.getElementById("match-counter");
-  if (!counter) return;
-  const total = lastMatches.length;
-  counter.textContent = total ? `${total - pendingCount()}/${total} al día` : "";
-}
-/* Re-lee el estado de análisis y repinta tarjetas + contador. Devuelve nº pendientes. */
-async function refreshAnalyzed() {
-  try { analyzedMap = await API.analyzed(currentGame); } catch (e) {}
-  const host = document.getElementById("match-grid");
-  if (host && lastMatches.length) host.innerHTML = lastMatches.map(matchCardHTML).join("");
-  updateMatchCounter();
-  return pendingCount();
-}
-
-/* ---------- Plan de mejora global (multi-partida) ---------- */
-async function loadPlan(regenerate) {
-  const host = document.getElementById("plan-body");
-  const badge = document.getElementById("plan-badge");
-  badge.textContent = "";
-  if (!lastMatches.length) { try { lastMatches = await API.matches(currentGame); } catch (e) {} }
-  await refreshAnalyzed();
-
-  // Partidas pendientes (sin informe o con análisis antiguo). Las generamos DE UNA EN
-  // UNA: cada informe es una petición HTTP corta, así nunca disparamos el 504 del proxy
-  // (un solo /plan que generase varias a la vez se pasaba del límite de tiempo).
-  const pend = lastMatches.filter(m => { const s = analyzedMap[m.id]; return !s || s.stale; });
-  let done = 0, stopped = false, stopMsg = "";
-  for (const m of pend) {
-    host.innerHTML = loadingHTML(
-      `Analizando partida ${done + 1} de ${pend.length} con el motor nuevo… ` +
-      `cada informe tarda unos segundos; puedes dejar esto en segundo plano.`);
-    try {
-      await API.report(currentGame, m.id, true);
-      done++;
-      await refreshAnalyzed();
-    } catch (e) {
-      stopped = true; stopMsg = e.message || ""; break;   // saturado/timeout: paramos y montamos el plan con lo que haya
-    }
-  }
-
-  // Plan global: a estas alturas los informes ya están cacheados → 1 sola llamada corta.
-  const needsFreshPlan = done > 0 || regenerate;
-  host.innerHTML = loadingHTML("Montando tu plan de mejora global…");
-  try {
-    const p = await API.plan(currentGame, needsFreshPlan);
-    host.innerHTML = planHTML(p);
-    if (!needsFreshPlan && p.new_matches > 0)
-      badge.innerHTML = `${p.new_matches} partidas nuevas sin incluir · <a href="#" onclick="loadPlan(true);return false;">regenerar</a>`;
-  } catch (e) { host.innerHTML = errorHTML(e); return; }
-
-  const remaining = pendingCount();
-  if (remaining > 0)
-    badge.innerHTML = `Quedan ${remaining} por actualizar${stopped ? " (motor gratis saturado, espera ~1 min)" : ""}. ` +
-      `<a href="#" onclick="loadPlan(true);return false;">continuar</a>`;
-  else
-    badge.textContent = "Todas al día ✓";
-}
-function planHTML(p) {
-  const rw = (p.recurring_weaknesses || []).map(w =>
-    `<div class="insight warn"><div><div class="it">${w.title} <span style="color:var(--muted);font-weight:600">· ${w.frequency_pct}% · sev ${w.avg_severity}</span></div><div class="id">${w.evidence || ""}</div></div></div>`
-  ).join("") || `<div class="empty">Sin patrones recurrentes todavía. Genera coaching de varias partidas primero.</div>`;
-  const roots = (p.root_causes || []).map(r => `<li>${r}</li>`).join("");
-  const rm = p.roadmap || {};
-  const horizon = (title, items) => `<div class="panel"><h3>${title}</h3>${(items || []).map(it =>
-    `<div style="margin-bottom:12px"><b>${it.focus}</b>${it.drills && it.drills.length ? `<ul style="margin:6px 0">${it.drills.map(d => `<li>${d}</li>`).join("")}</ul>` : ""}${it.resource ? `<div style="color:var(--muted);font-size:12.5px">Recurso: ${it.resource}</div>` : ""}${it.success_metric ? `<div style="color:var(--accent);font-size:12.5px">Éxito: ${it.success_metric}</div>` : ""}</div>`
-  ).join("") || '<div style="color:var(--muted)">—</div>'}</div>`;
-  const prio = (p.priority_order || []).map(x => `<li>${x}</li>`).join("");
-  return `<div class="panel"><h3>Plan de mejora global</h3>
-      <p style="font-size:14.5px;margin:0 0 14px">${p.summary || ""}</p>
-      <div class="insights">${rw}</div>
-      ${roots ? `<div style="margin-top:12px"><b>Causas raíz</b><ul>${roots}</ul></div>` : ""}</div>
-    <div class="stat-grid">${horizon("Esta semana", rm.this_week)}${horizon("Este mes", rm.this_month)}</div>
-    <div class="stat-grid">${horizon("Próximos 3 meses", rm.next_3_months)}${prio ? `<div class="panel"><h3>Por dónde empezar</h3><ol>${prio}</ol></div>` : ""}</div>`;
-}
-
-/* ---------- Estadísticas ---------- */
-const kpiHTML = (k) => `<div class="kpi ${k.cls || ""}"><div class="v">${k.v}</div><div class="k">${k.k}</div>${k.bench ? `<div class="bench">${k.bench}</div>` : ""}</div>`;
-const insightHTML = (i) => `<div class="insight ${i.cls}"><div><div class="it">${i.t}</div><div class="id">${i.d}</div></div></div>`;
-const tableHTML = (t) => `<table class="stat-table"><thead><tr>${t.cols.map((c, i) => `<th${i > 0 ? ' class="num"' : ""}>${c}</th>`).join("")}</tr></thead><tbody>${t.rows.map(r => `<tr>${r.map((c, i) => `<td${i > 0 ? ' class="num"' : ""}>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
-async function renderStats() {
-  document.getElementById("stats-eyebrow").textContent = "Sección complementaria · " + currentGame.toUpperCase();
-  const body = document.getElementById("stats-body");
-  body.innerHTML = loadingHTML("Calculando tus estadísticas…");
-  try {
-    const s = await API.stats(currentGame);
-    body.innerHTML = `
-      <div class="kpi-row">${s.kpis.map(kpiHTML).join("")}</div>
-      <h2 class="insights-title">Dónde pierdes LP <span class="tag">IA</span></h2>
-      <div class="insights">${(s.insights || []).map(insightHTML).join("")}</div>
-      <div class="stat-grid">
-        <div class="panel"><h3>${s.evol.label}</h3><div class="chart-host" id="evol-chart"></div></div>
-        <div class="panel"><h3>${s.dist.label}</h3><div class="chart-host" id="dist-chart"></div></div>
-      </div>
-      <div class="stat-grid">
-        <div class="panel"><h3>${s.tableA.title}</h3>${tableHTML(s.tableA)}</div>
-        <div class="panel"><h3>${s.tableB.title}</h3>${tableHTML(s.tableB)}</div>
-      </div>`;
-    renderLineChart("evol-chart", s.evol);
-    renderBarChart("dist-chart", s.dist);
-  } catch (e) { body.innerHTML = errorHTML(e); }
-}
-
-/* ---------- Meta ---------- */
-let metaData = null, metaTier = "Todos", metaStyle = "Todos";
-async function renderMeta() {
-  document.getElementById("meta-eyebrow").textContent = "Sección complementaria · " + currentGame.toUpperCase();
-  const body = document.getElementById("meta-body");
-  body.innerHTML = loadingHTML("Cargando la meta…");
-  try {
-    metaData = await API.meta(currentGame);
-    metaTier = "Todos"; metaStyle = "Todos";
-    body.innerHTML = `
-      <div class="meta-head"><span class="meta-chip">Parche ${metaData.patch}</span><span class="meta-chip">${metaData.rank}</span></div>
-      <div class="meta-filters"><div class="filter-group" id="filter-tier"></div><div class="filter-group" id="filter-style"></div></div>
-      <div class="comp-list" id="comp-list"></div>`;
-    renderMetaFilters();
-    renderMetaList();
-  } catch (e) { body.innerHTML = errorHTML(e); }
-}
-function renderMetaFilters() {
-  const tiers = ["Todos", "S", "A", "B", "C"];
-  document.getElementById("filter-tier").innerHTML = `<span class="fg-label">Tier</span>` +
-    tiers.map(t => `<button class="filter-pill" aria-pressed="${metaTier === t}" onclick="setMetaFilter('tier','${t}')">${t}</button>`).join("");
-  const label = currentGame === "tft" ? "Estilo" : "Rol";
-  document.getElementById("filter-style").innerHTML = `<span class="fg-label">${label}</span>` +
-    (metaData.styles || ["Todos"]).map(s => `<button class="filter-pill" aria-pressed="${metaStyle === s}" onclick="setMetaFilter('style','${s}')">${s}</button>`).join("");
-}
-function setMetaFilter(type, val) { if (type === "tier") metaTier = val; else metaStyle = val; renderMetaFilters(); renderMetaList(); }
-function renderMetaList() {
-  const cols = metaData.metricCols || [];
-  const rows = (metaData.comps || []).filter(c => (metaTier === "Todos" || c.tier === metaTier) && (metaStyle === "Todos" || c.style === metaStyle));
-  const list = document.getElementById("comp-list");
-  if (!rows.length) { list.innerHTML = `<div class="empty">Ninguna comp coincide con el filtro.</div>`; return; }
-  list.innerHTML = rows.map(c => {
-    const chips = (c.units && c.units.length) ? `<div class="unit-chips">${c.units.map(u => `<span class="unit-chip" style="color:${COST[u.c]};border-color:${COST[u.c]}55;background:${COST[u.c]}1A">${u.n}</span>`).join("")}</div>` : "";
-    const metrics = cols.map(col => `<div class="metric"><span class="m-v">${c.metrics[col.k]}</span><span class="m-k">${col.label}</span></div>`).join("");
-    const action = metaData.guide ? `<div class="comp-action"><a class="btn btn-ghost btn-sm" href="guia-comp.html">Ver guía →</a></div>` : `<div class="comp-action"></div>`;
-    return `<div class="comp-row"><div class="tier-badge tier-${c.tier}">${c.tier}</div>
-      <div class="comp-info"><div class="comp-name">${c.name} <span class="comp-style">${c.style} · ${c.difficulty}</span></div>${chips}</div>
-      <div class="comp-metrics">${metrics}</div>${action}</div>`;
-  }).join("");
-}
-
-/* ---------- Generar coaching (overlay → informe) ---------- */
-function openReport(game, id) {
-  const steps = Array.from(document.querySelectorAll("#an-steps li"));
-  document.getElementById("analyzing").classList.add("show");
-  steps.forEach(s => s.classList.remove("done", "active"));
-  let i = 0; steps[0].classList.add("active");
-  const timer = setInterval(() => {
-    steps[i].classList.remove("active"); steps[i].classList.add("done"); i++;
-    if (i < steps.length) steps[i].classList.add("active");
-    else { clearInterval(timer); location.href = `informe.html?game=${game}&id=${id}`; }
-  }, 700);
-}
-
-/* ---------- Init ---------- */
-const _ri = document.getElementById("riot-input");
-_ri.value = API.riotId();
-_ri.addEventListener("change", () => { API.setRiotId(_ri.value); loadView(currentView); });
-
-const _hash = location.hash.replace("#", "");
-if (["resumen", "coaching", "stats", "meta"].includes(_hash)) showView(_hash);
-else renderResumen();
-</script>
-<script src="assets/i18n.js"></script>
+  <script src="assets/i18n.js"></script>
 </body>
 </html>
