@@ -461,7 +461,7 @@ def build_plan_prompt(game: str, aggregate: dict, lang: str = "es") -> str:
 
 def validate_plan(raw: str, base: dict) -> ImprovementPlan:
     """Valida el JSON del plan global. Lanza si no valida (para reintento)."""
-    data = json.loads(raw)
+    data = _loads_lenient(raw)
     data.update(base)              # game, based_on_match_ids, new_matches
     return ImprovementPlan(**data)
 
@@ -612,8 +612,21 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
             f"colocación. Devuelve EXCLUSIVAMENTE un JSON válido con EXACTAMENTE estas claves (textos en español):\n{schema}")
 
 
+def _loads_lenient(raw: str) -> dict:
+    """json.loads tolerante: algunos modelos (DeepSeek, Nemotron…) envuelven el JSON en
+    ```json ... ``` o anteponen texto. Caemos al primer objeto { ... } del texto."""
+    s = (raw or "").strip()
+    try:
+        return json.loads(s)
+    except Exception:
+        i, j = s.find("{"), s.rfind("}")
+        if i != -1 and j > i:
+            return json.loads(s[i:j + 1])
+        raise
+
+
 def validate_report(raw: str, base: dict) -> CoachingReport:
     """Valida el JSON del informe v2 contra el schema. Lanza si no valida (para reintento)."""
-    data = json.loads(raw)
+    data = _loads_lenient(raw)
     data.update(base)              # game, match_id, metrics (servidor)
     return CoachingReport(**data)
