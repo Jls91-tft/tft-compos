@@ -70,6 +70,22 @@ async def generate_report(game: str, match_id: str, riot_id: str = "", lang: str
             "prueba otro modelo en el .env (p. ej. OPENROUTER_MODEL=moonshotai/kimi-k2.6:free)."
         )
 
+    # Contexto para la UI (pestaña "Desarrollo"): datos del payload, NO del LLM.
+    ctx = {}
+    if payload.get("rango"):
+        ctx["rango"] = payload["rango"]
+    if game == "lol":
+        if payload.get("progresion_lineas"):
+            ctx["progresion_lineas"] = payload["progresion_lineas"]
+        lt = payload.get("linea_temporal") or {}
+        if lt.get("muertes_por_fase"):
+            ctx["muertes_por_fase"] = lt["muertes_por_fase"]
+        comp = payload.get("comparativa") or {}
+        if comp.get("diferencias_con_rival"):
+            ctx["diferencias_con_rival"] = comp["diferencias_con_rival"]
+    if ctx:
+        report.context = ctx
+
     if user_key:
         return report_store.save_report(user_key, game, match_id, report.model_dump(), prompts.PROMPT_VERSION, model)
     return report

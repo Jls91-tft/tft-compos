@@ -76,6 +76,7 @@ class CoachingReport(BaseModel):
     model: str = ""
     generated_at: str = ""
     stale: bool = False
+    context: dict = {}                                    # datos para la UI (curva 10/15, muertes por fase, rango); no del LLM
 
 
 # ---------- Plan de mejora global (multi-partida) ----------

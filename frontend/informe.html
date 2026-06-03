@@ -27,6 +27,17 @@
   body.embedded .topbar, body.embedded footer, body.embedded .crumbs .path, body.embedded .crumbs a.back-link{display:none;}
   body.embedded .crumbs{justify-content:flex-end;}
   body.embedded #main{padding-top:16px;}
+  /* Pestaña "Desarrollo": curva de oro 10/15 + muertes por fase */
+  .dv-lead{display:flex;align-items:flex-end;gap:18px;height:140px;padding:8px 4px 0;max-width:320px;}
+  .dv-c{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px;height:100%;}
+  .dv-bar{width:46px;border-radius:7px 7px 0 0;min-height:8px;}
+  .dv-bar.up{background:linear-gradient(180deg,#7C5CFC,#22B8CF);} .dv-bar.down{background:linear-gradient(180deg,#EF6B4A,#b83f25);}
+  .dv-v{font-size:13px;font-weight:800;} .dv-v.up{color:#8ff0bd;} .dv-v.down{color:#ffb9a8;}
+  .dv-t{font-size:11px;color:var(--muted);}
+  .dv-note{margin:14px 0 0;font-size:13.5px;color:var(--muted);line-height:1.55;}
+  .dv-phases{display:flex;gap:12px;max-width:380px;}
+  .dv-ph{flex:1;text-align:center;border:1px solid var(--border);border-radius:12px;padding:14px 6px;background:var(--surface-2);}
+  .dv-pn{font-size:24px;font-weight:850;} .dv-pl{font-size:11px;color:var(--muted);margin-top:3px;}
 </style>
 </head>
 <body>
@@ -149,10 +160,39 @@ function reportHTML(report, match) {
     (!kpis && !strong ? `<div class="panel"><p style="margin:0;color:var(--muted)">Sin métricas destacables en esta partida.</p></div>` : "");
   const erroresPane = errBlocks || `<div class="panel"><p style="margin:0;color:var(--muted)">Partida limpia: la IA no detectó errores con evidencia suficiente.</p></div>`;
   const planPane = plan ? `<div class="panel"><h3>Para entrenar esta semana</h3><ol class="action-list">${plan}</ol></div>` : "";
+  // Pestaña "Desarrollo" (solo LoL): curva de oro al 10/15 y muertes por fase (de la timeline).
+  const ctx = report.context || {};
+  let desarrolloPane = "";
+  if (GAME === "lol") {
+    const prog = ctx.progresion_lineas || {};
+    const ph = ctx.muertes_por_fase || null;
+    const leadBar = (e, lbl) => {
+      if (!e || e.dif_oro_vs_rival == null) return "";
+      const d = e.dif_oro_vs_rival, up = d >= 0;
+      const h = Math.max(8, Math.min(100, Math.abs(d) / 20));
+      return `<div class="dv-c"><span class="dv-v ${up ? "up" : "down"}">${d > 0 ? "+" : ""}${d}</span><div class="dv-bar ${up ? "up" : "down"}" style="height:${h}%"></div><span class="dv-t">${lbl}</span></div>`;
+    };
+    const bars = leadBar(prog.min_10, "min 10") + leadBar(prog.min_15, "min 15");
+    let note = "";
+    if (prog.min_10 && prog.min_15 && prog.min_10.dif_oro_vs_rival != null && prog.min_15.dif_oro_vs_rival != null) {
+      const a = prog.min_10.dif_oro_vs_rival, b = prog.min_15.dif_oro_vs_rival;
+      note = (a > 0 && b < a) ? "Salías ganando la línea pero tu ventaja se diluyó: el foco está en el mediojuego." :
+             (b > a) ? "Tu ventaja creció tras la fase de líneas: buena transición." :
+             (a < 0) ? "Saliste por detrás en la línea: revisa trades y control de oleada tempranos." : "";
+    }
+    const curve = bars ? `<div class="panel"><h3>Ventaja de oro frente a tu rival</h3><div class="dv-lead">${bars}</div>${note ? `<p class="dv-note">${note}</p>` : ""}</div>` : "";
+    const deaths = ph ? `<div class="panel"><h3>Muertes por fase</h3><div class="dv-phases">
+        <div class="dv-ph"><div class="dv-pn">${ph.early || 0}</div><div class="dv-pl">Inicio</div></div>
+        <div class="dv-ph"><div class="dv-pn">${ph.mid || 0}</div><div class="dv-pl">Medio</div></div>
+        <div class="dv-ph"><div class="dv-pn">${ph.late || 0}</div><div class="dv-pl">Final</div></div>
+      </div></div>` : "";
+    desarrolloPane = curve + deaths;
+  }
   const tabs = [
     { id: "resumen", label: "Resumen", html: resumenPane, show: true, badge: "" },
     { id: "errores", label: "Errores", html: erroresPane, show: true, badge: errCount || "" },
     { id: "comparativa", label: "Comparativa", html: comp, show: !!comp, badge: "" },
+    { id: "desarrollo", label: "Desarrollo", html: desarrolloPane, show: !!desarrolloPane, badge: "" },
     { id: "plan", label: "Plan", html: planPane, show: !!planPane, badge: "" },
   ].filter(t => t.show);
   const nav = tabs.map((t, i) => `<button role="tab" aria-selected="${i === 0 ? "true" : "false"}" onclick="repTab('${t.id}', this)">${t.label}${t.badge ? `<span class="b">${t.badge}</span>` : ""}</button>`).join("");
