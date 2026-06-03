@@ -5,7 +5,7 @@
    ============================================================ */
 :root{
   /* Tema TENUE (gris oscuro suave, no negro) — dirección validada */
-  --bg:#0B0D12;--surface:#13161E;--surface-2:#191D27;--border:#262B37;--border-soft:#1F2531;
+  --bg:#0D0F17;--surface:#14171F;--surface-2:#1A1E28;--border:#272C3A;--border-soft:#202634;
   --text:#E9ECF3;--muted:#9AA3B2;
   --accent:#7C5CFC;--accent-2:#22B8CF;--accent-strong:#6B4DF0;--accent-soft:rgba(124,92,252,.14);--accent-glow:rgba(124,92,252,.40);
   --good:#22B36B;--warn:#D08700;--bad:#E5484D;--gold:#CA8A04;
@@ -18,17 +18,17 @@
 html{scroll-behavior:smooth;}
 body{margin:0;font-family:var(--font);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;position:relative;
   background:
-    radial-gradient(1100px 620px at 84% -12%,rgba(124,92,252,.26),transparent 62%),
-    radial-gradient(960px 560px at -6% -2%,rgba(34,184,207,.16),transparent 60%),
-    radial-gradient(1100px 760px at 50% 120%,rgba(124,92,252,.14),transparent 62%),
-    var(--bg);
+    radial-gradient(1150px 660px at 85% -12%,rgba(124,92,252,.34),transparent 60%),
+    radial-gradient(980px 580px at -6% 0%,rgba(34,184,207,.22),transparent 58%),
+    radial-gradient(1150px 800px at 50% 122%,rgba(124,92,252,.20),transparent 62%),
+    linear-gradient(165deg,#181430 0%,#10121C 46%,#0B131C 100%);
   background-attachment:fixed;}
-/* Rejilla fina (ambiente "Nebula"; distinta del patrón de puntos) */
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.6;
+/* Rejilla muy sutil (textura; manda el degradado de color, no la rejilla) */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.4;
   background-image:
-    linear-gradient(rgba(160,175,225,.05) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(160,175,225,.05) 1px,transparent 1px);
-  background-size:58px 58px;
+    linear-gradient(rgba(160,175,225,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(160,175,225,.045) 1px,transparent 1px);
+  background-size:60px 60px;
   -webkit-mask-image:radial-gradient(ellipse 95% 82% at 50% 22%,#000 38%,transparent 100%);
           mask-image:radial-gradient(ellipse 95% 82% at 50% 22%,#000 38%,transparent 100%);}
 a{color:var(--accent);text-decoration:none;}
