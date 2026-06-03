@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Synapse — Informe de coaching</title>
+<title>Aevyn — Informe de coaching</title>
 <link rel="stylesheet" href="assets/synapse.css">
 </head>
 <body>
   <a href="#main" class="skip">Saltar al contenido</a>
 
   <header class="topbar">
-    <a class="brand" href="app.html" aria-label="Synapse, inicio">
+    <a class="brand" href="app.html" aria-label="Aevyn, inicio">
       <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
         <circle cx="9" cy="11" r="3.4" fill="#8B5CF6"/><circle cx="23" cy="9" r="2.4" fill="#22D3EE"/>
         <circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
         <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
       </svg>
-      <span class="name">Synapse</span>
+      <span class="name">Aevyn</span>
     </a>
     <nav class="main-nav" aria-label="Secciones">
       <a class="navlink is-primary" href="app.html#coaching" aria-current="page">Coaching <span class="pill-ia">IA</span></a>
@@ -48,7 +48,7 @@
   </main>
 
   <footer>
-    <div>Synapse — Informe de coaching</div>
+    <div>Aevyn — Informe de coaching</div>
     <div class="legal">Marca propia no afiliada a los titulares de los juegos.</div>
   </footer>
 
@@ -84,7 +84,7 @@ function heroHTML(report, match) {
   return `<section class="report-hero">
     <div class="placement"><span class="big" style="color:${color}">${big}</span><span class="lbl">${lbl}</span>${tag ? `<span class="tag ${tagcls}">${tag}</span>` : ""}</div>
     <div class="verdict-wrap">
-      <span class="ai-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#C4B5FD"/></svg> Análisis generado por Synapse IA</span>
+      <span class="ai-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#C4B5FD"/></svg> Análisis generado por Aevyn IA</span>
       <p class="verdict">${report.summary || ""}</p>
       ${match ? `<div class="match-facts">${facts}</div>` : ""}
     </div>

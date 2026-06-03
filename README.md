@@ -1,4 +1,4 @@
-# Synapse — Coaching IA + estadísticas para TFT y LoL
+# Aevyn — Coaching IA + estadísticas para TFT y LoL
 
 Plataforma con dos funciones:
 - **Coaching IA (principal):** tras cada partida, genera un informe con errores, correcciones y consejos accionables; incluye chat con el coach. Para **TFT** y **LoL**.

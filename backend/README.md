@@ -1,4 +1,4 @@
-# Backend — Synapse API (FastAPI)
+# Backend — Aevyn API (FastAPI)
 
 API de coaching IA + estadísticas para TFT y LoL.
 

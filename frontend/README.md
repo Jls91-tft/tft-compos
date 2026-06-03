@@ -1,4 +1,4 @@
-# Frontend — Synapse (HTML/CSS/JS vanilla)
+# Frontend — Aevyn (HTML/CSS/JS vanilla)
 
 App de producción. Reutiliza el diseño validado en la Etapa 1 y consume la API real.
 

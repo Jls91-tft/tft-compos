@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Synapse — Coaching IA para TFT y LoL</title>
+<title>Aevyn — Coaching IA para TFT y LoL</title>
 <link rel="stylesheet" href="assets/synapse.css">
 <style>
   /* Dashboard bento (tema Tenue, sin emojis). El shell/topbar viene de synapse.css */
@@ -59,9 +59,9 @@
 <body>
   <a href="#main" class="skip">Saltar al contenido</a>
   <header class="topbar">
-    <div class="brand" aria-label="Synapse, inicio">
+    <div class="brand" aria-label="Aevyn, inicio">
       <svg class="logo" width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="9" cy="11" r="3.4" fill="#7C5CFC"/><circle cx="23" cy="9" r="2.4" fill="#22B8CF"/><circle cx="22" cy="23" r="3" fill="#B0A0FF"/><circle cx="10" cy="23" r="2" fill="#7C5CFC"/><path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#7C5CFC" stroke-width="1.4" stroke-opacity=".55"/></svg>
-      <span class="name">Synapse</span>
+      <span class="name">Aevyn</span>
     </div>
     <div class="game-switch" role="group" aria-label="Seleccionar juego">
       <button id="btn-tft" aria-pressed="true" onclick="setGame('tft')">TFT</button>
@@ -128,7 +128,7 @@
   </div>
 
   <footer>
-    <div>Synapse — Coaching IA y estadísticas para auto-battler y MOBA</div>
+    <div>Aevyn — Coaching IA y estadísticas para auto-battler y MOBA</div>
     <div class="legal">Marca propia genérica. No está afiliada, asociada ni respaldada por los titulares de los juegos.</div>
   </footer>
 
@@ -224,7 +224,7 @@ async function renderResumen() {
 
   host.innerHTML = `<div class="bento">
     <div class="dcard last s2">${heroHTML}</div>
-    <div class="dcard"><h3>Synapse Score</h3>
+    <div class="dcard"><h3>Aevyn Score</h3>
       <div class="score">
         <div class="ring"><svg width="108" height="108" viewBox="0 0 108 108"><circle cx="54" cy="54" r="46" fill="none" stroke="var(--bg)" stroke-width="11"/><circle cx="54" cy="54" r="46" fill="none" stroke="url(#sg)" stroke-width="11" stroke-linecap="round" stroke-dasharray="${dash} ${Math.round(circ)}" transform="rotate(-90 54 54)"/><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7C5CFC"/><stop offset="1" stop-color="#22B8CF"/></linearGradient></defs></svg><div class="n"><b>${score}</b><small>/100</small></div></div>
         <div><span class="delta ${delta >= 0 ? "up" : "down"}">${delta >= 0 ? "+" : ""}${delta} vs media</span></div>

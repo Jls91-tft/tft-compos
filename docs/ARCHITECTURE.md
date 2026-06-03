@@ -1,4 +1,4 @@
-# Arquitectura de Synapse
+# Arquitectura de Aevyn
 
 ## Componentes
 ```mermaid

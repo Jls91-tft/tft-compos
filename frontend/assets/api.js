@@ -1,4 +1,4 @@
-/* Cliente de la API de Synapse.
+/* Cliente de la API de Aevyn.
    El frontend llama a /api/... y nginx hace proxy al backend FastAPI.
    El Riot ID (opcional) se guarda en localStorage y se adjunta a las peticiones;
    en modo mock del backend se ignora. */

@@ -1,1 +1,1 @@
-"""Synapse API — coaching IA + estadísticas para TFT y LoL (ETAPA 2)."""
+"""Aevyn API — coaching IA + estadísticas para TFT y LoL (ETAPA 2)."""

@@ -1,4 +1,4 @@
-# Fuentes de datos de Synapse
+# Fuentes de datos de Aevyn
 
 Aclaración clave: hay **dos tipos de datos** con orígenes muy distintos.
 

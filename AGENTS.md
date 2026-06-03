@@ -4,7 +4,7 @@ Guía para agentes de IA que trabajen en este repositorio (estándar abierto).
 El contenido canónico y detallado está en **[`CLAUDE.md`](CLAUDE.md)** — léelo primero.
 
 ## Resumen rápido
-- **Proyecto:** Synapse — coaching IA + estadísticas para TFT y LoL. El coaching es el diferencial.
+- **Proyecto:** Aevyn — coaching IA + estadísticas para TFT y LoL. El coaching es el diferencial.
 - **Stack:** FastAPI (backend) · frontend vanilla servido por nginx · Ollama (IA local) · Docker Compose.
 - **Idioma:** español (respuestas, comentarios, commits).
 

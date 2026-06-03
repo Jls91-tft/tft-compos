@@ -1,4 +1,4 @@
-# Synapse — despliegue de BETA en una sola VM Linux (p. ej. Google Cloud e2-micro gratis; ver docs/DEPLOY.md).
+# Aevyn — despliegue de BETA en una sola VM Linux (p. ej. Google Cloud e2-micro gratis; ver docs/DEPLOY.md).
 # Expuesto con Cloudflare Tunnel (HTTPS, SIN abrir puertos) + Cloudflare Access (beta cerrada).
 #
 #   cp .env.example .env   → rellena RIOT_API_KEY, LLM_PROVIDER=groq, GROQ_API_KEY, TUNNEL_TOKEN, USE_MOCK=false
