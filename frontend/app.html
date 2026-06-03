@@ -55,6 +55,34 @@
   @media(max-width:1080px){ .bento{grid-template-columns:repeat(2,1fr);} .s2{grid-column:auto;} }
   @media(max-width:860px){ main{padding:24px 16px 70px;} }
   @media(max-width:560px){ .bento{grid-template-columns:1fr;} .s2{grid-column:auto;} }
+  /* ── Pestaña Coaching (estilo Bento C) ── */
+  .cv-bento{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:18px;}
+  @media(max-width:760px){.cv-bento{grid-template-columns:1fr;}}
+  .cv-tile{border:1px solid var(--border);border-radius:18px;background:var(--surface);padding:20px;}
+  .cv-plan{background:radial-gradient(440px 200px at 88% 0%,rgba(124,92,252,.13),transparent 70%),var(--surface);border-color:rgba(124,92,252,.32);}
+  .cv-plan .plan{background:transparent;border:0;padding:0;box-shadow:none;margin:0;}
+  .cv-analysis{display:flex;flex-direction:column;justify-content:center;gap:10px;}
+  .cv-ah{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent-2);}
+  .cv-allbtn{border:0;background:var(--grad);color:#08090D;font-weight:800;font-size:14px;border-radius:12px;padding:13px;cursor:pointer;box-shadow:0 8px 22px var(--accent-glow);transition:transform .15s ease,filter .15s ease;}
+  .cv-allbtn:hover{transform:translateY(-1px);filter:brightness(1.06);}
+  .cv-quota{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;}
+  .cv-quota a{color:var(--accent);font-weight:700;}
+  .cv-lh{font-size:19px;font-weight:800;margin:28px 0 4px;}
+  .cv-lh .cv-hint{font-size:13px;font-weight:500;color:var(--muted);}
+  .cv-matches{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:13px;margin-top:14px;}
+  .cv-mc{position:relative;overflow:hidden;border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:16px;cursor:pointer;transition:transform .16s ease,border-color .16s ease;display:flex;flex-direction:column;gap:11px;}
+  .cv-mc:hover{transform:translateY(-3px);border-color:rgba(124,92,252,.5);}
+  .cv-mc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#6F7889;}
+  .cv-mc.r-gold::before{background:#E6B450;} .cv-mc.r-good::before{background:#22A565;} .cv-mc.r-mid::before{background:#E6B450;} .cv-mc.r-bad::before{background:#EF6B4A;}
+  .cv-top{display:flex;align-items:center;gap:9px;}
+  .cv-place{font-weight:850;font-size:12.5px;padding:4px 11px;border-radius:99px;}
+  .cv-place.r-gold{color:#ffe6a3;background:rgba(230,180,80,.18);} .cv-place.r-good{color:#8ff0bd;background:rgba(34,165,101,.16);} .cv-place.r-mid{color:#f0d79a;background:rgba(230,180,80,.16);} .cv-place.r-bad{color:#ffb9a8;background:rgba(239,107,74,.16);}
+  .cv-st{margin-left:auto;font-size:10px;font-weight:700;padding:4px 9px;border-radius:99px;display:inline-flex;align-items:center;gap:5px;}
+  .cv-st .d{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .cv-st.ok{color:#8ff0bd;background:rgba(34,165,101,.12);} .cv-st.old{color:var(--muted);background:rgba(255,255,255,.05);} .cv-st.no{color:#9fe6f2;background:rgba(34,184,207,.12);}
+  .cv-mc h3{font-size:16px;font-weight:780;margin:0;}
+  .cv-meta{font-size:12.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;} .cv-meta b{color:var(--text);font-weight:600;}
+  .cv-cta{margin-top:auto;border-top:1px solid var(--border-soft);padding-top:11px;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:var(--accent);}
 </style>
 </head>
 <body>
@@ -91,15 +119,19 @@
       <section id="view-coaching" class="view" aria-label="Coaching" hidden>
         <p class="eyebrow">Coaching IA · lo que nos diferencia</p>
         <h1 class="title">Mejora partida a partida</h1>
-        <p class="subtitle">Analizamos cada partida terminada y te decimos qué hiciste bien, qué falló y qué hacer la próxima vez. Consejos accionables.</p>
-        <div class="plan" id="plan"></div>
-        <div style="margin:18px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="loadPlan(false)">Analizar todas mis partidas</button>
-          <span id="plan-badge" style="font-size:13px;color:var(--muted);"></span>
+        <div class="cv-bento">
+          <div class="cv-tile cv-plan">
+            <div class="plan" id="plan"></div>
+          </div>
+          <div class="cv-tile cv-analysis">
+            <div class="cv-ah">⚡ Análisis</div>
+            <button class="cv-allbtn" onclick="loadPlan(false)">Analizar todas mis partidas</button>
+            <span id="plan-badge" class="cv-quota"></span>
+          </div>
         </div>
-        <div id="plan-body" style="margin-bottom:26px;"></div>
-        <h2 class="section-title">Tus partidas recientes <span style="font-size:13px;font-weight:500;color:var(--muted);">— elige una para ver su coaching</span> <span id="match-counter" class="match-counter"></span></h2>
-        <div class="match-grid" id="match-grid"></div>
+        <div id="plan-body" style="margin:18px 0 26px;"></div>
+        <h2 class="cv-lh">Tus partidas recientes <span class="cv-hint">— elige una para ver su coaching</span> <span id="match-counter" class="match-counter"></span></h2>
+        <div class="cv-matches" id="match-grid"></div>
       </section>
 
       <!-- ESTADÍSTICAS -->
@@ -262,19 +294,21 @@ function renderPlan(game) {
 let analyzedMap = {};
 function analyzeBadge(m) {
   const st = analyzedMap[m.id];
-  if (!st) return `<span class="an-badge an-no" title="Aún no has generado el coaching de esta partida">Sin analizar</span>`;
-  if (st.stale) return `<span class="an-badge an-stale" title="Analizada con una versión anterior del coach. Regenera para el análisis nuevo.">Análisis antiguo</span>`;
-  return `<span class="an-badge an-ok" title="Coaching ya generado">Analizada</span>`;
+  if (!st) return `<span class="cv-st no" title="Aún no has generado el coaching de esta partida"><span class="d"></span>Sin analizar</span>`;
+  if (st.stale) return `<span class="cv-st old" title="Analizada con una versión anterior del coach. Regenera para el análisis nuevo."><span class="d"></span>Antiguo</span>`;
+  return `<span class="cv-st ok" title="Coaching ya generado"><span class="d"></span>Analizada</span>`;
 }
 function matchCardHTML(m) {
   const r = resultInfo(m);
-  const pill = { gold: "res-gold", good: "res-win", mid: "res-mid", bad: "res-loss" }[r.cls];
-  const body = `<h3>${m.title}</h3><div class="match-meta">${Object.entries(m.meta || {}).map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>`;
-  const analyzed = !!analyzedMap[m.id];
-  return `<div class="match-card${analyzed ? " is-analyzed" : ""}">
-    <div class="match-top"><span class="result-pill ${pill}">${r.label}</span>${analyzeBadge(m)}</div>
-    <div class="match-body">${body}</div>
-    <button class="btn btn-ghost btn-sm" onclick="openReport('${m.game}','${encodeURIComponent(m.id)}')">${analyzed ? "Ver coaching →" : "Generar coaching →"}</button>
+  const st = analyzedMap[m.id];
+  const meta = `<div class="cv-meta">${Object.entries(m.meta || {}).map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>`;
+  const cta = !st ? "Generar coaching" : (st.stale ? "Reanalizar" : "Ver coaching");
+  const arrow = (st && st.stale) ? "↻" : "→";
+  return `<div class="cv-mc r-${r.cls}" role="button" tabindex="0" onclick="openReport('${m.game}','${encodeURIComponent(m.id)}')">
+    <div class="cv-top"><span class="cv-place r-${r.cls}">${r.label}</span>${analyzeBadge(m)}</div>
+    <h3>${m.title}</h3>
+    ${meta}
+    <div class="cv-cta">${cta} <span>${arrow}</span></div>
   </div>`;
 }
 async function renderCoaching() {
