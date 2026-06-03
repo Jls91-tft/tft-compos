@@ -76,7 +76,10 @@
       <a class="navlink" href="lab.html">Lab</a>
       <a class="navlink" href="perfil.html">Perfil</a>
     </nav>
-    <input class="riot-input" id="riot-input" placeholder="Tu Riot ID (Nombre#TAG)" aria-label="Tu Riot ID" autocomplete="off">
+    <form class="riot-form" id="riot-form" autocomplete="off">
+      <input class="riot-input" id="riot-input" placeholder="Tu Riot ID (Nombre#TAG)" aria-label="Tu Riot ID" autocomplete="off">
+      <button class="riot-go" id="riot-go" type="submit" aria-label="Cargar mis partidas" title="Cargar mis partidas">→</button>
+    </form>
     <span class="avatar">N</span>
   </header>
 
@@ -448,8 +451,19 @@ function openReport(game, id) {
 
 /* ---------- Init ---------- */
 const _ri = document.getElementById("riot-input");
+const _rf = document.getElementById("riot-form");
 _ri.value = API.riotId();
-_ri.addEventListener("change", () => { API.setRiotId(_ri.value); loadView(currentView); });
+let _riLast = _ri.value.trim();
+function _commitRiot(force) {
+  const v = _ri.value.trim();
+  if (!force && v === _riLast) return;   // sin cambios: no recargar
+  _riLast = v;
+  API.setRiotId(v);
+  loadView(currentView);
+}
+// Enter o botón → carga (sirve también de "reintentar"); al perder el foco, solo si cambió.
+_rf.addEventListener("submit", (e) => { e.preventDefault(); _commitRiot(true); _ri.blur(); });
+_ri.addEventListener("blur", () => _commitRiot(false));
 
 const _hash = location.hash.replace("#", "");
 if (["resumen", "coaching", "stats", "meta"].includes(_hash)) showView(_hash);
