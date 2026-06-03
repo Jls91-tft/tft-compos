@@ -106,6 +106,55 @@ def lol_challenges(match: dict, puuid: str) -> dict:
     return out
 
 
+def lol_lane_progression(match: dict, puuid: str, timeline: dict) -> dict | None:
+    """Curva de líneas (Fase 2): oro/CS/nivel propios y la DIFERENCIA con el rival de
+    línea al minuto 10 y 15 (de la timeline). Revela si la ventaja se mantuvo o se diluyó."""
+    info = match.get("info", {})
+    parts = info.get("participants", [])
+    me = next((p for p in parts if p.get("puuid") == puuid), {})
+    pid = me.get("participantId")
+    pos = me.get("teamPosition") or ""
+    opp = next((p for p in parts if p.get("teamPosition") == pos and p.get("teamId") != me.get("teamId")), None) if pos else None
+    oppid = opp.get("participantId") if opp else None
+    frames = (timeline.get("info", {}) or {}).get("frames", []) or []
+    if pid is None or not frames:
+        return None
+
+    def frame_at(minute):
+        target = minute * 60000
+        best, bestd = None, None
+        for fr in frames:
+            d = abs((fr.get("timestamp", 0) or 0) - target)
+            if bestd is None or d < bestd:
+                best, bestd = fr, d
+        return best
+
+    def pstats(fr, p):
+        pf = ((fr or {}).get("participantFrames", {}) or {}).get(str(p)) if p is not None else None
+        if not pf:
+            return None
+        return {
+            "oro": pf.get("totalGold"),
+            "cs": (pf.get("minionsKilled", 0) or 0) + (pf.get("jungleMinionsKilled", 0) or 0),
+            "nivel": pf.get("level"),
+        }
+
+    out = {}
+    for minute in (10, 15):
+        fr = frame_at(minute)
+        mine = pstats(fr, pid)
+        if not mine:
+            continue
+        entry = {"oro": mine["oro"], "cs": mine["cs"], "nivel": mine["nivel"]}
+        ot = pstats(fr, oppid)
+        if ot:
+            entry["dif_oro_vs_rival"] = (mine["oro"] or 0) - (ot["oro"] or 0)
+            entry["dif_cs_vs_rival"] = mine["cs"] - ot["cs"]
+            entry["dif_nivel_vs_rival"] = (mine["nivel"] or 0) - (ot["nivel"] or 0)
+        out[f"min_{minute}"] = entry
+    return out or None
+
+
 def tft_signals(summary: dict) -> dict:
     """Hechos calculados del tablero FINAL (verificables), para anclar el análisis."""
     units = summary.get("unidades", []) or []
@@ -266,6 +315,9 @@ def enrich(game: str, match: dict, summary: dict, puuid: str, timeline: dict | N
             out["challenges"] = ch
         if timeline:
             out["linea_temporal"] = _lol_timeline(match, puuid, timeline)
+            prog = lol_lane_progression(match, puuid, timeline)
+            if prog:
+                out["progresion_lineas"] = prog
         return out
     # TFT: sin timeline; añadimos señales del estado final + señales del lobby (8 tableros)
     return {**summary, "señales": tft_signals(summary), "lobby": tft_lobby(match, puuid)}

@@ -9,7 +9,7 @@ import re
 from app.schemas.models import CoachingReport, ImprovementPlan
 from app.services import tft_names
 
-PROMPT_VERSION = "report-v3.2-rango-challenges-2026-06"   # sube esto al mejorar el prompt/motor → invalida cachés
+PROMPT_VERSION = "report-v3.3-timeline-lineas-2026-06"   # sube esto al mejorar el prompt/motor → invalida cachés
 PLAN_PROMPT_VERSION = "plan-v4.1-analista-2026-06"
 
 # --- Voz del coach (system prompt) ---
@@ -633,15 +633,18 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
             "participación en kills del equipo), 'challenges' (métricas avanzadas YA calculadas por Riot: oro/min, "
             "daño/min, CS en los primeros 10 min, ventaja máxima de nivel sobre tu rival, ventaja de oro/exp en fase de "
             "líneas, asesinatos en solitario, guardianes de control, participación en dragones/barones, placas de torre, "
-            "habilidades acertadas/esquivadas) y la 'linea_temporal' (muertes con timestamp, fase y posición). Usa esos "
-            "datos REALES para anclar la evidencia; no inventes momentos ni cifras que no estén en los datos."
+            "habilidades acertadas/esquivadas), la 'linea_temporal' (muertes con timestamp, fase y posición) y "
+            "'progresion_lineas' (tu oro/CS/nivel y la DIFERENCIA con tu rival de línea al minuto 10 y 15: dice si tu "
+            "ventaja de líneas se MANTUVO o se DILUYÓ — clave para distinguir un problema de líneas de uno de mediojuego). "
+            "Usa esos datos REALES para anclar la evidencia; no inventes momentos ni cifras que no estén en los datos."
             if es else
             "DATA IN LoL: you have the summary, the 'comparativa' (lane opponent, diffs vs you, team damage share and kill "
             "participation), 'challenges' (advanced metrics ALREADY computed by Riot: gold/min, damage/min, CS in the first "
             "10 min, max level lead over your lane opponent, gold/exp advantage in the laning phase, solo kills, control "
-            "wards, dragon/baron takedowns, turret plates, skillshots hit/dodged) and the 'linea_temporal' (deaths with "
-            "timestamp, phase and position). Use those REAL data to anchor evidence; never invent moments or numbers not "
-            "present in the data.")
+            "wards, dragon/baron takedowns, turret plates, skillshots hit/dodged), the 'linea_temporal' (deaths with "
+            "timestamp, phase and position) and 'progresion_lineas' (your gold/CS/level and the GAP vs your lane opponent "
+            "at minute 10 and 15: tells whether your laning lead was KEPT or FADED — key to tell a laning problem from a "
+            "mid-game one). Use those REAL data to anchor evidence; never invent moments or numbers not present in the data.")
     blocks.append(
         "RANGO DEL JUGADOR: si el payload trae 'rango' (cola, tier, división y LP), úsalo SOLO como contexto para "
         "calibrar el listón —lo que se espera a ese elo— y juzgar si su rendimiento está por encima o por debajo de su "
