@@ -335,6 +335,15 @@ def stats(game: str):
     return _STATS.get(game, {})
 
 
+def rank(game: str):
+    """Rango de ejemplo (modo mock)."""
+    if game == "tft":
+        return {"cola": "TFT", "tier": "GOLD", "division": "II", "lp": 47,
+                "victorias": 120, "derrotas": 110, "winrate_pct": 52, "racha_victorias": False}
+    return {"cola": "Solo/Dúo", "tier": "GOLD", "division": "II", "lp": 47,
+            "victorias": 64, "derrotas": 59, "winrate_pct": 52, "racha_victorias": True}
+
+
 def meta(game: str):
     return _META.get(game, {})
 

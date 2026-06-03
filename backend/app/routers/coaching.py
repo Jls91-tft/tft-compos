@@ -71,6 +71,22 @@ async def analyzed(game: Game, riot_id: str = Query(default="", description="Nom
     }
 
 
+@router.get("/rank/{game}")
+async def rank(game: Game, riot_id: str = Query(default="", description="Nombre#TAG")):
+    """Rango/LP del jugador (contexto). Devuelve null si no está rankeado, sin Riot ID o si falla."""
+    if settings.use_mock:
+        return mock.rank(game)
+    rid = riot_id or settings.default_riot_id
+    if not rid or "#" not in rid:
+        return None
+    name, tag = _parse_riot_id(rid)
+    try:
+        puuid = await riot_client.get_puuid(name, tag)
+        return await riot_client.get_rank(puuid, game)
+    except RiotApiError:
+        return None
+
+
 @router.get("/report/{game}/{match_id}", response_model=CoachingReport)
 async def get_report(game: Game, match_id: str, riot_id: str = Query(default="", description="Nombre#TAG"),
                      lang: str = Query(default="es", description="Idioma del informe: es | en"),
