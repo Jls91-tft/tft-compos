@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coaching · Estilo B (Última partida)</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4.5' y='18' width='5.5' height='9' rx='2' fill='%237C5CFC'/%3E%3Crect x='13.25' y='14' width='5.5' height='13' rx='2' fill='%239B7DFF'/%3E%3Crect x='22' y='12.5' width='5.5' height='14.5' rx='2' fill='%2322B8CF'/%3E%3C/svg%3E">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{--bg:#0B0D12;--surface:#13161E;--surface-2:#191D27;--border:#262B37;--soft:#1F2531;--text:#EAEDF4;--muted:#98A1B2;--muted-2:#6F7889;
+    --accent:#7C5CFC;--accent-2:#22B8CF;--grad:linear-gradient(105deg,#7C5CFC,#22B8CF);--glow:rgba(124,92,252,.4);
+    --top4:#22A565;--mid:#E6B450;--low:#EF6B4A;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(900px 460px at 82% -10%,rgba(124,92,252,.18),transparent 62%),radial-gradient(700px 380px at 4% 2%,rgba(34,184,207,.10),transparent 60%);background-attachment:fixed;}
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:13px 24px;backdrop-filter:blur(14px);background:rgba(11,13,18,.8);border-bottom:1px solid var(--border);}
+  .top .name{font-weight:850;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:17px;}
+  .gs{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:3px;gap:2px;}
+  .gs b{font-size:12px;font-weight:800;padding:6px 14px;border-radius:99px;color:var(--muted);cursor:pointer;} .gs b.on{background:var(--grad);color:#08090D;}
+  .top .nav{margin-left:auto;display:flex;gap:4px;} .top .nav a{color:var(--muted);font-size:13.5px;font-weight:700;text-decoration:none;padding:8px 12px;border-radius:9px;} .top .nav a.on{color:var(--text);background:rgba(124,92,252,.14);}
+  .back{color:var(--muted);font-size:12.5px;text-decoration:none;border:1px solid var(--border);padding:6px 12px;border-radius:99px;}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 24px 60px;}
+
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  h1{font-size:28px;font-weight:850;letter-spacing:-1px;margin:8px 0 18px;}
+
+  .hero{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:stretch;}
+  @media(max-width:860px){.hero{grid-template-columns:1fr;}}
+
+  /* Featured last match */
+  .feat{border:1px solid rgba(124,92,252,.4);border-radius:18px;background:radial-gradient(560px 240px at 85% 0%,rgba(124,92,252,.16),transparent 70%),var(--surface);padding:24px;box-shadow:0 18px 44px rgba(124,92,252,.14);display:flex;flex-direction:column;}
+  .feat .lab{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#cdbcff;margin-bottom:14px;}
+  .feat .r1{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .place{font-weight:850;font-size:14px;padding:6px 13px;border-radius:99px;}
+  .place.t4{color:#8ff0bd;background:rgba(34,165,101,.16);} .place.mid{color:#f0d79a;background:rgba(230,180,80,.16);} .place.lo{color:#ffb9a8;background:rgba(239,107,74,.16);}
+  .feat .r1 .comp{font-size:18px;font-weight:800;} .feat .r1 .meta{color:var(--muted);font-size:13px;}
+  .feat .verdict{font-size:15.5px;line-height:1.55;color:var(--text);background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px;}
+  .feat .verdict .k{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent-2);display:block;margin-bottom:7px;}
+  .feat .cta{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap;}
+  .btn{border:0;font-weight:800;font-size:14px;border-radius:99px;padding:12px 22px;cursor:pointer;}
+  .btn.p{background:var(--grad);color:#08090D;box-shadow:0 8px 22px var(--glow);}
+  .btn.g{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--border);}
+
+  /* Side rail */
+  .rail{display:flex;flex-direction:column;gap:14px;}
+  .rcard{border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:18px;}
+  .rcard .h{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent-2);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+  .rank{display:flex;align-items:center;gap:12px;}
+  .rank .badge{width:46px;height:46px;border-radius:13px;background:var(--grad);display:grid;place-items:center;font-size:22px;}
+  .rank .t{font-size:18px;font-weight:850;} .rank .lp{font-size:12.5px;color:var(--muted);}
+  .rank .wr{margin-left:auto;text-align:right;font-size:12px;color:var(--muted);} .rank .wr b{color:#8ff0bd;display:block;font-size:15px;}
+  .goal{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--soft);} .goal:first-of-type{border-top:0;padding-top:0;}
+  .goal .ic{flex-shrink:0;width:30px;height:30px;border-radius:9px;background:rgba(124,92,252,.14);border:1px solid rgba(124,92,252,.3);display:grid;place-items:center;font-size:14px;}
+  .goal .tx h3{font-size:13.5px;font-weight:700;} .goal .tx .bar{height:5px;border-radius:3px;background:#222838;margin-top:6px;overflow:hidden;width:130px;} .goal .tx .bar i{display:block;height:100%;background:var(--grad);}
+  .goal .tx .lab{font-size:11px;color:var(--muted);margin-top:4px;}
+  .allbtn{width:100%;border:0;background:var(--grad);color:#08090D;font-weight:800;font-size:13.5px;border-radius:99px;padding:11px;cursor:pointer;box-shadow:0 8px 22px var(--glow);}
+  .quota{text-align:center;font-size:11.5px;color:var(--muted);margin-top:9px;}
+
+  .lh{display:flex;align-items:center;gap:12px;margin:30px 0 12px;}
+  .lh h2{font-size:18px;font-weight:800;} .lh .hint{color:var(--muted);font-size:13px;}
+  .rows{display:flex;flex-direction:column;gap:9px;}
+  .row{display:flex;align-items:center;gap:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:13px 16px;cursor:pointer;transition:border-color .15s,transform .15s;}
+  .row:hover{border-color:rgba(124,92,252,.5);transform:translateX(2px);}
+  .row .place{flex-shrink:0;}
+  .row .comp{font-weight:750;font-size:14.5px;min-width:150px;}
+  .row .kv{color:var(--muted);font-size:12.5px;} .row .kv b{color:var(--text);font-weight:600;}
+  .row .status{margin-left:auto;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:5px;}
+  .status.ok{color:#8ff0bd;background:rgba(34,165,101,.12);} .status.old{color:var(--muted);background:rgba(255,255,255,.05);} .status.new{color:#9fe6f2;background:rgba(34,184,207,.12);}
+  .status .d{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .row .arr{color:var(--accent);font-weight:700;font-size:14px;}
+  @media(max-width:600px){.row .kv{display:none;}.row .comp{min-width:0;}}
+</style>
+</head>
+<body>
+  <div class="top">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect x="4.5" y="18" width="5.5" height="9" rx="2" fill="#7C5CFC"/><rect x="13.25" y="14" width="5.5" height="13" rx="2" fill="#9B7DFF"/><rect x="22" y="12.5" width="5.5" height="14.5" rx="2" fill="#22B8CF"/></svg>
+    <span class="name">DivisionUp</span>
+    <span class="gs"><b class="on">TFT</b><b>LoL</b></span>
+    <nav class="nav"><a>Resumen</a><a class="on">Coaching</a><a>Estadísticas</a><a>Meta</a></nav>
+    <a class="back" href="index.html">← estilos</a>
+  </div>
+
+  <div class="wrap">
+    <span class="eyebrow">Coaching IA · lo que nos diferencia</span>
+    <h1>Mejora partida a partida</h1>
+
+    <div class="hero">
+      <div class="feat">
+        <span class="lab">⭐ Tu última partida</span>
+        <div class="r1">
+          <span class="place lo">8.º</span>
+          <span class="comp">Comp ManaTrait</span>
+          <span class="meta">· nivel 9 · 33:05 · hace 12 min</span>
+        </div>
+        <div class="verdict">
+          <span class="k">Adelanto del análisis</span>
+          Llegaste tarde al pico de poder: nivel 9 con el tablero suelto y la carry sin completar. La itemización repartida fue la causa raíz del 8.º.
+        </div>
+        <div class="cta">
+          <button class="btn p">Ver coaching completo →</button>
+          <button class="btn g">Saltar a la siguiente</button>
+        </div>
+      </div>
+
+      <div class="rail">
+        <div class="rcard">
+          <div class="h">🏅 Tu rango</div>
+          <div class="rank">
+            <div class="badge">🏅</div>
+            <div><div class="t">Oro II</div><div class="lp">47 LP</div></div>
+            <div class="wr"><b>52%</b>winrate</div>
+          </div>
+        </div>
+        <div class="rcard">
+          <div class="h">📋 Plan de mejora</div>
+          <div class="goal"><div class="ic">⏱️</div><div class="tx"><h3>Subir de nivel a tiempo en etapa 3</h3><div class="bar"><i style="width:67%;"></i></div><div class="lab">Aplicado en 4/6</div></div></div>
+          <div class="goal"><div class="ic">🛡️</div><div class="tx"><h3>Proteger al portador del asesino</h3><div class="bar"><i style="width:20%;"></i></div><div class="lab">Aplicado en 1/5</div></div></div>
+        </div>
+        <div class="rcard">
+          <button class="allbtn">⚡ Analizar todas mis partidas</button>
+          <div class="quota">0 / 20 análisis usados hoy</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lh">
+      <h2>Partidas anteriores</h2>
+      <span class="hint">— elige una para ver su coaching</span>
+    </div>
+    <div class="rows">
+      <div class="row"><span class="place t4">Top 4</span><span class="comp">Comp Astronaut</span><span class="kv">nivel <b>8</b> · <b>39:11</b></span><span class="status ok"><span class="d"></span>Analizada</span><span class="arr">→</span></div>
+      <div class="row"><span class="place t4">Top 4</span><span class="comp">Comp Astronaut</span><span class="kv">nivel <b>9</b> · <b>32:41</b></span><span class="status ok"><span class="d"></span>Analizada</span><span class="arr">→</span></div>
+      <div class="row"><span class="place mid">6.º</span><span class="comp">Comp Medallion</span><span class="kv">nivel <b>8</b> · <b>35:37</b></span><span class="status old"><span class="d"></span>Antiguo</span><span class="arr">↻</span></div>
+      <div class="row"><span class="place mid">6.º</span><span class="comp">Comp Shield</span><span class="kv">nivel <b>9</b> · <b>32:55</b></span><span class="status old"><span class="d"></span>Antiguo</span><span class="arr">↻</span></div>
+      <div class="row"><span class="place t4">4.º</span><span class="comp">Comp Astronaut</span><span class="kv">nivel <b>9</b> · <b>36:19</b></span><span class="status ok"><span class="d"></span>Analizada</span><span class="arr">→</span></div>
+      <div class="row"><span class="place mid">6.º</span><span class="comp">Comp DarkStar</span><span class="kv">nivel <b>8</b> · <b>32:43</b></span><span class="status new"><span class="d"></span>Nueva</span><span class="arr">→</span></div>
+    </div>
+  </div>
+</body>
+</html>
