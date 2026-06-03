@@ -83,6 +83,16 @@
   .cv-mc h3{font-size:16px;font-weight:780;margin:0;}
   .cv-meta{font-size:12.5px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;} .cv-meta b{color:var(--text);font-weight:600;}
   .cv-cta{margin-top:auto;border-top:1px solid var(--border-soft);padding-top:11px;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:var(--accent);}
+  /* ── Informe en ventana (overlay) ── */
+  .report-ov{position:fixed;inset:0;z-index:200;}
+  .report-ov[hidden]{display:none;}
+  .report-ov-backdrop{position:absolute;inset:0;background:rgba(5,7,12,.66);backdrop-filter:blur(4px);}
+  .report-ov-panel{position:relative;margin:24px auto;width:min(1180px,calc(100% - 32px));height:calc(100vh - 48px);background:var(--bg);border:1px solid var(--border);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden;animation:ovin .22s ease;}
+  @keyframes ovin{from{opacity:0;transform:translateY(10px) scale(.99);}to{opacity:1;transform:none;}}
+  .report-ov-close{position:absolute;top:12px;right:14px;z-index:3;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:rgba(19,22,30,.92);color:var(--text);font-size:15px;cursor:pointer;transition:border-color .15s ease;}
+  .report-ov-close:hover{border-color:var(--accent);}
+  .report-ov iframe{width:100%;height:100%;border:0;display:block;background:var(--bg);}
+  @media(max-width:560px){.report-ov-panel{margin:0;width:100%;height:100%;border-radius:0;border:0;}}
 </style>
 </head>
 <body>
@@ -150,6 +160,15 @@
         <div id="meta-body"></div>
       </section>
     </main>
+
+  <!-- Informe como ventana (overlay con URL propia #report/<juego>/<id>) -->
+  <div id="report-ov" class="report-ov" hidden>
+    <div class="report-ov-backdrop" onclick="closeReport()"></div>
+    <div class="report-ov-panel">
+      <button class="report-ov-close" onclick="closeReport()" aria-label="Cerrar informe" title="Cerrar (Esc)">✕</button>
+      <iframe id="report-frame" title="Informe de coaching" src="about:blank"></iframe>
+    </div>
+  </div>
 
   <div class="analyzing" id="analyzing" role="status" aria-live="polite">
     <div class="box">
@@ -471,17 +490,45 @@ function renderMetaList() {
 }
 
 /* ---------- Generar coaching (overlay → informe) ---------- */
+// Abre el informe como ventana (overlay) con URL propia: #report/<juego>/<id>
 function openReport(game, id) {
-  const steps = Array.from(document.querySelectorAll("#an-steps li"));
-  document.getElementById("analyzing").classList.add("show");
-  steps.forEach(s => s.classList.remove("done", "active"));
-  let i = 0; steps[0].classList.add("active");
-  const timer = setInterval(() => {
-    steps[i].classList.remove("active"); steps[i].classList.add("done"); i++;
-    if (i < steps.length) steps[i].classList.add("active");
-    else { clearInterval(timer); location.href = `informe.html?game=${game}&id=${id}`; }
-  }, 700);
+  location.hash = "report/" + game + "/" + id;
 }
+function showReportOverlay(game, encId) {
+  const ov = document.getElementById("report-ov");
+  const fr = document.getElementById("report-frame");
+  const src = "informe.html?game=" + game + "&id=" + encId;
+  if (fr.getAttribute("data-src") !== src) { fr.src = src; fr.setAttribute("data-src", src); }
+  ov.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+function hideReportOverlay() {
+  const ov = document.getElementById("report-ov");
+  if (!ov || ov.hidden) return;
+  ov.hidden = true;
+  document.body.style.overflow = "";
+  const fr = document.getElementById("report-frame");
+  fr.src = "about:blank"; fr.removeAttribute("data-src");
+}
+function closeReport() {
+  if (location.hash.indexOf("#report/") === 0) location.hash = "coaching"; // Atrás/cierre → vuelve a la lista
+  else hideReportOverlay();
+}
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeReport(); });
+// Enrutado por hash: vistas (#coaching…) y ventana de informe (#report/<juego>/<id>)
+function handleHash() {
+  const h = location.hash.replace(/^#/, "");
+  const m = h.match(/^report\/(tft|lol)\/(.+)$/);
+  if (m) {
+    if (m[1] !== currentGame) setGame(m[1]);
+    if (currentView !== "coaching") showView("coaching");
+    showReportOverlay(m[1], m[2]);
+    return;
+  }
+  hideReportOverlay();
+  if (["resumen", "coaching", "stats", "meta"].includes(h) && currentView !== h) showView(h);
+}
+window.addEventListener("hashchange", handleHash);
 
 /* ---------- Init ---------- */
 const _ri = document.getElementById("riot-input");
@@ -499,8 +546,7 @@ function _commitRiot(force) {
 _rf.addEventListener("submit", (e) => { e.preventDefault(); _commitRiot(true); _ri.blur(); });
 _ri.addEventListener("blur", () => _commitRiot(false));
 
-const _hash = location.hash.replace("#", "");
-if (["resumen", "coaching", "stats", "meta"].includes(_hash)) showView(_hash);
+if (location.hash.replace(/^#/, "")) handleHash();
 else renderResumen();
 </script>
 <script src="assets/i18n.js"></script>

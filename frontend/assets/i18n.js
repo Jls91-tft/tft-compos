@@ -21,6 +21,9 @@
   var DICT = {
     // Navegación / chrome
     "Coaching": "Coaching",
+    "Resumen": "Summary",
+    "Errores": "Mistakes",
+    "Comparativa": "Comparison",
     "Estadísticas": "Stats",
     "Meta": "Meta",
     "Lab": "Lab",

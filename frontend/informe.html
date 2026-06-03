@@ -23,6 +23,10 @@
   .rep-chat h3{margin-top:0;}
   .rep-chat .chat-log{flex:1;overflow-y:auto;min-height:150px;}
   @media(max-width:960px){.rep-chat{position:static;max-height:none;}}
+  /* Embebido en la ventana (overlay) de la app: sin topbar/footer/volver duplicados */
+  body.embedded .topbar, body.embedded footer, body.embedded .crumbs .path, body.embedded .crumbs a.back-link{display:none;}
+  body.embedded .crumbs{justify-content:flex-end;}
+  body.embedded #main{padding-top:16px;}
 </style>
 </head>
 <body>
@@ -75,6 +79,7 @@
 
 <script src="assets/api.js"></script>
 <script>
+if (window.self !== window.top) document.body.classList.add("embedded"); // dentro de la ventana de la app
 const params = new URLSearchParams(location.search);
 const GAME = params.get("game") === "lol" ? "lol" : "tft";
 const ID = decodeURIComponent(params.get("id") || "");
