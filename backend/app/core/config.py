@@ -1,4 +1,4 @@
-"""Configuración central de Aevyn. Lee variables de entorno / fichero .env.
+"""Configuración central de DivisionUp. Lee variables de entorno / fichero .env.
 
 Las credenciales NUNCA van en el código: se inyectan por entorno. Aquí solo
 hay valores por defecto seguros y placeholders.

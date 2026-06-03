@@ -1,4 +1,4 @@
-# Aevyn — orquestación de servicios (ETAPA 2)
+# DivisionUp — orquestación de servicios (ETAPA 2)
 # En el OTRO PC:  cp .env.example .env  →  rellena .env  →  docker compose up -d --build
 #
 #   api         → backend FastAPI (http://localhost:8000, docs en /docs)

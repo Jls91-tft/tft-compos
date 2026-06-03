@@ -1,4 +1,4 @@
-"""Aevyn API — punto de entrada FastAPI (ETAPA 2).
+"""DivisionUp API — punto de entrada FastAPI (ETAPA 2).
 
 En la Fase 0 la API responde con datos de EJEMPLO (mock) que replican el
 prototipo, para poder conectar el frontend cuanto antes. En las siguientes
@@ -13,7 +13,7 @@ from app.core.config import settings
 from app.routers import health, riot, coaching, stats, meta, chat, lab
 
 app = FastAPI(
-    title="Aevyn API",
+    title="DivisionUp API",
     description="Coaching IA y estadísticas para auto-battler (TFT) y MOBA (LoL).",
     version="0.2.0-etapa2",
 )
@@ -40,7 +40,7 @@ app.include_router(lab.router)
 def root():
     """Raíz informativa."""
     return {
-        "app": "Aevyn API",
+        "app": "DivisionUp API",
         "version": app.version,
         "modo": "mock" if settings.use_mock else "real",
         "docs": "/docs",

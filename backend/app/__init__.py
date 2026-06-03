@@ -1,1 +1,1 @@
-"""Aevyn API — coaching IA + estadísticas para TFT y LoL (ETAPA 2)."""
+"""DivisionUp API — coaching IA + estadísticas para TFT y LoL (ETAPA 2)."""

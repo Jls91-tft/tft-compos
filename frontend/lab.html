@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aevyn — Lab (centro de entrenamiento)</title>
+<title>DivisionUp — Lab (centro de entrenamiento)</title>
 <!--
   MAQUETA de rediseño (ETAPA 2) — look "vibrante con profundidad" + sección Lab.
   Autónoma (doble clic). Datos de ejemplo. Marca propia, sin assets de Riot.
@@ -231,7 +231,7 @@
         <circle cx="22" cy="23" r="3" fill="#C4B5FD"/><circle cx="10" cy="23" r="2" fill="#8B5CF6"/>
         <path d="M9 11 L23 9 M9 11 L22 23 M23 9 L22 23 M10 23 L9 11" stroke="#8B5CF6" stroke-width="1.4" stroke-opacity=".55"/>
       </svg>
-      <span class="name">Aevyn</span>
+      <span class="name">DivisionUp</span>
     </div>
     <div class="game-switch" role="group" aria-label="Juego">
       <button id="g-tft" aria-pressed="true" onclick="setGame('tft')">TFT</button>
@@ -280,7 +280,7 @@
   </div>
 
   <button class="clean-exit" onclick="toggleClean()">✕ Salir de captura</button>
-  <footer>Aevyn — Lab (maqueta de rediseño · datos de ejemplo). Marca propia, no afiliada a los titulares de los juegos.</footer>
+  <footer>DivisionUp — Lab (maqueta de rediseño · datos de ejemplo). Marca propia, no afiliada a los titulares de los juegos.</footer>
 
 <script>
 /* ============ DATOS DE EJEMPLO (mock) — sin nombres de Riot ============
@@ -663,7 +663,7 @@ async function exportPNG(){
   simToast('Generando imagen…');
   try{
     const canvas = await html2canvas(target,{backgroundColor:'#090B11',scale:2,useCORS:true});
-    const a=document.createElement('a'); a.download='aevyn-comp.png'; a.href=canvas.toDataURL('image/png'); a.click();
+    const a=document.createElement('a'); a.download='divisionup-comp.png'; a.href=canvas.toDataURL('image/png'); a.click();
     simToast('Imagen descargada ✓');
   }catch(e){ simToast('No se pudo generar; usa imprimir'); window.print(); }
 }

@@ -1,4 +1,4 @@
-# Arquitectura de Aevyn
+# Arquitectura de DivisionUp
 
 ## Componentes
 ```mermaid

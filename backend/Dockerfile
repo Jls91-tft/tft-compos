@@ -1,4 +1,4 @@
-# Aevyn API — imagen del backend (FastAPI)
+# DivisionUp API — imagen del backend (FastAPI)
 FROM python:3.12-slim
 
 WORKDIR /app

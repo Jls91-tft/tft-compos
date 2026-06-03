@@ -1,6 +1,6 @@
 # Despliegue de la beta (gratis o casi gratis)
 
-Objetivo: Aevyn funcionando para **usuarios controlados** (beta cerrada), barato y fiable.
+Objetivo: DivisionUp funcionando para **usuarios controlados** (beta cerrada), barato y fiable.
 El despliegue es **idéntico en cualquier VM Linux**: Docker Compose + Cloudflare Tunnel. Como la IA va por **Groq (API)**, basta con **~1 GB de RAM**.
 
 ## Arquitectura
@@ -54,10 +54,10 @@ TUNNEL_TOKEN=...            # del paso 5
 ## 5. Cloudflare Tunnel (HTTPS sin abrir puertos)
 1. Añade tu **dominio a Cloudflare** (gratis; o uno barato).
 2. **Zero Trust → Networks → Tunnels → Create tunnel** → copia el **token** → `TUNNEL_TOKEN`.
-3. **Public Hostname**: `aevyn.tudominio.com` → Service **HTTP** `web:80`.
+3. **Public Hostname**: `divisionup.tudominio.com` → Service **HTTP** `web:80`.
 
 ## 6. Beta cerrada — Cloudflare Access (gratis ≤50 usuarios)
-1. **Zero Trust → Access → Applications → Add → Self-hosted** → dominio `aevyn.tudominio.com`.
+1. **Zero Trust → Access → Applications → Add → Self-hosted** → dominio `divisionup.tudominio.com`.
 2. **Policy** *Allow* → regla **Emails** con los correos de tus beta testers.
 3. Login por One-time PIN (email) o Google. Solo esos correos entran.
 
@@ -85,7 +85,7 @@ proteger todo el dominio (como en el paso 1 de arriba), en la aplicación de Acc
 docker compose -f docker-compose.prod.yml up -d --build
 docker compose -f docker-compose.prod.yml logs -f api
 ```
-Abre **https://aevyn.tudominio.com** → login de Access → la app.
+Abre **https://divisionup.tudominio.com** → login de Access → la app.
 
 > ¿Ollama local en vez de Groq? Solo en VM con RAM suficiente (Hetzner): `LLM_PROVIDER=ollama` y `--profile local-llm`.
 

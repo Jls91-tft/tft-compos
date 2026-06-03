@@ -3,7 +3,7 @@
 > Léelo antes de tocar nada. Resume el proyecto, las reglas y dónde está cada cosa.
 > Documentación complementaria: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`backend/README.md`](backend/README.md), [`frontend/README.md`](frontend/README.md).
 
-## Qué es Aevyn
+## Qué es DivisionUp
 Plataforma de **coaching IA + estadísticas** para **TFT** (auto-battler) y **LoL** (MOBA).
 El **coaching tras cada partida es el diferencial** (errores, correcciones, plan accionable y chat con el coach). Estadísticas y meta son complementos.
 

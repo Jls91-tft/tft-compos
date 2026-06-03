@@ -1,4 +1,4 @@
-# Backend — Aevyn API (FastAPI)
+# Backend — DivisionUp API (FastAPI)
 
 API de coaching IA + estadísticas para TFT y LoL.
 

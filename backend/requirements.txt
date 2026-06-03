@@ -1,4 +1,4 @@
-# Aevyn API — dependencias (ETAPA 2)
+# DivisionUp API — dependencias (ETAPA 2)
 # Se instalan en el OTRO PC con: pip install -r requirements.txt  (o vía Docker)
 fastapi==0.115.*
 uvicorn[standard]==0.32.*

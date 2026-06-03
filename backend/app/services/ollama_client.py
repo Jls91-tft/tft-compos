@@ -38,7 +38,7 @@ class OllamaClient:
                 "https://openrouter.ai/api/v1/chat/completions",
                 settings.openrouter_api_key, settings.openrouter_model, "OpenRouter",
                 prompt, system, json_mode,
-                extra_headers={"HTTP-Referer": "https://aevyn.gg", "X-Title": "Aevyn"},
+                extra_headers={"HTTP-Referer": "https://divisionup.gg", "X-Title": "DivisionUp"},
             )
         return await self._ollama(prompt, system, json_mode)
 
