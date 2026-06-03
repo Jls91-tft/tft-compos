@@ -32,6 +32,50 @@
 
     // ───────── Home / Landing ─────────
     "Funciones": "Features",
+
+    // ── Home: secciones nuevas (problema / preview / FAQ) ──
+    "¿Atascado de rango? No es (solo) mala suerte": "Hardstuck? It's not (just) bad luck",
+    "Pierdes partidas y no sabes exactamente por qué. Las webs de estadísticas te dan números, pero no te dicen qué decisión te costó el puesto.":
+      "You lose games and don't know exactly why. Stats sites give you numbers, but they don't tell you which decision cost you the placement.",
+    "Juegas a ciegas": "You play blind",
+    "Repites los mismos errores partida tras partida porque nadie te los señala con datos.":
+      "You repeat the same mistakes game after game because nobody points them out with data.",
+    "Consejos genéricos": "Generic advice",
+    '"Mejora tu macro", "farmea más"… frases vacías que no se anclan a TU partida.':
+      "\"Improve your macro\", \"farm more\"… empty phrases not anchored to YOUR game.",
+    "Sin un plan": "No plan",
+    "Sabes que algo falla, pero no qué entrenar primero para subir de verdad.":
+      "You know something's off, but not what to train first to actually climb.",
+    "Así es un informe de DivisionUp": "This is what a DivisionUp report looks like",
+    "Cada partida, un análisis profundo anclado a tus datos reales: errores, comparación con el ganador y qué hiciste bien.":
+      "Every game, a deep analysis anchored to your real data: mistakes, comparison with the winner and what you did well.",
+    "Caíste en la ronda 26 porque tu tablero llegó suelto: nivel 8 con menos densidad y unidades de coste alto que el ganador. La itemización repartida fue la causa raíz del 8.º puesto.":
+      "You went out in round 26 because your board arrived weak: level 8 with less density and fewer high-cost units than the winner. Spread itemization was the root cause of 8th place.",
+    "Comparación con el Top 1": "Comparison with 1st place",
+    "El ganador tenía nivel 10 (2 más que tú), 10 unidades a 2★ o más (4 más) y una a 3★ que tú no tenías. Ambos con 3 ítems en la carry.":
+      "The winner was level 10 (2 more than you), 10 units at 2★ or more (4 more) and one 3★ you didn't have. Both with 3 items on the carry.",
+    "Error de decisión": "Decision error",
+    "Mantuviste 2 tanques de 4 coste contestados por 3 rivales: bloqueó tu economía sin densidad para sobrevivir.":
+      "You kept 2 four-cost tanks contested by 3 opponents: it choked your economy without enough density to survive.",
+    "Lo que hiciste bien": "What you did well",
+    "Tu carry principal quedó completamente itemizada con sus 3 ítems de daño, y colocaste 6 unidades a 2★ pese al nivel bajo.":
+      "Your main carry ended fully itemized with its 3 damage items, and you fielded 6 units at 2★ despite the low level.",
+    "Preguntas frecuentes": "FAQ",
+    "¿Cómo obtiene DivisionUp mis partidas?": "How does DivisionUp get my games?",
+    "Con la API oficial de Riot. Solo necesitas tu Riot ID (Nombre#TAG); leemos tus partidas recientes de TFT y LoL.":
+      "Through the official Riot API. You just need your Riot ID (Name#TAG); we read your recent TFT and LoL games.",
+    "¿En qué se diferencia de una web de estadísticas?": "How is it different from a stats site?",
+    "Las webs de stats te dan números. DivisionUp te da coaching: te dice qué decisión te costó el puesto, lo compara con quien ganó y te marca un plan para mejorar.":
+      "Stats sites give you numbers. DivisionUp gives you coaching: it tells you which decision cost you the placement, compares it with the winner and sets you a plan to improve.",
+    "¿Funciona para TFT y para LoL?": "Does it work for both TFT and LoL?",
+    "Sí, en ambos. En TFT analizamos tablero, itemización y lobby; en LoL, tu rendimiento frente a tu rival de línea y tus muertes por fase.":
+      "Yes, both. In TFT we analyze board, itemization and lobby; in LoL, your performance vs your lane opponent and your deaths by phase.",
+    "¿Es gratis?": "Is it free?",
+    "Estamos en beta cerrada por invitación. Más adelante habrá un plan de acceso; quienes entren en la beta tendrán condiciones especiales.":
+      "We're in a closed, invite-only beta. There will be an access plan later; beta members will get special terms.",
+    "¿Estáis afiliados a Riot Games?": "Are you affiliated with Riot Games?",
+    "No. DivisionUp es una marca independiente; usamos la API oficial de Riot solo para mostrar tus datos reales.":
+      "No. DivisionUp is an independent brand; we use the official Riot API only to show your real data.",
     "Cómo funciona": "How it works",
     "Acceso": "Access",
     "Acceder": "Sign in",
