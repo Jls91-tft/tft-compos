@@ -72,6 +72,40 @@ def lol_comparison(match: dict, puuid: str) -> dict:
     return out
 
 
+# 'challenges' de match-v5 de alta señal para coaching (apiName → etiqueta legible, transform)
+_LOL_CHALLENGES = [
+    ("goldPerMinute", "oro_por_min", lambda v: round(v)),
+    ("damagePerMinute", "dano_por_min", lambda v: round(v)),
+    ("laneMinionsFirst10Minutes", "cs_primeros_10_min", lambda v: round(v)),
+    ("maxLevelLeadLaneOpponent", "ventaja_max_nivel_vs_rival", lambda v: int(v)),
+    ("laningPhaseGoldExpAdvantage", "ventaja_oro_exp_en_lineas", lambda v: int(v)),
+    ("soloKills", "asesinatos_en_solitario", lambda v: int(v)),
+    ("controlWardsPlaced", "guardianes_de_control", lambda v: int(v)),
+    ("dragonTakedowns", "participacion_dragones", lambda v: int(v)),
+    ("baronTakedowns", "participacion_barones", lambda v: int(v)),
+    ("turretPlatesTaken", "placas_de_torre", lambda v: int(v)),
+    ("skillshotsHit", "habilidades_acertadas", lambda v: int(v)),
+    ("skillshotsDodged", "habilidades_esquivadas", lambda v: int(v)),
+]
+
+
+def lol_challenges(match: dict, puuid: str) -> dict:
+    """Métricas avanzadas YA calculadas por Riot ('challenges' de match-v5), curadas.
+    Sale del propio match-v5 (sin llamadas extra). Campos ausentes se omiten."""
+    me = next((p for p in match.get("info", {}).get("participants", []) if p.get("puuid") == puuid), {})
+    ch = me.get("challenges") or {}
+    out = {}
+    for api, label, fn in _LOL_CHALLENGES:
+        v = ch.get(api)
+        if v is None:
+            continue
+        try:
+            out[label] = fn(v)
+        except (TypeError, ValueError):
+            continue
+    return out
+
+
 def tft_signals(summary: dict) -> dict:
     """Hechos calculados del tablero FINAL (verificables), para anclar el análisis."""
     units = summary.get("unidades", []) or []
@@ -227,6 +261,9 @@ def enrich(game: str, match: dict, summary: dict, puuid: str, timeline: dict | N
     """summary (de extract_summary) + hechos calculados según el juego."""
     if game == "lol":
         out = {**summary, "comparativa": lol_comparison(match, puuid)}
+        ch = lol_challenges(match, puuid)
+        if ch:
+            out["challenges"] = ch
         if timeline:
             out["linea_temporal"] = _lol_timeline(match, puuid, timeline)
         return out

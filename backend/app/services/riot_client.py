@@ -113,6 +113,43 @@ class RiotClient:
         data = await self._get(url)
         return data.get("entries", []) if isinstance(data, dict) else []
 
+    async def get_rank(self, puuid: str, game: str, platform: str | None = None) -> dict | None:
+        """Rango/LP del jugador (league-v4 / tft-league-v1, by-puuid). Devuelve None si no está
+        rankeado o si falla: el rango es CONTEXTO, nunca debe romper el informe."""
+        base = self._platform_base(platform)
+        if game == "tft":
+            url = f"{base}/tft/league/v1/entries/by-puuid/{puuid}"
+            preferidas = ("RANKED_TFT",)
+        else:
+            url = f"{base}/lol/league/v4/entries/by-puuid/{puuid}"
+            preferidas = ("RANKED_SOLO_5x5", "RANKED_FLEX_SR")
+        try:
+            data = await self._get(url)
+        except Exception:
+            return None
+        if not isinstance(data, list) or not data:
+            return None
+        entry = None
+        for q in preferidas:
+            entry = next((e for e in data if e.get("queueType") == q), None)
+            if entry:
+                break
+        entry = entry or data[0]
+        w = entry.get("wins", 0) or 0
+        losses = entry.get("losses", 0) or 0
+        total = w + losses
+        colas = {"RANKED_SOLO_5x5": "Solo/Dúo", "RANKED_FLEX_SR": "Flexible", "RANKED_TFT": "TFT"}
+        return {
+            "cola": colas.get(entry.get("queueType"), entry.get("queueType")),
+            "tier": entry.get("tier"),
+            "division": entry.get("rank"),
+            "lp": entry.get("leaguePoints"),
+            "victorias": w,
+            "derrotas": losses,
+            "winrate_pct": round(100 * w / total) if total else None,
+            "racha_victorias": bool(entry.get("hotStreak")),
+        }
+
     async def get_summoner_puuid(self, summoner_id: str, game: str,
                                  platform: str | None = None) -> str:
         """summonerId → puuid (tft-summoner-v1 · summoner-v4)."""

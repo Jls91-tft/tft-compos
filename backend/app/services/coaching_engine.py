@@ -43,6 +43,12 @@ async def generate_report(game: str, match_id: str, riot_id: str = "", lang: str
         await tft_names.ensure_loaded()   # nombres reales de rasgos/unidades (cacheado)
     summary = prompts.extract_summary(game, match, puuid)
     payload = match_features.enrich(game, match, summary, puuid, timeline)
+    try:
+        rango = await riot_client.get_rank(puuid, game)
+        if rango:
+            payload["rango"] = rango
+    except Exception:
+        pass
     base = {"game": game, "match_id": match_id, "metrics": match_features.metrics_for(game, summary)}
     model = current_model()
     system = prompts.system_report(lang)

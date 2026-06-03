@@ -9,7 +9,7 @@ import re
 from app.schemas.models import CoachingReport, ImprovementPlan
 from app.services import tft_names
 
-PROMPT_VERSION = "report-v3.1-nombres-lol-2026-06"   # sube esto al mejorar el prompt/motor → invalida cachés
+PROMPT_VERSION = "report-v3.2-rango-challenges-2026-06"   # sube esto al mejorar el prompt/motor → invalida cachés
 PLAN_PROMPT_VERSION = "plan-v4.1-analista-2026-06"
 
 # --- Voz del coach (system prompt) ---
@@ -169,6 +169,7 @@ def _tft_summary(match: dict, puuid: str) -> dict:
         "oro_sobrante": me.get("gold_left"),
         "jugadores_eliminados": me.get("players_eliminated"),
         "daño_a_jugadores": me.get("total_damage_to_players"),
+        "supervivencia_seg": me.get("time_eliminated"),
         "aumentos": [_clean_id(a) for a in me.get("augments", [])],
         "rasgos_activos": traits,
         "unidades": units,
@@ -629,12 +630,26 @@ def build_report_prompt_v2(game: str, payload: dict, lang: str = "es") -> str:
     else:
         blocks.append(
             "DATOS EN LoL: tienes el resumen, la 'comparativa' (rival de línea, diferencias contigo, cuota de daño y "
-            "participación en kills del equipo) y la 'linea_temporal' (muertes con timestamp, fase y posición). Usa esos "
+            "participación en kills del equipo), 'challenges' (métricas avanzadas YA calculadas por Riot: oro/min, "
+            "daño/min, CS en los primeros 10 min, ventaja máxima de nivel sobre tu rival, ventaja de oro/exp en fase de "
+            "líneas, asesinatos en solitario, guardianes de control, participación en dragones/barones, placas de torre, "
+            "habilidades acertadas/esquivadas) y la 'linea_temporal' (muertes con timestamp, fase y posición). Usa esos "
             "datos REALES para anclar la evidencia; no inventes momentos ni cifras que no estén en los datos."
             if es else
             "DATA IN LoL: you have the summary, the 'comparativa' (lane opponent, diffs vs you, team damage share and kill "
-            "participation) and the 'linea_temporal' (deaths with timestamp, phase and position). Use those REAL data to "
-            "anchor evidence; never invent moments or numbers not present in the data.")
+            "participation), 'challenges' (advanced metrics ALREADY computed by Riot: gold/min, damage/min, CS in the first "
+            "10 min, max level lead over your lane opponent, gold/exp advantage in the laning phase, solo kills, control "
+            "wards, dragon/baron takedowns, turret plates, skillshots hit/dodged) and the 'linea_temporal' (deaths with "
+            "timestamp, phase and position). Use those REAL data to anchor evidence; never invent moments or numbers not "
+            "present in the data.")
+    blocks.append(
+        "RANGO DEL JUGADOR: si el payload trae 'rango' (cola, tier, división y LP), úsalo SOLO como contexto para "
+        "calibrar el listón —lo que se espera a ese elo— y juzgar si su rendimiento está por encima o por debajo de su "
+        "nivel. No es un dato de ESTA partida y NO es un error en sí mismo. Si no hay 'rango', ignóralo."
+        if es else
+        "PLAYER RANK: if the payload has 'rango' (queue, tier, division and LP), use it ONLY as context to calibrate the "
+        "bar —what's expected at that elo— and to judge whether their performance is above or below their level. It is "
+        "not a stat from THIS game and is NOT a mistake by itself. If 'rango' is absent, ignore it.")
     if game == "tft":
         blocks.append(_FRAMEWORK_TFT_ES if es else _FRAMEWORK_TFT_EN)
     else:
