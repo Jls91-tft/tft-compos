@@ -33,6 +33,35 @@
     // ───────── Home / Landing ─────────
     "Funciones": "Features",
 
+    // ── Home "Nebula" (rediseño): etiquetas de sección y textos nuevos ──
+    "El problema": "The problem",
+    "Qué hace DivisionUp": "What DivisionUp does",
+    "Coaching de verdad, no otro panel de stats": "Real coaching, not another stats dashboard",
+    "Así es un informe": "What a report looks like",
+    "Llegaste tarde al pico de poder y el tablero no aguantó.":
+      "You hit your power spike too late and the board couldn't hold.",
+    "Pico de poder tardío y tablero contestado.": "Late power spike and a contested board.",
+    "detectado y explicado": "detected and explained",
+    "+2 niveles": "+2 levels",
+    "vs. el ganador": "vs. the winner",
+    "de tus partidas analizadas": "of your games analyzed",
+    "juegos: TFT y LoL": "games: TFT & LoL",
+    "comparación con quien ganó": "comparison with the winner",
+    "accionable y medible": "actionable, measurable",
+    "Tanques contestados manteniendo economía sin densidad.":
+      "Contested tanks while holding economy without board density.",
+    "Veredicto claro de por qué quedaste donde quedaste.":
+      "A clear verdict on why you placed where you did.",
+    "Comparación con el Top 1: nivel, tablero e itemización.":
+      "Comparison with 1st place: level, board and itemization.",
+    "Errores priorizados por severidad, no una lista plana.":
+      "Mistakes ranked by severity, not a flat list.",
+    "Lo que hiciste bien, para no romper lo que funciona.":
+      "What you did well, so you don't break what works.",
+    "Empieza a subir": "Start climbing",
+    "Conecta tu Riot ID y deja que la IA te diga exactamente qué entrenar primero.":
+      "Connect your Riot ID and let the AI tell you exactly what to train first.",
+
     // ── Home: secciones nuevas (problema / preview / FAQ) ──
     "¿Atascado de rango? No es (solo) mala suerte": "Hardstuck? It's not (just) bad luck",
     "Pierdes partidas y no sabes exactamente por qué. Las webs de estadísticas te dan números, pero no te dicen qué decisión te costó el puesto.":

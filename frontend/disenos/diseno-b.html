@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DivisionUp — Coaching IA para TFT y LoL · Diseño B (Studio)</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4.5' y='18' width='5.5' height='9' rx='2' fill='%237C5CFC'/%3E%3Crect x='13.25' y='14' width='5.5' height='13' rx='2' fill='%239B7DFF'/%3E%3Crect x='22' y='12.5' width='5.5' height='14.5' rx='2' fill='%2322B8CF'/%3E%3C/svg%3E">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --bg:#FBFBFD;--panel:#FFFFFF;--panel-2:#F4F4F7;--ink:#0E1116;--ink-2:#3A3F4B;--muted:#6B7180;--line:#E9E9EF;--line-2:#DEDEE6;
+    --accent:#6B4DF0;--accent-2:#0FA9C0;--accent-soft:#EFEBFF;--accent-grad:linear-gradient(100deg,#6B4DF0,#0FA9C0);
+    --r:16px;--r-sm:10px;--r-pill:999px;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sh-sm:0 1px 2px rgba(16,18,30,.05),0 4px 14px rgba(16,18,30,.05);
+    --sh:0 12px 36px rgba(16,18,40,.10);--sh-lg:0 30px 70px rgba(16,18,40,.16);
+  }
+  html{scroll-behavior:smooth;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+  .accent{color:var(--accent);}
+  .mono{font-family:var(--mono);}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:50;background:rgba(251,251,253,.8);backdrop-filter:blur(14px);border-bottom:1px solid transparent;transition:border-color .3s ease;}
+  nav.scrolled{border-color:var(--line);}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:68px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .name{font-size:20px;font-weight:800;letter-spacing:-.2px;color:var(--ink);}
+  .nav-links{display:flex;align-items:center;gap:4px;}
+  .nav-links a{color:var(--ink-2);font-weight:600;font-size:14px;padding:9px 13px;border-radius:9px;transition:.18s;}
+  .nav-links a:hover{color:var(--ink);background:var(--panel-2);}
+  .nav-cta{display:flex;align-items:center;gap:12px;}
+  .lang{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line-2);border-radius:8px;padding:6px 10px;cursor:pointer;}
+  .lang:hover{color:var(--ink);border-color:var(--accent);}
+  @media(max-width:840px){.nav-links{display:none;}}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:650;font-size:14.5px;padding:11px 20px;border-radius:11px;cursor:pointer;border:1px solid transparent;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease;white-space:nowrap;}
+  .btn-primary{background:var(--ink);color:#fff;}
+  .btn-primary:hover{transform:translateY(-1px);background:#000;box-shadow:0 10px 24px rgba(16,18,30,.22);}
+  .btn-accent{background:var(--accent);color:#fff;box-shadow:0 8px 22px rgba(107,77,240,.28);}
+  .btn-accent:hover{transform:translateY(-1px);filter:brightness(1.05);}
+  .btn-line{background:var(--panel);color:var(--ink);border-color:var(--line-2);}
+  .btn-line:hover{border-color:var(--ink);}
+  .btn-sm{padding:8px 16px;font-size:13.5px;}
+
+  /* eyebrow */
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border-radius:8px;padding:6px 12px;}
+
+  /* HERO */
+  .hero{padding:80px 0 30px;text-align:center;}
+  .hero h1{font-size:clamp(40px,6.5vw,72px);font-weight:800;letter-spacing:-2.5px;line-height:1.02;margin:26px auto 0;max-width:880px;}
+  .hero h1 .accent{background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero .sub{color:var(--muted);font-size:19px;line-height:1.6;max-width:600px;margin:24px auto 0;}
+  .hero .ctas{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-top:34px;}
+  .hero .micro{margin-top:20px;font-size:13px;color:var(--muted);font-family:var(--mono);}
+
+  /* browser frame product */
+  .frame-wrap{margin:56px auto 0;max-width:1000px;position:relative;}
+  .frame-wrap::after{content:"";position:absolute;left:8%;right:8%;bottom:-30px;height:60px;background:radial-gradient(ellipse,rgba(107,77,240,.22),transparent 70%);filter:blur(20px);z-index:-1;}
+  .frame{background:var(--panel);border:1px solid var(--line-2);border-radius:18px;box-shadow:var(--sh-lg);overflow:hidden;}
+  .frame .bar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line);background:var(--panel-2);}
+  .frame .bar .dots{display:flex;gap:6px;}
+  .frame .bar .dots i{width:11px;height:11px;border-radius:50%;display:block;background:#D9D9E2;}
+  .frame .bar .url{flex:1;text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 12px;max-width:300px;margin:0 auto;}
+  .frame .screen{padding:26px;display:grid;grid-template-columns:1fr 1.15fr;gap:22px;text-align:left;background:linear-gradient(180deg,#fff,#FAFAFC);}
+  @media(max-width:720px){.frame .screen{grid-template-columns:1fr;}}
+  .sidebar{display:flex;flex-direction:column;gap:10px;}
+  .sb-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;}
+  .sb-card .k{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+  .sb-card .v{font-size:24px;font-weight:800;letter-spacing:-1px;margin-top:4px;}
+  .sb-card .v.ac{background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .barsmini{display:flex;align-items:flex-end;gap:8px;height:64px;margin-top:10px;}
+  .barsmini i{flex:1;border-radius:5px 5px 0 0;display:block;}
+  /* report block */
+  .rep{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;}
+  .rep .h{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);background:linear-gradient(100deg,var(--accent-soft),#fff);}
+  .rep .badge{width:44px;height:44px;border-radius:11px;background:var(--accent-grad);color:#fff;display:grid;place-items:center;font-weight:800;font-size:18px;flex-shrink:0;}
+  .rep .h .m{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+  .rep .h .ve{font-size:13.5px;font-weight:700;margin-top:2px;}
+  .rep .b{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+  .rblk{border:1px solid var(--line);border-left:3px solid var(--line-2);border-radius:9px;padding:11px 13px;}
+  .rblk h5{font-size:12.5px;font-weight:750;display:flex;gap:8px;align-items:center;margin-bottom:5px;}
+  .rblk p{font-size:12px;color:var(--ink-2);line-height:1.5;}
+  .rblk.cmp{border-left-color:var(--accent-2);background:#F2FBFD;} .rblk.cmp h5{color:#0a8499;}
+  .rblk.err{border-left-color:#EF6B4A;} .sev{font-family:var(--mono);font-size:10px;font-weight:700;color:#c2391a;background:#FCE7E0;border-radius:5px;padding:1px 6px;}
+  .rblk.win{border-left-color:#22A565;} .rblk.win h5{color:#198a52;}
+
+  /* logos / trust */
+  .trust-row{margin-top:60px;text-align:center;}
+  .trust-row .lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
+  .trust-row .items{display:flex;justify-content:center;gap:36px;flex-wrap:wrap;color:var(--ink-2);font-weight:700;font-size:15px;opacity:.7;}
+  .trust-row .items span{display:flex;align-items:center;gap:8px;}
+
+  /* SECTION shell */
+  .sec{padding:90px 0;}
+  .sec-head{max-width:680px;margin:0 auto 52px;text-align:center;}
+  .sec-head h2{font-size:clamp(30px,4.6vw,46px);font-weight:800;letter-spacing:-1.6px;line-height:1.08;margin-top:16px;}
+  .sec-head p{color:var(--muted);font-size:17px;line-height:1.6;margin-top:14px;}
+
+  /* PROBLEM */
+  .problems{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  @media(max-width:780px){.problems{grid-template-columns:1fr;}}
+  .prob{border:1px solid var(--line);border-radius:var(--r);padding:28px;background:var(--panel);box-shadow:var(--sh-sm);}
+  .prob .n{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;margin-bottom:14px;}
+  .prob h3{font-size:18px;font-weight:750;margin-bottom:8px;}
+  .prob p{color:var(--muted);font-size:14.5px;}
+
+  /* FEATURES bento (line style) */
+  .bento{display:grid;grid-template-columns:repeat(6,1fr);gap:20px;}
+  .feat{border:1px solid var(--line);border-radius:var(--r);padding:28px;background:var(--panel);box-shadow:var(--sh-sm);transition:transform .2s ease,box-shadow .2s ease;}
+  .feat:hover{transform:translateY(-3px);box-shadow:var(--sh);}
+  .feat.w4{grid-column:span 4;} .feat.w2{grid-column:span 3;} .feat.w3{grid-column:span 3;} .feat.w2b{grid-column:span 2;} .feat.w4b{grid-column:span 4;}
+  @media(max-width:820px){.feat{grid-column:span 6!important;}}
+  .feat .ic{width:44px;height:44px;border-radius:11px;border:1px solid var(--line-2);display:grid;place-items:center;font-size:20px;margin-bottom:16px;background:var(--panel-2);}
+  .feat h3{font-size:19px;font-weight:750;margin-bottom:8px;letter-spacing:-.3px;}
+  .feat p{color:var(--muted);font-size:14.5px;line-height:1.6;}
+  .feat .demo-bars{display:flex;align-items:flex-end;gap:14px;height:96px;margin-top:18px;max-width:200px;}
+  .feat .demo-bars .c{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;}
+  .feat .demo-bars .bar{width:100%;border-radius:6px 6px 0 0;}
+  .feat .demo-bars .lab{font-family:var(--mono);font-size:10px;color:var(--muted);}
+  .you{background:var(--accent);} .win{background:var(--accent-2);}
+
+  /* ANATOMY (annotated) */
+  .anatomy{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
+  @media(max-width:880px){.anatomy{grid-template-columns:1fr;gap:32px;}}
+  .anatomy .copy h2{font-size:clamp(28px,3.8vw,38px);font-weight:800;letter-spacing:-1.2px;line-height:1.12;margin:14px 0;}
+  .anatomy .copy p{color:var(--muted);font-size:16px;margin-bottom:24px;}
+  .alist{display:flex;flex-direction:column;gap:18px;}
+  .ai{display:flex;gap:14px;}
+  .ai .dot{flex-shrink:0;width:30px;height:30px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:13px;font-family:var(--mono);}
+  .ai h4{font-size:15.5px;font-weight:700;margin-bottom:3px;}
+  .ai p{font-size:14px;color:var(--muted);margin:0;}
+
+  /* STEPS */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--panel);}
+  @media(max-width:780px){.steps{grid-template-columns:1fr;}}
+  .step{padding:34px 30px;border-right:1px solid var(--line);}
+  .step:last-child{border-right:none;}
+  @media(max-width:780px){.step{border-right:none;border-bottom:1px solid var(--line);}.step:last-child{border-bottom:none;}}
+  .step .n{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;letter-spacing:1px;}
+  .step h3{font-size:19px;font-weight:750;margin:16px 0 8px;}
+  .step p{color:var(--muted);font-size:14.5px;}
+
+  /* ACCESS */
+  .access-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--panel);box-shadow:var(--sh);}
+  @media(max-width:780px){.access-grid{grid-template-columns:1fr;}}
+  .access-grid .l{padding:44px;}
+  .access-grid .l h2{font-size:30px;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}
+  .access-grid .l p{color:var(--muted);font-size:16px;margin-bottom:22px;}
+  .access-grid ul{list-style:none;display:flex;flex-direction:column;gap:12px;}
+  .access-grid li{display:flex;gap:11px;font-size:14.5px;}
+  .access-grid li .tick{color:var(--accent-2);font-weight:800;flex-shrink:0;}
+  .access-grid .r{align-self:stretch;background:linear-gradient(160deg,var(--accent),#4a32c9);color:#fff;padding:44px;display:flex;flex-direction:column;justify-content:center;}
+  .access-grid .r .tag{font-family:var(--mono);font-size:12px;letter-spacing:1px;text-transform:uppercase;opacity:.85;}
+  .access-grid .r .price{font-size:32px;font-weight:850;letter-spacing:-1px;margin:8px 0 4px;}
+  .access-grid .r .price small{font-size:14px;font-weight:600;opacity:.85;}
+  .access-grid .r .note{font-size:12.5px;opacity:.8;margin-top:14px;}
+  .btn-white{background:#fff;color:var(--accent);margin-top:22px;}
+  .btn-white:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.18);}
+
+  /* FAQ */
+  .faq{max-width:760px;margin:0 auto;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--panel);}
+  .faq details{border-bottom:1px solid var(--line);}
+  .faq details:last-child{border-bottom:none;}
+  .faq summary{padding:20px 24px;font-weight:700;font-size:15.5px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:center;}
+  .faq summary::-webkit-details-marker{display:none;}
+  .faq summary .ar{font-size:20px;color:var(--muted);transition:transform .2s ease;line-height:1;}
+  .faq details[open] summary .ar{transform:rotate(45deg);color:var(--accent);}
+  .faq details p{padding:0 24px 22px;color:var(--muted);font-size:14.5px;line-height:1.65;}
+
+  /* FINAL */
+  .final{background:var(--ink);color:#fff;border-radius:26px;padding:66px 32px;text-align:center;position:relative;overflow:hidden;}
+  .final::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 280px at 50% 0%,rgba(107,77,240,.5),transparent 65%);}
+  .final>*{position:relative;}
+  .final h2{font-size:clamp(30px,4.6vw,46px);font-weight:800;letter-spacing:-1.4px;line-height:1.08;margin-bottom:16px;}
+  .final p{color:rgba(255,255,255,.7);font-size:17px;max-width:520px;margin:0 auto 28px;}
+
+  footer{border-top:1px solid var(--line);padding:42px 0 36px;margin-top:90px;}
+  .foot-in{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
+  footer .legal{color:var(--muted);font-size:12.5px;text-align:right;line-height:1.7;}
+
+  .badge-pill{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;background:#fff;border:1px solid var(--line-2);border-radius:var(--r-pill);padding:8px 16px;font-size:12.5px;color:var(--muted);box-shadow:var(--sh);}
+  .badge-pill a{color:var(--accent);font-weight:700;}
+</style>
+</head>
+<body>
+<nav id="nav">
+  <div class="wrap nav-in">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect x="4.5" y="18" width="5.5" height="9" rx="2" fill="#7C5CFC"/><rect x="13.25" y="14" width="5.5" height="13" rx="2" fill="#9B7DFF"/><rect x="22" y="12.5" width="5.5" height="14.5" rx="2" fill="#22B8CF"/><path d="M21 10 L24.75 5.5 L28.5 10" fill="none" stroke="#22B8CF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="name">DivisionUp</span>
+    </div>
+    <div class="nav-links">
+      <a href="#problema">El problema</a>
+      <a href="#features">Funciones</a>
+      <a href="#como">Cómo funciona</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <span class="lang">ES/EN</span>
+      <a class="btn btn-primary btn-sm" href="#acceso">Entrar</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">// Coaching IA · TFT y LoL</span>
+    <h1>Deja de adivinar <span class="accent">por qué pierdes</span></h1>
+    <p class="sub">DivisionUp analiza cada partida, te dice exactamente qué falló, lo compara con quien ganó y te da un plan accionable para subir de rango.</p>
+    <div class="ctas">
+      <a class="btn btn-accent" href="#acceso">Empezar gratis</a>
+      <a class="btn btn-line" href="#features">Ver un informe ↓</a>
+    </div>
+    <p class="micro">Sin tarjeta · Conecta tu Riot ID · TFT y LoL</p>
+
+    <div class="frame-wrap">
+      <div class="frame">
+        <div class="bar">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <div class="url">app.divisionup.gg/informe</div>
+        </div>
+        <div class="screen">
+          <div class="sidebar">
+            <div class="sb-card">
+              <div class="k">Resultado</div>
+              <div class="v">8.º <span style="font-size:13px;color:var(--muted);font-weight:600;">de 8</span></div>
+            </div>
+            <div class="sb-card">
+              <div class="k">Tú vs. Top 1 · nivel</div>
+              <div class="v ac">8 → 10</div>
+              <div class="barsmini">
+                <i class="you" style="height:70%;"></i>
+                <i class="win" style="height:100%;"></i>
+              </div>
+            </div>
+            <div class="sb-card">
+              <div class="k">Errores detectados</div>
+              <div class="v">3</div>
+            </div>
+          </div>
+          <div class="rep">
+            <div class="h">
+              <div class="badge">8.º</div>
+              <div><div class="m">Informe TFT · Ranked</div><div class="ve">Pico de poder tardío y tablero contestado.</div></div>
+            </div>
+            <div class="b">
+              <div class="rblk cmp"><h5>⚔️ Comparación con el Top 1</h5><p>El ganador tenía nivel 10 (2 más que tú), 10 unidades a 2★ o más (4 más) y una a 3★ que tú no tenías. Ambos con 3 ítems en la carry.</p></div>
+              <div class="rblk err"><h5>Error de decisión <span class="sev">SEV 4</span></h5><p>Mantuviste 2 tanques de 4 coste contestados por 3 rivales: bloqueó tu economía sin densidad para sobrevivir.</p></div>
+              <div class="rblk win"><h5>✓ Lo que hiciste bien</h5><p>Tu carry quedó completamente itemizada con sus 3 ítems de daño, y colocaste 6 unidades a 2★ pese al nivel bajo.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trust-row">
+      <div class="lbl">Análisis profundo de cada partida</div>
+      <div class="items">
+        <span>🧠 Coaching IA</span>
+        <span>⚔️ Comparación Top 1</span>
+        <span>📋 Plan global</span>
+        <span>📊 Stats &amp; meta</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="problema" class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">// El problema</span>
+      <h2>¿Atascado de rango? No es (solo) mala suerte</h2>
+      <p>Pierdes partidas y no sabes exactamente por qué. Las webs de estadísticas te dan números, pero no te dicen qué decisión te costó el puesto.</p>
+    </div>
+    <div class="problems">
+      <div class="prob"><div class="n">01</div><h3>Juegas a ciegas</h3><p>Repites los mismos errores partida tras partida porque nadie te los señala con datos.</p></div>
+      <div class="prob"><div class="n">02</div><h3>Consejos genéricos</h3><p>"Mejora tu macro", "farmea más"… frases vacías que no se anclan a TU partida.</p></div>
+      <div class="prob"><div class="n">03</div><h3>Sin un plan</h3><p>Sabes que algo falla, pero no qué entrenar primero para subir de verdad.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="sec" style="background:var(--panel-2);border-block:1px solid var(--line);">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">// Qué hace DivisionUp</span>
+      <h2>Coaching de verdad, no otro panel de stats</h2>
+      <p>El coaching tras cada partida es el diferencial. Las estadísticas y la meta son el complemento.</p>
+    </div>
+    <div class="bento">
+      <article class="feat w4">
+        <div class="ic">🧠</div>
+        <h3>Coaching tras cada partida</h3>
+        <p>Errores de decisión, fallos de macro y mecánica, y la causa raíz real de tu resultado — anclado a los datos de TU partida, no a consejos genéricos. Cada informe prioriza qué arreglar primero por su impacto en el resultado.</p>
+      </article>
+      <article class="feat w2">
+        <div class="ic">⚔️</div>
+        <h3>Comparación con quien ganó</h3>
+        <p>Cuánto te faltó exactamente: nivel, tablero e itemización.</p>
+        <div class="demo-bars">
+          <div class="c"><div class="bar you" style="height:58%;"></div><div class="lab">Tú</div></div>
+          <div class="c"><div class="bar win" style="height:96%;"></div><div class="lab">Top 1</div></div>
+        </div>
+      </article>
+      <article class="feat w3">
+        <div class="ic">📋</div>
+        <h3>Plan de mejora global</h3>
+        <p>Cruzamos todas tus partidas para detectar patrones recurrentes y darte un roadmap medible: esta semana, este mes y los próximos meses.</p>
+      </article>
+      <article class="feat w3">
+        <div class="ic">📊</div>
+        <h3>Estadísticas y meta</h3>
+        <p>Tu rendimiento de un vistazo y la meta del parche, para tomar decisiones con datos en lugar de intuición.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="anatomy">
+      <div class="copy">
+        <span class="eyebrow">// Así es un informe</span>
+        <h2>Cada partida, un análisis profundo</h2>
+        <p>Anclado a tus datos reales. Nada de plantillas: si no hay un error claro, te lo decimos.</p>
+        <div class="alist">
+          <div class="ai"><div class="dot">01</div><div><h4>Veredicto en una frase</h4><p>Por qué quedaste donde quedaste, sin rodeos.</p></div></div>
+          <div class="ai"><div class="dot">02</div><div><h4>Comparación con el Top 1</h4><p>Nivel, fuerza de tablero e itemización frente a quien ganó.</p></div></div>
+          <div class="ai"><div class="dot">03</div><div><h4>Errores por severidad</h4><p>Priorizados por impacto, no una lista plana.</p></div></div>
+          <div class="ai"><div class="dot">04</div><div><h4>Lo que hiciste bien</h4><p>Para que no rompas lo que ya funciona.</p></div></div>
+        </div>
+      </div>
+      <div class="rep">
+        <div class="h">
+          <div class="badge">8.º</div>
+          <div><div class="m">Informe TFT · Ranked · 32 min</div><div class="ve">Pico de poder tardío y tablero contestado.</div></div>
+        </div>
+        <div class="b">
+          <div class="rblk cmp"><h5>⚔️ Comparación con el Top 1</h5><p>El ganador tenía nivel 10 (2 más que tú), 10 unidades a 2★ o más (4 más) y una a 3★ que tú no tenías. Ambos con 3 ítems en la carry.</p></div>
+          <div class="rblk err"><h5>Error de decisión <span class="sev">SEV 4</span></h5><p>Mantuviste 2 tanques de 4 coste contestados por 3 rivales: bloqueó tu economía sin densidad para sobrevivir.</p></div>
+          <div class="rblk win"><h5>✓ Lo que hiciste bien</h5><p>Tu carry principal quedó completamente itemizada con sus 3 ítems de daño, y colocaste 6 unidades a 2★ pese al nivel bajo.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="como" class="sec" style="background:var(--panel-2);border-block:1px solid var(--line);">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">// Cómo funciona</span>
+      <h2>De tu Riot ID a subir, en 3 pasos</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n">PASO 01</div><h3>Conecta tu Riot ID</h3><p>Introduce tu Nombre#TAG. Leemos tus partidas con la API oficial de Riot.</p></div>
+      <div class="step"><div class="n">PASO 02</div><h3>La IA analiza cada partida</h3><p>Genera un informe profundo con tus errores, la comparación con el ganador y tus aciertos.</p></div>
+      <div class="step"><div class="n">PASO 03</div><h3>Aplicas el plan y subes</h3><p>Entrenas lo que de verdad mueve la aguja, partida a partida.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="acceso" class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">// Acceso</span>
+      <h2>Acceso a la beta</h2>
+      <p>Estamos en beta cerrada, afinando el coaching con jugadores reales.</p>
+    </div>
+    <div class="access-grid">
+      <div class="l">
+        <h2>Todo el coaching, sin coste durante la beta</h2>
+        <p>Quienes entren ahora tendrán condiciones especiales cuando lancemos los planes de pago.</p>
+        <ul>
+          <li><span class="tick">✓</span> Coaching IA tras cada partida (TFT y LoL)</li>
+          <li><span class="tick">✓</span> Comparación con quien ganó</li>
+          <li><span class="tick">✓</span> Plan de mejora global</li>
+          <li><span class="tick">✓</span> Estadísticas y meta del parche</li>
+        </ul>
+      </div>
+      <div class="r">
+        <span class="tag">Beta cerrada</span>
+        <div class="price">Por invitación <small>/ gratis</small></div>
+        <p style="opacity:.85;font-size:14px;">Plazas limitadas mientras afinamos el coaching.</p>
+        <a class="btn btn-white" href="#">Solicitar invitación</a>
+        <p class="note">Si aún no tienes acceso, escríbenos para entrar en la beta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="sec" style="background:var(--panel-2);border-block:1px solid var(--line);">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">// FAQ</span>
+      <h2>Preguntas frecuentes</h2>
+    </div>
+    <div class="faq">
+      <details open><summary>¿Cómo obtiene DivisionUp mis partidas?<span class="ar">+</span></summary><p>Con la API oficial de Riot. Solo necesitas tu Riot ID (Nombre#TAG); leemos tus partidas recientes de TFT y LoL.</p></details>
+      <details><summary>¿En qué se diferencia de una web de estadísticas?<span class="ar">+</span></summary><p>Las webs de stats te dan números. DivisionUp te da coaching: te dice qué decisión te costó el puesto, lo compara con quien ganó y te marca un plan para mejorar.</p></details>
+      <details><summary>¿Funciona para TFT y para LoL?<span class="ar">+</span></summary><p>Sí, en ambos. En TFT analizamos tablero, itemización y lobby; en LoL, tu rendimiento frente a tu rival de línea y tus muertes por fase.</p></details>
+      <details><summary>¿Es gratis?<span class="ar">+</span></summary><p>Estamos en beta cerrada por invitación. Más adelante habrá un plan de acceso; quienes entren en la beta tendrán condiciones especiales.</p></details>
+      <details><summary>¿Estáis afiliados a Riot Games?<span class="ar">+</span></summary><p>No. DivisionUp es una marca independiente; usamos la API oficial de Riot solo para mostrar tus datos reales.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="sec" style="padding-top:20px;">
+  <div class="wrap">
+    <div class="final">
+      <h2>Empieza a subir partida a partida</h2>
+      <p>Conecta tu Riot ID y deja que la IA te diga exactamente qué entrenar primero.</p>
+      <a class="btn btn-accent" href="#acceso">Entrar a la beta</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect x="4.5" y="18" width="5.5" height="9" rx="2" fill="#7C5CFC"/><rect x="13.25" y="14" width="5.5" height="13" rx="2" fill="#9B7DFF"/><rect x="22" y="12.5" width="5.5" height="14.5" rx="2" fill="#22B8CF"/><path d="M21 10 L24.75 5.5 L28.5 10" fill="none" stroke="#22B8CF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="name">DivisionUp</span>
+    </div>
+    <div class="legal">
+      Marca propia, no afiliada a los titulares de los juegos.<br>
+      © 2026 DivisionUp · Coaching IA para TFT y LoL
+    </div>
+  </div>
+</footer>
+
+<div class="badge-pill">Maqueta de diseño · <a href="index.html">← volver al selector</a></div>
+
+<script>
+  const nav=document.getElementById('nav');
+  const onScroll=()=>nav.classList.toggle('scrolled',window.scrollY>10);
+  onScroll();window.addEventListener('scroll',onScroll,{passive:true});
+</script>
+</body>
+</html>
