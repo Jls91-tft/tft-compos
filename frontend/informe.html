@@ -6,6 +6,24 @@
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <title>DivisionUp — Informe de coaching</title>
 <link rel="stylesheet" href="assets/synapse.css">
+<style>
+  /* Informe estilo C: dos columnas (informe + chat acoplado) con pestañas */
+  .rep-layout{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start;}
+  @media(max-width:960px){.rep-layout{grid-template-columns:1fr;}}
+  .rep-tabs{display:flex;gap:4px;flex-wrap:wrap;margin:18px 0 16px;border:1px solid var(--border);background:var(--surface-2);border-radius:14px;padding:6px;}
+  .rep-tabs button{flex:0 0 auto;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13.5px;padding:9px 15px;border-radius:9px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:7px;}
+  .rep-tabs button:hover{color:var(--text);background:rgba(255,255,255,.04);}
+  .rep-tabs button[aria-selected="true"]{background:var(--grad);color:#08090D;}
+  .rep-tabs .b{font-size:10px;font-weight:800;background:rgba(0,0,0,.18);border-radius:99px;padding:1px 7px;}
+  .rep-pane{display:none;}
+  .rep-pane.on{display:block;animation:repfade .2s ease;}
+  .rep-pane > .panel:first-child{margin-top:0;}
+  @keyframes repfade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  .rep-chat{position:sticky;top:88px;display:flex;flex-direction:column;max-height:calc(100vh - 120px);margin-top:0!important;}
+  .rep-chat h3{margin-top:0;}
+  .rep-chat .chat-log{flex:1;overflow-y:auto;min-height:150px;}
+  @media(max-width:960px){.rep-chat{position:static;max-height:none;}}
+</style>
 </head>
 <body>
   <a href="#main" class="skip">Saltar al contenido</a>
@@ -32,10 +50,11 @@
       <a class="back-link" href="app.html#coaching">← Volver a mis partidas</a>
       <button class="back-link" type="button" onclick="loadReport(true)" title="Vuelve a generar el análisis (consume una llamada a la IA)">↻ Regenerar análisis</button>
     </div>
-    <div id="report-body"></div>
+    <div class="rep-layout">
+      <div id="report-body"></div>
 
-    <!-- Chat con el coach -->
-    <section class="panel" id="chat" style="margin-top:22px;display:none;">
+      <!-- Chat con el coach (acoplado en lateral) -->
+      <aside class="panel rep-chat" id="chat" style="display:none;">
       <h3>Pregunta a tu coach</h3>
       <div class="chat-log" id="chat-log">
         <div class="msg coach"><div class="bubble">Pregúntame lo que quieras sobre esta partida. Aquí tienes algunas ideas:</div></div>
@@ -45,7 +64,8 @@
         <input type="text" id="chat-text" placeholder="Escribe tu pregunta…" autocomplete="off" aria-label="Tu pregunta para el coach">
         <button class="btn-send" type="submit" aria-label="Enviar pregunta">➤</button>
       </form>
-    </section>
+      </aside>
+    </div>
   </main>
 
   <footer>
@@ -111,22 +131,33 @@ function reportHTML(report, match) {
   const plan = (report.top_3_actionable || []).map((a, i) => `<li><span class="num">${i + 1}</span> ${a}</li>`).join("");
   const comp = report.comparison ? `<div class="panel panel-compare"><h3>${GAME === "tft" ? "Comparación con el Top 1" : "Comparación con tu rival de línea"}</h3><p style="margin:0;line-height:1.6">${report.comparison}</p></div>` : "";
   const strong = (report.strengths || []).map(s => `<li>${s}</li>`).join("");
-  return heroHTML(report, match) +
-    `<div class="kpi-row">${kpis}</div>
-     <div class="report-grid">
-       <div class="col-main">
-         ${comp}
-         ${dec ? `<div class="panel"><h3>Errores de decisión</h3>${dec}</div>` : ""}
-         ${macro ? `<div class="panel"><h3>Macro (rotaciones, objetivos, tempo)</h3>${macro}</div>` : ""}
-         ${mech ? `<div class="panel"><h3>Mecánica (cs, trades, itemización)</h3>${mech}</div>` : ""}
-         ${mental ? `<div class="panel"><h3>Patrones mentales</h3>${mental}</div>` : ""}
-         ${!dec && !macro && !mech && !mental && !comp ? `<div class="panel"><p style="margin:0;color:var(--muted)">Partida limpia: la IA no detectó errores con evidencia suficiente.</p></div>` : ""}
-       </div>
-       <div class="col-side">
-         ${strong ? `<div class="panel"><h3>Lo que hiciste bien</h3><ul class="win-list">${strong}</ul></div>` : ""}
-         ${plan ? `<div class="panel"><h3>Para entrenar esta semana</h3><ol class="action-list">${plan}</ol></div>` : ""}
-       </div>
-     </div>`;
+  // Pestañas dinámicas (solo las que tienen contenido); Resumen siempre visible.
+  const errCount = (report.decision_errors || []).length + (report.macro_issues || []).length + (report.mechanical_issues || []).length + (report.mental_patterns || []).length;
+  const errBlocks =
+    (dec ? `<div class="panel"><h3>Errores de decisión</h3>${dec}</div>` : "") +
+    (macro ? `<div class="panel"><h3>Macro (rotaciones, objetivos, tempo)</h3>${macro}</div>` : "") +
+    (mech ? `<div class="panel"><h3>Mecánica (cs, trades, itemización)</h3>${mech}</div>` : "") +
+    (mental ? `<div class="panel"><h3>Patrones mentales</h3>${mental}</div>` : "");
+  const resumenPane =
+    (kpis ? `<div class="kpi-row">${kpis}</div>` : "") +
+    (strong ? `<div class="panel"><h3>Lo que hiciste bien</h3><ul class="win-list">${strong}</ul></div>` : "") +
+    (!kpis && !strong ? `<div class="panel"><p style="margin:0;color:var(--muted)">Sin métricas destacables en esta partida.</p></div>` : "");
+  const erroresPane = errBlocks || `<div class="panel"><p style="margin:0;color:var(--muted)">Partida limpia: la IA no detectó errores con evidencia suficiente.</p></div>`;
+  const planPane = plan ? `<div class="panel"><h3>Para entrenar esta semana</h3><ol class="action-list">${plan}</ol></div>` : "";
+  const tabs = [
+    { id: "resumen", label: "Resumen", html: resumenPane, show: true, badge: "" },
+    { id: "errores", label: "Errores", html: erroresPane, show: true, badge: errCount || "" },
+    { id: "comparativa", label: "Comparativa", html: comp, show: !!comp, badge: "" },
+    { id: "plan", label: "Plan", html: planPane, show: !!planPane, badge: "" },
+  ].filter(t => t.show);
+  const nav = tabs.map((t, i) => `<button role="tab" aria-selected="${i === 0 ? "true" : "false"}" onclick="repTab('${t.id}', this)">${t.label}${t.badge ? `<span class="b">${t.badge}</span>` : ""}</button>`).join("");
+  const panes = tabs.map((t, i) => `<div class="rep-pane${i === 0 ? " on" : ""}" data-pane="${t.id}">${t.html}</div>`).join("");
+  return heroHTML(report, match) + `<div class="rep-tabs" role="tablist">${nav}</div>` + panes;
+}
+
+function repTab(id, btn) {
+  document.querySelectorAll(".rep-tabs button").forEach(b => b.setAttribute("aria-selected", b === btn ? "true" : "false"));
+  document.querySelectorAll(".rep-pane").forEach(p => p.classList.toggle("on", p.getAttribute("data-pane") === id));
 }
 
 async function loadReport(regenerate = false) {
