@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     # Cadena de respaldo (OpenRouter prueba en ORDEN si el primario falla: 429, caído, retirado…).
     # Mitiga la volatilidad del 'free' y reparte el cupo diario. Slugs separados por coma; verifica
     # los exactos en https://openrouter.ai/models (cambian). 'openrouter/free' al final = comodín.
-    openrouter_fallback_models: str = "deepseek/deepseek-chat-v3.1:free,z-ai/glm-4.5-air:free,qwen/qwen3-coder:free,openrouter/free"
+    openrouter_fallback_models: str = "deepseek/deepseek-chat-v3.1:free,qwen/qwen3-235b-a22b:free,openrouter/free"
     llm_temperature: float = 0.4
 
     # --- Aplicación ---
