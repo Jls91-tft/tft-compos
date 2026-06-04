@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     # (razonamiento) iba demasiado lento → 524. Kimi K2.6 da buena calidad y es más rápido.
     # Alternativa aún más rápida si hiciera falta: google/gemma-4-31b-it:free.
     openrouter_model: str = "moonshotai/kimi-k2.6:free"
+    # Cadena de respaldo (OpenRouter prueba en ORDEN si el primario falla: 429, caído, retirado…).
+    # Mitiga la volatilidad del 'free' y reparte el cupo diario. Slugs separados por coma; verifica
+    # los exactos en https://openrouter.ai/models (cambian). 'openrouter/free' al final = comodín.
+    openrouter_fallback_models: str = "deepseek/deepseek-chat-v3.1:free,z-ai/glm-4.5-air:free,qwen/qwen3-coder:free,openrouter/free"
     llm_temperature: float = 0.4
 
     # --- Aplicación ---

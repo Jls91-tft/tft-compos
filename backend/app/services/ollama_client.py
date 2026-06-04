@@ -71,6 +71,11 @@ class OllamaClient:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
         payload = {"model": model, "messages": messages, "temperature": settings.llm_temperature}
+        # OpenRouter: cadena de respaldo nativa — si el primario falla (429, caída, retirado/404),
+        # enruta al siguiente del array en la MISMA petición. Mitiga la volatilidad del 'free'.
+        if label == "OpenRouter" and settings.openrouter_fallback_models.strip():
+            extras = [m.strip() for m in settings.openrouter_fallback_models.split(",") if m.strip()]
+            payload["models"] = [model] + [m for m in extras if m != model]
         # OpenRouter enruta a muchos proveedores; algunos modelos (Nemotron y otros de
         # razonamiento) responden {} o fallan con response_format forzado. Confiamos en
         # el prompt ("devuelve SOLO JSON") + el parser tolerante. En Groq sí lo usamos.
