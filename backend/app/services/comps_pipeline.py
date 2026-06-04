@@ -31,13 +31,20 @@ def _clean_item(raw: str) -> str:
     return _clean(raw).replace(" ", "").lower()
 
 
+def _is_unique_trait(api_name: str) -> bool:
+    """Rasgos únicos de campeones legendarios (no definen una comp)."""
+    n = (api_name or "").lower()
+    return "unique" in n or "_singleton" in n
+
+
 def _active_traits(traits: list[dict]) -> list[tuple[str, int]]:
-    """Lista de (nombre_limpio, style) para rasgos en silver+."""
+    """Lista de (nombre_limpio, style) para rasgos en silver+ que NO sean únicos."""
     out = []
     for t in traits or []:
         style = t.get("style", 0) or 0
-        if style >= _MIN_TRAIT_STYLE:
-            out.append((_clean(t.get("name", "")), style))
+        api = t.get("name", "")
+        if style >= _MIN_TRAIT_STYLE and not _is_unique_trait(api):
+            out.append((_clean(api), style))
     # Ordenar por style desc y num_units desc para que los más cargados manden.
     out.sort(key=lambda x: x[1], reverse=True)
     return out
@@ -180,6 +187,7 @@ def _aggregate(matches: list[dict]) -> dict:
         comps_out.append({
             "tier": _tier_from_avg(avg_place),
             "name": _comp_name(sig, carry, style),
+            "_traits_raw": list(sig),   # consumido por _cdragon_enrich para re-traducir
             "style": style,
             "difficulty": diff,
             "metrics": {
@@ -237,6 +245,21 @@ def _cdragon_enrich(payload: dict) -> dict:
             if meta:
                 comp["carry"] = meta["name"]
                 comp["carry_icon"] = meta.get("icon")
+        # Reconstruir el nombre con los rasgos traducidos al idioma del CDragon.
+        traits_raw = comp.pop("_traits_raw", None) or []
+        if traits_raw:
+            translated = []
+            for t in traits_raw:
+                tmeta = cdragon_client.lookup(idx, "traits", t)
+                translated.append(tmeta["name"] if tmeta else t)
+            translated.sort()
+            base = " · ".join(translated)
+            head = (
+                f"Reroll {base}" if comp.get("style") == "Reroll"
+                else f"Fast 8 {base}" if comp.get("style") == "Fast 8"
+                else base
+            )
+            comp["name"] = f"{head} — {comp['carry']}" if comp.get("carry") else head
         comp["carry_items"] = [
             (cdragon_client.lookup(idx, "items", it) or {}).get("name") or it
             for it in comp.get("carry_items", []) or []
