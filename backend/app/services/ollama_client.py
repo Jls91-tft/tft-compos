@@ -75,7 +75,8 @@ class OllamaClient:
         # enruta al siguiente del array en la MISMA petición. Mitiga la volatilidad del 'free'.
         if label == "OpenRouter" and settings.openrouter_fallback_models.strip():
             extras = [m.strip() for m in settings.openrouter_fallback_models.split(",") if m.strip()]
-            payload["models"] = [model] + [m for m in extras if m != model]
+            # OpenRouter exige `models` con 3 elementos como máximo (primario + 2 fallbacks).
+            payload["models"] = ([model] + [m for m in extras if m != model])[:3]
         # OpenRouter enruta a muchos proveedores; algunos modelos (Nemotron y otros de
         # razonamiento) responden {} o fallan con response_format forzado. Confiamos en
         # el prompt ("devuelve SOLO JSON") + el parser tolerante. En Groq sí lo usamos.
