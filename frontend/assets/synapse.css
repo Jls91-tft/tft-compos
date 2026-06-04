@@ -181,7 +181,13 @@ h2.section-title{font-size:18px;font-weight:800;margin:34px 0 16px;display:flex;
 .tier-C{color:var(--muted);background:rgba(140,151,168,.12);border:1px solid var(--border);}
 .comp-name{font-size:16px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
 .comp-style{font-size:12px;font-weight:500;color:var(--muted);}
-.comp-lema{font-size:13px;color:var(--muted);margin:3px 0 4px;line-height:1.45;}
+.comp-facts{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:8px;font-size:12.5px;}
+.cf-label{color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px;font-size:11px;}
+.cf-val{color:var(--text);font-weight:600;}
+.cf-sep{color:var(--border);}
+.meta-note{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);color:#F5BC56;padding:10px 14px;border-radius:var(--r-sm);margin:8px 0 14px;font-size:13px;line-height:1.5;}
+.meta-chip.ok{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#86EFAC;}
+.meta-chip.warn{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:#F5BC56;}
 .unit-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
 .unit-chip{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:6px;border:1px solid;}
 .comp-metrics{display:flex;gap:16px;}

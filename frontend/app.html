@@ -485,7 +485,8 @@ async function renderMeta() {
     metaData = await API.meta(currentGame);
     metaTier = "Todos"; metaStyle = "Todos";
     body.innerHTML = `
-      <div class="meta-head"><span class="meta-chip">Parche ${metaData.patch}</span><span class="meta-chip">${metaData.rank}</span></div>
+      <div class="meta-head"><span class="meta-chip">Parche ${metaData.patch}</span><span class="meta-chip">${metaData.rank}</span>${metaData.source === "real" ? `<span class="meta-chip ok">Datos reales del Challenger</span>` : `<span class="meta-chip warn">Datos de ejemplo</span>`}</div>
+      ${metaData.source !== "real" ? `<div class="meta-note">Esto es un placeholder con nombres inventados. La tier list real (nombres, ítems y aumentos del set actual) se llena cuando hay clave Riot de producción y el worker de meta está activo.</div>` : ""}
       <div class="meta-filters"><div class="filter-group" id="filter-tier"></div><div class="filter-group" id="filter-style"></div></div>
       <div class="comp-list" id="comp-list"></div>`;
     renderMetaFilters();
@@ -510,9 +511,10 @@ function renderMetaList() {
     const chips = (c.units && c.units.length) ? `<div class="unit-chips">${c.units.map(u => `<span class="unit-chip" style="color:${COST[u.c]};border-color:${COST[u.c]}55;background:${COST[u.c]}1A">${u.n}</span>`).join("")}</div>` : "";
     const metrics = cols.map(col => `<div class="metric"><span class="m-v">${c.metrics[col.k]}</span><span class="m-k">${col.label}</span></div>`).join("");
     const action = metaData.guide ? `<div class="comp-action"><a class="btn btn-ghost btn-sm" href="guia-comp.html">Ver guía →</a></div>` : `<div class="comp-action"></div>`;
-    const lema = c.lema ? `<div class="comp-lema">${c.lema}</div>` : "";
+    const carryRow = c.carry ? `<div class="comp-facts"><span class="cf-label">Carry</span><span class="cf-val">${c.carry}</span>${(c.carry_items && c.carry_items.length) ? `<span class="cf-sep">·</span><span class="cf-label">Ítems</span><span class="cf-val">${c.carry_items.slice(0,3).join(", ")}</span>` : ""}</div>` : "";
+    const augRow = (c.augments && c.augments.length) ? `<div class="comp-facts"><span class="cf-label">Aumentos top</span><span class="cf-val">${c.augments.slice(0,3).join(", ")}</span></div>` : "";
     return `<div class="comp-row"><div class="tier-badge tier-${c.tier}">${c.tier}</div>
-      <div class="comp-info"><div class="comp-name">${c.name} <span class="comp-style">${c.style} · ${c.difficulty}</span></div>${lema}${chips}</div>
+      <div class="comp-info"><div class="comp-name">${c.name} <span class="comp-style">${c.style} · ${c.difficulty}</span></div>${chips}${carryRow}${augRow}</div>
       <div class="comp-metrics">${metrics}</div>${action}</div>`;
   }).join("");
 }

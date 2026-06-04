@@ -20,4 +20,6 @@ def get_meta(game: Game = "tft"):
         real = meta_store.load_comps("tft")
         if real and real.get("comps"):
             return real
-    return mock.meta(game)
+    payload = dict(mock.meta(game))
+    payload["source"] = "mock"   # el frontend lo usa para avisar "datos de ejemplo"
+    return payload
