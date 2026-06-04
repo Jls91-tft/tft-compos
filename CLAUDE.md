@@ -9,7 +9,10 @@ El **coaching tras cada partida es el diferencial** (errores, correcciones, plan
 
 ## Reglas no negociables
 1. **Idioma:** responde y documenta en **español**.
-2. **Marca propia genérica:** NUNCA uses logos, marcas ni nombres de personajes de Riot en la UI/branding ni en datos de ejemplo (usa arquetipos inventados: Místico, Vanguardia…). Mostrar los datos reales de la partida del usuario obtenidos vía la **Riot API oficial** sí es legítimo en producción.
+2. **Marca propia genérica:** NUNCA uses logos, marcas registradas o el nombre "Riot" en branding propio (logo, nombre del producto, materiales de marketing). Sí está permitido usar nombres reales de campeones/rasgos/ítems/aumentos cuando provengan de:
+   - **Datos de la partida del usuario** vía la Riot Games API oficial.
+   - **Asset estático oficial** vía Data Dragon o CommunityDragon (idéntico camino que usan MetaTFT, Lolchess, Tactics.tools…).
+   Tanto el mock dinámico (`data/mock_cdragon.py`) como las agregaciones reales (`services/comps_pipeline._cdragon_enrich`) usan CDragon. El mock estático invented (`data/mock.py`, arquetipos Místico/Vanguardia) sigue existiendo como último fallback cuando CDragon no responde.
 3. **Secretos:** la clave de Riot va en `.env` (en `.gitignore`). Nunca en el código ni en commits. En `.env.example` solo placeholders. Si se expone una clave, **revócala**.
 4. **Versionado:** commits en **castellano**, claros, y **`git push`** tras cada avance. Repo: `github.com/Jls91-tft/tft-compos` (rama `main`).
 5. **Entorno de desarrollo actual:** se escribe el código pero **NO se instala ni ejecuta** el stack en este equipo (Windows). La ejecución real (Docker, instalaciones, Ollama) se hace en **otro PC**. No lances `pip` / `npm` / `docker` / `ollama` aquí salvo petición explícita.

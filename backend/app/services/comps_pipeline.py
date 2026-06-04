@@ -213,6 +213,43 @@ def _aggregate(matches: list[dict]) -> dict:
 
 
 # ----------------------------------- Entrada -----------------------------------
+def _cdragon_enrich(payload: dict) -> dict:
+    """Resuelve nombres limpios → display name traducido + icon URL vía CDragon.
+    Si CDragon no responde, deja todo tal cual (no rompe nada)."""
+    try:
+        from app.services import cdragon_client
+        idx = cdragon_client.index()
+    except Exception:   # noqa: BLE001 — degradación silenciosa
+        return payload
+    if not idx.get("champions") and not idx.get("items"):
+        return payload
+
+    for comp in payload.get("comps", []):
+        for u in comp.get("units", []) or []:
+            meta = cdragon_client.lookup(idx, "champions", u.get("n", ""))
+            if meta:
+                u["n"] = meta["name"]
+                u["icon"] = meta.get("icon")
+                if meta.get("cost"):
+                    u["c"] = meta["cost"]
+        if comp.get("carry"):
+            meta = cdragon_client.lookup(idx, "champions", comp["carry"])
+            if meta:
+                comp["carry"] = meta["name"]
+                comp["carry_icon"] = meta.get("icon")
+        comp["carry_items"] = [
+            (cdragon_client.lookup(idx, "items", it) or {}).get("name") or it
+            for it in comp.get("carry_items", []) or []
+        ]
+        comp["augments"] = [
+            (cdragon_client.lookup(idx, "augments", a) or {}).get("name") or a
+            for a in comp.get("augments", []) or []
+        ]
+    if idx.get("set_name"):
+        payload["patch"] = f"{idx['set_name']} (en vivo)"
+    return payload
+
+
 def run_sync(matches: list[dict]) -> dict:
     """Versión sin red: recibe las partidas ya descargadas (lo llama el worker
     tras ``meta_pipeline._matches`` para reutilizar la misma muestra).
@@ -221,4 +258,4 @@ def run_sync(matches: list[dict]) -> dict:
     agg["sample"] = {"matches": len(matches)}
     agg["generated_at"] = datetime.now(timezone.utc).isoformat()
     agg["source"] = "real"
-    return agg
+    return _cdragon_enrich(agg)

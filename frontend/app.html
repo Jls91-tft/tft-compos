@@ -508,7 +508,7 @@ function renderMetaList() {
   const list = document.getElementById("comp-list");
   if (!rows.length) { list.innerHTML = `<div class="empty">Ninguna comp coincide con el filtro.</div>`; return; }
   list.innerHTML = rows.map(c => {
-    const chips = (c.units && c.units.length) ? `<div class="unit-chips">${c.units.map(u => `<span class="unit-chip" style="color:${COST[u.c]};border-color:${COST[u.c]}55;background:${COST[u.c]}1A">${u.n}</span>`).join("")}</div>` : "";
+    const chips = (c.units && c.units.length) ? `<div class="unit-chips">${c.units.map(u => `<span class="unit-chip${u.icon ? " has-icon" : ""}" style="color:${COST[u.c]};border-color:${COST[u.c]}55;background:${COST[u.c]}1A">${u.icon ? `<img class="uc-icon" src="${u.icon}" alt="" loading="lazy" onerror="this.remove()">` : ""}${u.n}</span>`).join("")}</div>` : "";
     const metrics = cols.map(col => `<div class="metric"><span class="m-v">${c.metrics[col.k]}</span><span class="m-k">${col.label}</span></div>`).join("");
     const action = metaData.guide ? `<div class="comp-action"><a class="btn btn-ghost btn-sm" href="guia-comp.html">Ver guía →</a></div>` : `<div class="comp-action"></div>`;
     const carryRow = c.carry ? `<div class="comp-facts"><span class="cf-label">Carry</span><span class="cf-val">${c.carry}</span>${(c.carry_items && c.carry_items.length) ? `<span class="cf-sep">·</span><span class="cf-label">Ítems</span><span class="cf-val">${c.carry_items.slice(0,3).join(", ")}</span>` : ""}</div>` : "";
