@@ -10,6 +10,53 @@ Plataforma con dos funciones:
 
 ---
 
+## 🔄 Retomar en un equipo nuevo
+
+Todo el código está en GitHub; lo único que **no** se versiona son los **secretos** (`.env`).
+
+```bash
+# 1) Clonar
+git clone https://github.com/Jls91-tft/tft-compos.git
+cd tft-compos
+
+# 2) Crear el .env desde la plantilla
+cp .env.example .env
+```
+
+Valores del `.env` que importan **hoy**:
+
+```
+USE_MOCK=false
+RIOT_API_KEY=...                          # https://developer.riotgames.com (regénerala si la perdiste)
+LLM_PROVIDER=openrouter                    # el motor actual es OpenRouter, NO Ollama
+OPENROUTER_API_KEY=...                     # https://openrouter.ai/keys
+OPENROUTER_MODEL=moonshotai/kimi-k2.6:free
+# OPENROUTER_FALLBACK_MODELS ya trae valor por defecto en config.py (no hace falta tocarlo)
+```
+
+> Las claves **no están en el repo** (a propósito). Si no las tienes guardadas, **regenéralas** en los portales de Riot y OpenRouter.
+
+```bash
+# 3) Levantar (en el PC/VM con Docker)
+docker compose -f docker-compose.prod.yml up -d --build   # producción (incluye túnel Cloudflare)
+# …o, para desarrollo local sin túnel:
+docker compose up -d --build
+```
+
+- Frontend: `http://localhost:8080`  ·  API: `http://localhost:8000/docs`
+- **Ollama es opcional** (ya no es el motor): solo arranca con `--profile local-llm` y `LLM_PROVIDER=ollama`.
+
+### Dónde quedó el proyecto (junio 2026)
+- **Motor LLM:** OpenRouter con **Kimi K2.6** (`moonshotai/kimi-k2.6:free`) + **cadena de fallback** automática (DeepSeek → Qwen → comodín `openrouter/free`) ante 429/caídas/retiradas.
+- **Coaching rediseñado (estilo "Nebula"):** pestaña *Coaching* en **bento** (plan + rango/LP + partidas con estado claro), **informe estilo C** (pestañas Resumen · Errores · Comparativa · Desarrollo · Plan) que se abre como **ventana** con URL propia (`#report/<juego>/<id>`), y **chat del coach acoplado**.
+- **Datos enriquecidos (Fase 1+2):** rango/LP real, `challenges` de LoL y **progresión de oro al min 10/15** desde la timeline; alimentan el coaching.
+- **Despliegue:** Docker Compose `prod` + **Cloudflare Tunnel** (HTTPS sin certificados) + **Cloudflare Access** para gatear la beta. Detalle en [`docs/DEPLOY.md`](docs/DEPLOY.md).
+- **Pendientes/ideas:** patrón **asíncrono** si algún día se usa un modelo lento (p. ej. DeepSeek V4); registrar `divisionup.gg` y activar Access; surfacing del rango en más vistas.
+
+> Lee [`CLAUDE.md`](CLAUDE.md) para el contexto y las reglas completas antes de tocar nada.
+
+---
+
 ## Estado del proyecto
 
 - **Etapa 1 — Prototipo (cerrado):** maquetas HTML autónomas en [`synapse-prototipo/`](synapse-prototipo/) (tag `prototipo-etapa-1`).
