@@ -221,6 +221,13 @@ def _aggregate(matches: list[dict]) -> dict:
 
 
 # ----------------------------------- Entrada -----------------------------------
+def _enrich_named(idx: dict, kind: str, raw: str) -> dict:
+    """Devuelve {name, icon} resolviendo `raw` (apiName limpio) vía CDragon."""
+    from app.services import cdragon_client
+    meta = cdragon_client.lookup(idx, kind, raw) or {}
+    return {"name": meta.get("name") or raw, "icon": meta.get("icon")}
+
+
 def _cdragon_enrich(payload: dict) -> dict:
     """Resuelve nombres limpios → display name traducido + icon URL vía CDragon.
     Si CDragon no responde, deja todo tal cual (no rompe nada)."""
@@ -260,14 +267,8 @@ def _cdragon_enrich(payload: dict) -> dict:
                 else base
             )
             comp["name"] = f"{head} — {comp['carry']}" if comp.get("carry") else head
-        comp["carry_items"] = [
-            (cdragon_client.lookup(idx, "items", it) or {}).get("name") or it
-            for it in comp.get("carry_items", []) or []
-        ]
-        comp["augments"] = [
-            (cdragon_client.lookup(idx, "augments", a) or {}).get("name") or a
-            for a in comp.get("augments", []) or []
-        ]
+        comp["carry_items"] = [_enrich_named(idx, "items", it) for it in comp.get("carry_items", []) or []]
+        comp["augments"] = [_enrich_named(idx, "augments", a) for a in comp.get("augments", []) or []]
     if idx.get("set_name"):
         payload["patch"] = f"{idx['set_name']} (en vivo)"
     return payload

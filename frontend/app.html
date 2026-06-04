@@ -511,8 +511,11 @@ function renderMetaList() {
     const chips = (c.units && c.units.length) ? `<div class="unit-chips">${c.units.map(u => `<span class="unit-chip${u.icon ? " has-icon" : ""}" style="color:${COST[u.c]};border-color:${COST[u.c]}55;background:${COST[u.c]}1A">${u.icon ? `<img class="uc-icon" src="${u.icon}" alt="" loading="lazy" onerror="this.remove()">` : ""}${u.n}</span>`).join("")}</div>` : "";
     const metrics = cols.map(col => `<div class="metric"><span class="m-v">${c.metrics[col.k]}</span><span class="m-k">${col.label}</span></div>`).join("");
     const action = metaData.guide ? `<div class="comp-action"><a class="btn btn-ghost btn-sm" href="guia-comp.html">Ver guía →</a></div>` : `<div class="comp-action"></div>`;
-    const carryRow = c.carry ? `<div class="comp-facts"><span class="cf-label">Carry</span><span class="cf-val">${c.carry}</span>${(c.carry_items && c.carry_items.length) ? `<span class="cf-sep">·</span><span class="cf-label">Ítems</span><span class="cf-val">${c.carry_items.slice(0,3).join(", ")}</span>` : ""}</div>` : "";
-    const augRow = (c.augments && c.augments.length) ? `<div class="comp-facts"><span class="cf-label">Aumentos top</span><span class="cf-val">${c.augments.slice(0,3).join(", ")}</span></div>` : "";
+    const itemName = it => (typeof it === "string" ? it : it.name);
+    const itemIcon = it => (typeof it === "string" ? null : it.icon);
+    const itemChip = it => `<span class="item-chip">${itemIcon(it) ? `<img class="ic-icon" src="${itemIcon(it)}" alt="" loading="lazy" onerror="this.remove()">` : ""}${itemName(it)}</span>`;
+    const carryRow = c.carry ? `<div class="comp-facts"><span class="cf-label">Carry</span><span class="cf-val">${c.carry_icon ? `<img class="ic-icon" src="${c.carry_icon}" alt="" loading="lazy" onerror="this.remove()">` : ""}${c.carry}</span>${(c.carry_items && c.carry_items.length) ? `<span class="cf-sep">·</span><span class="cf-label">Ítems</span><span class="cf-row">${c.carry_items.slice(0,3).map(itemChip).join("")}</span>` : ""}</div>` : "";
+    const augRow = (c.augments && c.augments.length) ? `<div class="comp-facts"><span class="cf-label">Aumentos top</span><span class="cf-row">${c.augments.slice(0,3).map(itemChip).join("")}</span></div>` : "";
     return `<div class="comp-row"><div class="tier-badge tier-${c.tier}">${c.tier}</div>
       <div class="comp-info"><div class="comp-name">${c.name} <span class="comp-style">${c.style} · ${c.difficulty}</span></div>${chips}${carryRow}${augRow}</div>
       <div class="comp-metrics">${metrics}</div>${action}</div>`;

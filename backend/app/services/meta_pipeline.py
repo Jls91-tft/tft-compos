@@ -202,7 +202,47 @@ def aggregate_explorer(game: str, matches: list[dict]) -> dict:
     agg["sample"] = {"matches": len(matches)}
     agg["generated_at"] = datetime.now(timezone.utc).isoformat()
     agg["source"] = "real"
+    if game == "tft":
+        agg = _cdragon_enrich_explorer(agg)
     return agg
+
+
+def _cdragon_enrich_explorer(payload: dict) -> dict:
+    """Traduce nombres y añade iconos a los listados del Lab Explorer (TFT)."""
+    try:
+        from app.services import cdragon_client
+        idx = cdragon_client.index()
+    except Exception:   # noqa: BLE001
+        return payload
+    if not idx.get("champions") and not idx.get("items"):
+        return payload
+
+    def _resolve(kind: str, entries: list[dict]) -> list[dict]:
+        out = []
+        for e in entries or []:
+            meta = cdragon_client.lookup(idx, kind, e.get("n", "")) or {}
+            new = dict(e)
+            if meta:
+                new["n"] = meta.get("name") or new["n"]
+                new["icon"] = meta.get("icon")
+                if kind == "champions" and meta.get("cost"):
+                    new["cost"] = meta["cost"]
+            # Traducir también los chips (ítems top o unidades top).
+            chip_kind = "items" if kind == "champions" else "champions"
+            chips_translated = []
+            for chip in new.get("chips", []) or []:
+                chip_meta = cdragon_client.lookup(idx, chip_kind, chip) or {}
+                chips_translated.append(chip_meta.get("name") or chip)
+            new["chips"] = chips_translated
+            out.append(new)
+        return out
+
+    payload["units"] = _resolve("champions", payload.get("units", []))
+    payload["items"] = _resolve("items", payload.get("items", []))
+    payload["augments"] = _resolve("augments", payload.get("augments", []))
+    if idx.get("set_name"):
+        payload["set"] = idx["set_name"]
+    return payload
 
 
 async def run(game: str) -> dict:
