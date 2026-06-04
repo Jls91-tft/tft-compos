@@ -14,7 +14,8 @@ perfil 'meta') en bucle cada META_REFRESH_SECONDS.
 import asyncio
 import sys
 
-from app.services import comps_pipeline, meta_pipeline, meta_store
+from app.core.config import settings
+from app.services import comps_enrich, comps_pipeline, meta_pipeline, meta_store
 
 
 async def _refresh(game: str) -> None:
@@ -28,6 +29,8 @@ async def _refresh(game: str) -> None:
     n_comps = 0
     if game == "tft":
         comps = comps_pipeline.run_sync(matches)
+        if settings.meta_enrich_llm:
+            comps = await comps_enrich.enrich(comps)
         meta_store.save_comps("tft", comps)
         n_comps = len(comps.get("comps", []))
 

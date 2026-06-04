@@ -510,8 +510,9 @@ function renderMetaList() {
     const chips = (c.units && c.units.length) ? `<div class="unit-chips">${c.units.map(u => `<span class="unit-chip" style="color:${COST[u.c]};border-color:${COST[u.c]}55;background:${COST[u.c]}1A">${u.n}</span>`).join("")}</div>` : "";
     const metrics = cols.map(col => `<div class="metric"><span class="m-v">${c.metrics[col.k]}</span><span class="m-k">${col.label}</span></div>`).join("");
     const action = metaData.guide ? `<div class="comp-action"><a class="btn btn-ghost btn-sm" href="guia-comp.html">Ver guía →</a></div>` : `<div class="comp-action"></div>`;
+    const lema = c.lema ? `<div class="comp-lema">${c.lema}</div>` : "";
     return `<div class="comp-row"><div class="tier-badge tier-${c.tier}">${c.tier}</div>
-      <div class="comp-info"><div class="comp-name">${c.name} <span class="comp-style">${c.style} · ${c.difficulty}</span></div>${chips}</div>
+      <div class="comp-info"><div class="comp-name">${c.name} <span class="comp-style">${c.style} · ${c.difficulty}</span></div>${lema}${chips}</div>
       <div class="comp-metrics">${metrics}</div>${action}</div>`;
   }).join("");
 }

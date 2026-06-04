@@ -56,6 +56,8 @@ class Settings(BaseSettings):
     meta_matches_per_player: int = 8             # partidas por jugador
     meta_top_n: int = 24                         # entradas por explorador
     meta_min_games: int = 5                      # mínimo de apariciones para listar
+    meta_enrich_llm: bool = False                # si true, el worker pide al LLM nombre/lema/guía por comp
+    meta_enrich_top: int = 12                    # nº de comps a enriquecer (las mejores)
 
     # --- Coaching IA: persistencia (SQLite stdlib) + plan global ---
     reports_db: str = "app/data/generated/synapse.db"   # informes y planes cacheados
