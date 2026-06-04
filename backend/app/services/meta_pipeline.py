@@ -185,15 +185,29 @@ def _aggregate_lol(matches: list[dict]) -> dict:
 
 
 # ---------------------------------- Entrada ----------------------------------
-async def run(game: str) -> dict:
+async def fetch_sample(game: str) -> list[dict]:
+    """Descarga (una sola vez) la muestra del ladder para reutilizar en varios pipelines."""
     puuids = await _sample_puuids(game, settings.meta_sample_players)
     matches = await _matches(game, puuids)
+    return matches
+
+
+def aggregate_explorer(game: str, matches: list[dict]) -> dict:
+    """Agregación para /lab/explorer (unidades/ítems/aumentos)."""
     agg = _aggregate_tft(matches) if game == "tft" else _aggregate_lol(matches)
 
     from app.data import mock_lab  # import local: evita ciclo y solo se usa aquí
 
     agg["styles"] = mock_lab.STYLES.get(game, [])
-    agg["sample"] = {"players": len(puuids), "matches": len(matches)}
+    agg["sample"] = {"matches": len(matches)}
     agg["generated_at"] = datetime.now(timezone.utc).isoformat()
     agg["source"] = "real"
     return agg
+
+
+async def run(game: str) -> dict:
+    """Compatibilidad: descarga + agrega explorer en una llamada."""
+    matches = await fetch_sample(game)
+    out = aggregate_explorer(game, matches)
+    out["sample"]["players"] = settings.meta_sample_players  # informativo
+    return out

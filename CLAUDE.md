@@ -56,4 +56,7 @@ Frontend en `:8080`, API en `:8000/docs`. `USE_MOCK=true` → datos de ejemplo (
 - **Añadir una pantalla:** nueva página en `frontend/`, enlázala desde la navegación; usa `synapse.css` y `api.js`.
 
 ## Nota sobre la Meta global
-La tier list del parche **no** se puede derivar del historial de un solo jugador (necesita agregación de muchas partidas de alto elo). Por eso `/meta` sirve un **dataset curado** en `mock.py`; un pipeline de datos real es trabajo futuro.
+La tier list del parche **no** se puede derivar del historial de un solo jugador. Hay dos pipelines reales sobre la Riot API oficial (muestreo Challenger):
+- `services/meta_pipeline.py` → unidades/ítems/aumentos para `/lab/explorer`.
+- `services/comps_pipeline.py` → clusteriza tableros por rasgos+carry para `/meta` (TFT).
+Ambos los alimenta el worker (`app/worker/refresh_meta.py`, perfil `meta` del Compose) cada `META_REFRESH_SECONDS`. Si el JSON no existe (clave Dev caducada, worker apagado), los routers caen al mock genérico.
