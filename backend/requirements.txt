@@ -1,7 +1,17 @@
-# DivisionUp API — dependencias (ETAPA 2)
-# Se instalan en el OTRO PC con: pip install -r requirements.txt  (o vía Docker)
+# DivisionUp API — dependencias
+# Se instalan en la VM vía Docker: docker compose ... up -d --build
 fastapi==0.115.*
 uvicorn[standard]==0.32.*
 httpx==0.27.*
 pydantic==2.*
 pydantic-settings==2.*
+
+# FASE 2 — núcleo de análisis (aprobado: opción A)
+sqlalchemy==2.0.*          # ORM (Postgres en prod; SQLite como fallback/tests)
+alembic==1.14.*            # migraciones
+psycopg[binary]==3.2.*     # driver PostgreSQL
+redis==5.*                 # cola (RQ) + limitador de rate centralizado
+rq==2.*                    # worker de cola
+
+# Tests (se ejecutan en la VM dentro del contenedor)
+pytest==8.*

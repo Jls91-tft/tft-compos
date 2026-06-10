@@ -66,5 +66,18 @@ class Settings(BaseSettings):
     plan_autoanalyze: int = 2                            # informes que el endpoint /plan genera por sí mismo (respaldo;
     #                                                      el frontend ya los genera de uno en uno para no agotar el proxy)
 
+    # --- FASE 2: núcleo de análisis (BD relacional + cola + polling) ---
+    # En prod (compose): Postgres. Sin DATABASE_URL: SQLite en el volumen (fallback/tests).
+    database_url: str = "sqlite:///app/data/generated/divisionup.db"
+    # Sin REDIS_URL la cola se ejecuta inline (modo degradado/opción B) y el
+    # limitador de rate pasa a ser local al proceso.
+    redis_url: str = ""
+    rq_queue: str = "analisis"                  # nombre de la cola de análisis
+    poll_interval_seconds: int = 300            # cada cuánto sondea partidas nuevas por usuario
+    poll_count: int = 10                        # nº de IDs recientes que pide por usuario
+    # Límite real de la Dev/Personal key: 20 req/s y 100 req/2min. Margen de seguridad.
+    riot_rate_rps: int = 15
+    riot_rate_per_2min: int = 90
+
 
 settings = Settings()

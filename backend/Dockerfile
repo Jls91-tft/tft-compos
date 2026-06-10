@@ -7,8 +7,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Código de la aplicación
+# Código de la aplicación + migraciones + tests (pytest corre en la VM)
 COPY app ./app
+COPY alembic.ini .
+COPY alembic ./alembic
+COPY tests ./tests
 
 EXPOSE 8000
 

@@ -13,6 +13,7 @@ import httpx
 
 from app.core.config import settings
 from app.services.cache import TTLCache
+from app.services.rate_limiter import limitador
 
 _match_cache = TTLCache()   # detalle de partida (inmutable)
 _ids_cache = TTLCache()     # historial de IDs (cambia poco)
@@ -45,6 +46,9 @@ class RiotClient:
         async with self._sem:
             async with httpx.AsyncClient(timeout=settings.http_timeout) as client:
                 for _ in range(3):
+                    # Limitador centralizado (FASE 2): respeta 20 req/s · 100 req/2min
+                    # con margen, compartido entre procesos si hay Redis.
+                    await limitador.adquirir()
                     r = await client.get(url, headers=headers)
                     if r.status_code == 429:
                         await asyncio.sleep(float(r.headers.get("Retry-After", "1")))
