@@ -1,17 +1,20 @@
-/* Cliente de la API de DivisionUp.
+/* Cliente de la API de DivisionUp (beta TFT).
    El frontend llama a /api/... y nginx hace proxy al backend FastAPI.
-   El Riot ID (opcional) se guarda en localStorage y se adjunta a las peticiones;
-   en modo mock del backend se ignora. */
+   El Riot ID se guarda en localStorage (clave divisionup_riot_id; se migra
+   automáticamente desde la clave antigua synapse_riot_id si existe). */
 const API = {
   base: "/api",
 
-  riotId() { return localStorage.getItem("synapse_riot_id") || ""; },
-  setRiotId(v) { localStorage.setItem("synapse_riot_id", (v || "").trim()); },
-  lang() {
-    const saved = localStorage.getItem("synapse_lang");
-    if (saved) return saved;
-    return (navigator.language || "es").toLowerCase().indexOf("en") === 0 ? "en" : "es";
+  riotId() {
+    let v = localStorage.getItem("divisionup_riot_id");
+    if (!v) {
+      // migración silenciosa desde el diseño anterior
+      v = localStorage.getItem("synapse_riot_id") || "";
+      if (v) localStorage.setItem("divisionup_riot_id", v);
+    }
+    return v || "";
   },
+  setRiotId(v) { localStorage.setItem("divisionup_riot_id", (v || "").trim()); },
 
   _q(params) {
     const p = new URLSearchParams(params);
@@ -23,7 +26,7 @@ const API = {
   async _err(res) {
     let detail;
     try { detail = (await res.json()).detail; } catch { detail = res.statusText; }
-    return new Error(detail || ("Error " + res.status));
+    return new Error(typeof detail === "string" ? detail : ("Error " + res.status));
   },
   async _get(path) {
     const res = await fetch(this.base + path);
@@ -40,18 +43,12 @@ const API = {
     return res.json();
   },
 
-  matches(game) { return this._get(`/coaching/matches?${this._q({ game })}`); },
-  analyzed(game) { return this._get(`/coaching/analyzed/${game}?${this._q({})}`); },
-  rank(game) { return this._get(`/coaching/rank/${game}?${this._q({})}`); },
-  report(game, id, regenerate = false) { return this._get(`/coaching/report/${game}/${encodeURIComponent(id)}?${this._q({ lang: this.lang(), regenerate })}`); },
-  plan(game, regenerate = false) { return this._get(`/coaching/plan/${game}?${this._q({ lang: this.lang(), regenerate })}`); },
-  stats(game) { return this._get(`/stats?${this._q({ game })}`); },
-  meta(game) { return this._get(`/meta?game=${game}`); },
-  chat(game, id, question) {
-    return this._post(`/chat`, { game, match_id: id, question, riot_id: this.riotId(), lang: this.lang() });
-  },
-  labExplorer(game, kind) { return this._get(`/lab/explorer?game=${game}&kind=${kind}`); },
-  labRecipes() { return this._get(`/lab/recipes`); },
-  labGpi(game) { return this._get(`/lab/gpi?game=${game}`); },
-  labChampion(id) { return this._get(`/lab/champion?id=${encodeURIComponent(id || "mago-control")}`); },
+  /* --- beta TFT --- */
+  matches(game = "tft") { return this._get(`/coaching/matches?${this._q({ game })}`); },
+  rank(game = "tft") { return this._get(`/coaching/rank/${game}?${this._q({})}`); },
+  stats(game = "tft") { return this._get(`/stats?${this._q({ game })}`); },
+  meta(game = "tft") { return this._get(`/meta?game=${game}`); },
+  waitlist(datos) { return this._post(`/waitlist`, datos); },
+  /* FASE 4: feedback de señales (telemetría por patrón) */
+  feedback(datos) { return this._post(`/feedback`, datos); },
 };

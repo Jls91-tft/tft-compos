@@ -1,65 +1,71 @@
 # CLAUDE.md — Guía para agentes de IA
 
 > Léelo antes de tocar nada. Resume el proyecto, las reglas y dónde está cada cosa.
-> Documentación complementaria: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`backend/README.md`](backend/README.md), [`frontend/README.md`](frontend/README.md).
+> Documentación complementaria: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`backend/README.md`](backend/README.md), [`frontend/README.md`](frontend/README.md), [`docs/RIOT_APPLICATION.md`](docs/RIOT_APPLICATION.md).
 
 ## Qué es DivisionUp
-Plataforma de **coaching IA + estadísticas** para **TFT** (auto-battler) y **LoL** (MOBA).
-El **coaching tras cada partida es el diferencial** (errores, correcciones, plan accionable y chat con el coach). Estadísticas y meta son complementos.
+Producto de **coaching post-partida para Teamfight Tactics (TFT)**, en **beta cerrada 100 % TFT**.
+League of Legends NO forma parte de la beta: solo aparece en el copy como "en el roadmap".
+El diferencial es el **informe por partida construido sobre hechos verificados** del match (API oficial de Riot), no un panel de estadísticas.
 
-## Reglas no negociables
-1. **Idioma:** responde y documenta en **español**.
-2. **Marca propia genérica:** NUNCA uses logos, marcas registradas o el nombre "Riot" en branding propio (logo, nombre del producto, materiales de marketing). Sí está permitido usar nombres reales de campeones/rasgos/ítems/aumentos cuando provengan de:
-   - **Datos de la partida del usuario** vía la Riot Games API oficial.
-   - **Asset estático oficial** vía Data Dragon o CommunityDragon (idéntico camino que usan MetaTFT, Lolchess, Tactics.tools…).
-   Tanto el mock dinámico (`data/mock_cdragon.py`) como las agregaciones reales (`services/comps_pipeline._cdragon_enrich`) usan CDragon. El mock estático invented (`data/mock.py`, arquetipos Místico/Vanguardia) sigue existiendo como último fallback cuando CDragon no responde.
-3. **Secretos:** la clave de Riot va en `.env` (en `.gitignore`). Nunca en el código ni en commits. En `.env.example` solo placeholders. Si se expone una clave, **revócala**.
-4. **Versionado:** commits en **castellano**, claros, y **`git push`** tras cada avance. Repo: `github.com/Jls91-tft/tft-compos` (rama `main`).
-5. **Entorno de desarrollo actual:** se escribe el código pero **NO se instala ni ejecuta** el stack en este equipo (Windows). La ejecución real (Docker, instalaciones, Ollama) se hace en **otro PC**. No lances `pip` / `npm` / `docker` / `ollama` aquí salvo petición explícita.
+## Decisiones de producto CERRADAS (no reabrir)
+1. **Beta 100 % TFT.** LoL solo como roadmap en el copy.
+2. **Lenguaje de hipótesis:** el informe dice "Hipótesis principal" (NUNCA "veredicto") y "Señal de decisión" (NUNCA "error"). Las señales pueden llevar una pregunta de coach en cursiva.
+3. **Objetivo semanal protagonista:** banner arriba con regla concreta y progreso (ej. 6/10); cada partida lleva ✓/✗; cada informe abre con el chip "OBJETIVO DE LA SEMANA: ✓/✗".
+4. **Comparación "VS · PODIO DE TU LOBBY"** (media del top 4), NUNCA contra el Top 1 individual.
+5. **Transparencia radical:** desplegable "HECHOS VERIFICADOS · N REGISTROS" con líneas crudas en monoespaciada, incluidos los patrones DESCARTADOS por contraevidencia; pie con versión del catálogo.
+6. **Feedback por señal:** botones "✓ Acierta / ✗ Falla" que persisten el voto (telemetría por patrón).
+7. **Honestidad de alcance:** el análisis NO ve posicionamiento ni tiendas/rolls, y el copy lo declara (FAQ).
+8. **Captación:** UN solo CTA en la landing → formulario de waitlist (`POST /api/waitlist`).
+9. **Discord solo como canal de aviso** (fase futura; no implementado).
+10. **PROHIBIDO inventar métricas, testimonios o nombres de unidades/rasgos del set en copy o datos de ejemplo.** Arquetipos genéricos ("Reroll de 1 coste", "Fast 8") y datos de Data Dragon/CDragon cuando sean reales.
 
-## Estado
-- **Etapa 1** (prototipo HTML autónomo): cerrada → `synapse-prototipo/` (tag `prototipo-etapa-1`).
-- **Etapa 2** (producto): fases 0-5 completas (andamiaje, Riot API, coaching Ollama, stats, frontend, despliegue).
+## Acciones PROHIBIDAS
+- **NUNCA llamar a un LLM en el pipeline de informes**: la v1 es template-first (plantillas deterministas en castellano sobre hechos). El motor LLM antiguo (`coaching_engine`/`prompts`/`ollama_client`) está en retirada — no ampliarlo.
+- **NUNCA implementar MMR/ELO propio** ni nada presentable como ranking alternativo (políticas de Riot). La "posición esperada" solo por partida individual.
+- **NUNCA hardcodear claves**: `RIOT_API_KEY` y demás secretos solo en `.env` (gitignored). Si se expone una clave, revócala.
+- **NO añadir features no pedidas** (auth social, temas, i18n, modo LoL, pagos…).
+- **Parar y preguntar** antes de: borrar archivos, añadir dependencias, modificar esquemas de BD existentes, tocar despliegue/CI.
 
-## Arquitectura (resumen)
+## Reglas de trabajo
+1. **Idioma:** español en respuestas, comentarios, docstrings y commits.
+2. **Marca propia:** sin logos/marcas de Riot en branding propio. Nombres reales de campeones/ítems/rasgos SÍ cuando provengan de los datos del usuario (API oficial) o de Data Dragon/CommunityDragon.
+3. **Versionado:** commits en castellano y `git push` tras cada avance. Repo `github.com/Jls91-tft/tft-compos`, rama `main`.
+4. **En este equipo (Windows) no se ejecuta el stack**: la ejecución real (Docker, pytest) vive en la VM de GCP (`docs/DEPLOY.md`). Los tests se lanzan en la VM vía Docker.
+
+## Diseño (paleta "Hielo")
+La referencia canónica de UI es **`design-reference/divisionup-landing-v3.html`** y **`design-reference/divisionup-app-v3.html`** — léelas antes de tocar frontend y replica tokens/copys/comportamientos.
+- Fondos `#070B12 / #0A0F17`, paneles `#101724 / #16202F`, líneas `#1F2C3E / #2B3B52`.
+- Acentos: azul `#5BA8FF` (primario), menta `#53E0C4` (positivo), frambuesa `#F0668F` (señales), oro `#FFC95C` (**reservado** a Top 1 y logros).
+- Texto `#EAF1FA / #9FB2CB / #62758F`. Degradado de marca `linear-gradient(92deg,#53E0C4,#5BA8FF)`.
+- Tipos: Rajdhani (display/uppercase), Instrument Sans (cuerpo), JetBrains Mono (datos).
+- Logo: tres chevrones ascendentes (plata → oro → degradado), símbolo SVG en las referencias y `frontend/assets/logo.svg`.
+
+## Arquitectura objetivo del análisis (en construcción por fases)
 ```
-navegador → nginx (web, :8080) ──/──> frontend estático
-                                └─/api─> FastAPI (api, :8000) ──> Riot API
-                                                              └─> Ollama (IA local, :11434)
+CAPA 1  Motor de hechos       determinista, sin IA — end-state de los 8 jugadores
+CAPA 2  Catálogo de patrones  versionado; disparador + contraevidencia + confianza + severidad + plantilla + telemetría
+CAPA 3  Generador             template-first determinista (misma partida + misma versión = mismo informe)
 ```
-Detalle y flujo de datos en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Infra prevista (FASE 2, aprobada con reserva): FastAPI + PostgreSQL + RQ/Redis en la VM e2-micro; si la RAM no aguanta, fallback a SQLite + APScheduler.
 
 ## Estructura del repo
 ```
-backend/        API FastAPI            → backend/README.md
-frontend/       App de producción      → frontend/README.md
-nginx/          Sirve frontend + proxy /api
-synapse-prototipo/   Prototipo Etapa 1 (referencia visual, se abre con doble clic)
-docs/           Documentación
-docker-compose.yml · .env.example · README.md
+backend/            API FastAPI (routers, services, schemas, data, worker)
+frontend/           index.html (landing) · app.html (app) · privacy.html · tos.html · assets/
+design-reference/   Referencia canónica de UI v3 (NO servir; solo consulta)
+nginx/              Sirve frontend + proxy /api
+docs/               Documentación (DEPLOY, DATOS, RIOT_APPLICATION…)
+synapse-prototipo/  Prototipo Etapa 1 (cerrado, no tocar)
 ```
 
-## Cómo ejecutar (en el PC con Docker)
-```bash
-cp .env.example .env      # editar: RIOT_API_KEY, USE_MOCK
-docker compose up -d --build
-```
-Frontend en `:8080`, API en `:8000/docs`. `USE_MOCK=true` → datos de ejemplo (sin clave ni IA); `false` → Riot + Ollama reales.
+## Estado actual (junio 2026)
+- **FASE 1 (interfaz v3 "Hielo")**: landing + app nuevas, waitlist real (`POST /api/waitlist`, SQLite). La vista Coaching usa datos de ejemplo hasta FASE 4.
+- **Pipelines de meta reales** (reutilizados): `meta_pipeline`/`comps_pipeline`/`cdragon_client` + worker (`--profile meta`) alimentan `/meta` y `/lab/explorer` con ladder Challenger.
+- **Pendiente**: FASE 2 (modelos+migraciones, rate limiter central, motor de hechos, polling), FASE 3 (catálogo 10 patrones + generador + objetivo semanal), FASE 4 (endpoints reales, /debug, golden tests, desconexión del motor LLM antiguo).
 
 ## Convenciones clave
-- **El contrato API↔frontend** son los **schemas Pydantic** en `backend/app/schemas/models.py`. Si cambias una respuesta, cambia el schema.
-- **Datos de ejemplo** centralizados en `backend/app/data/mock.py`. Patrón en cada router/servicio: `if settings.use_mock: return mock...` ; si no, lógica real. Así el frontend se integra antes de tener Riot/IA.
-- **Servicios** (`backend/app/services/`): `riot_client` (Riot API), `ollama_client` (IA), `coaching_engine` (orquesta), `stats_engine` (agrega historial), `prompts` (voz del coach + extracción + parseo).
-- **Frontend vanilla** (sin framework): `frontend/assets/` (`api.js`, `charts.js`, `synapse.css`) + páginas HTML. Se sirve con nginx; **no** funciona abriendo el HTML con doble clic (hace `fetch` a `/api`).
-
-## Tareas típicas
-- **Añadir endpoint:** crea el router en `backend/app/routers/`, inclúyelo en `backend/app/main.py`, define el schema en `schemas/models.py` y el mock en `data/mock.py`.
-- **Mejorar la calidad/voz del coaching:** `backend/app/services/prompts.py` (`COACH_SYSTEM` y los `build_*_prompt`).
-- **Tocar el diseño:** `frontend/assets/synapse.css` (design system con tokens).
-- **Añadir una pantalla:** nueva página en `frontend/`, enlázala desde la navegación; usa `synapse.css` y `api.js`.
-
-## Nota sobre la Meta global
-La tier list del parche **no** se puede derivar del historial de un solo jugador. Hay dos pipelines reales sobre la Riot API oficial (muestreo Challenger):
-- `services/meta_pipeline.py` → unidades/ítems/aumentos para `/lab/explorer`.
-- `services/comps_pipeline.py` → clusteriza tableros por rasgos+carry para `/meta` (TFT).
-Ambos los alimenta el worker (`app/worker/refresh_meta.py`, perfil `meta` del Compose) cada `META_REFRESH_SECONDS`. Si el JSON no existe (clave Dev caducada, worker apagado), los routers caen al mock genérico.
+- Contrato API↔frontend = schemas Pydantic en `backend/app/schemas/models.py`.
+- Patrón mock: `if settings.use_mock: return mock...` (datos de ejemplo en `backend/app/data/`).
+- Frontend vanilla sin framework; se sirve con nginx (no funciona con doble clic, hace fetch a `/api`).
+- Frontend en la VM va **bind-mounted**: desplegar = `git pull` en la VM. Backend requiere `docker compose -f docker-compose.prod.yml up -d --build api`.

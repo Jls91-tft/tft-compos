@@ -135,3 +135,13 @@ class MetaComp(BaseModel):
     difficulty: str
     metrics: dict                # coloc/top4/win/pick (TFT) o win/pick/ban/kda (LoL)
     units: list[dict] = []       # [{"n": "Místico", "c": 4}]  (vacío en LoL)
+
+
+# ---------- Waitlist (beta cerrada) ----------
+class WaitlistRequest(BaseModel):
+    """Solicitud de acceso a la beta desde la landing (POST /waitlist)."""
+    email: str
+    riot_id: str                 # Nombre#TAG (validado por regex en el router)
+    rango: str                   # opción literal del formulario
+    partidas_semana: str         # opción literal del formulario
+    consentimiento: bool = False # RGPD: obligatorio que sea true

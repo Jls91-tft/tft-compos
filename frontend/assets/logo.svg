@@ -1,6 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 32 32" fill="none" role="img" aria-label="DivisionUp">
-  <rect x="4.5" y="18" width="5.5" height="9" rx="2" fill="#7C5CFC"/>
-  <rect x="13.25" y="14" width="5.5" height="13" rx="2" fill="#9B7DFF"/>
-  <rect x="22" y="12.5" width="5.5" height="14.5" rx="2" fill="#22B8CF"/>
-  <path d="M21 10 L24.75 5.5 L28.5 10" fill="none" stroke="#22B8CF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="gradLogo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#53E0C4"/><stop offset="1" stop-color="#5BA8FF"/>
+    </linearGradient>
+  </defs>
+  <path d="M7 28 16 21 25 28" fill="none" stroke="#8C9BB5" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M7 19.5 16 12.5 25 19.5" fill="none" stroke="#FFC95C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M7 11 16 4 25 11" fill="none" stroke="url(#gradLogo)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

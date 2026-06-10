@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DivisionUp — Coaching IA para TFT. Sube de división con datos, no con suerte.</title>
 <meta name="description" content="DivisionUp analiza cada partida de TFT con hechos verificados de tu match: qué decisión te costó el puesto y qué entrenar esta semana para subir.">
-<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -77,7 +76,6 @@ header{
 }
 .btn-azul{background:var(--grad);color:#06101E;box-shadow:0 0 0 1px rgba(91,168,255,.35),0 8px 34px rgba(91,168,255,.28)}
 .btn-azul:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(91,168,255,.5),0 14px 44px rgba(91,168,255,.4)}
-.btn-azul[disabled]{opacity:.6;cursor:wait;transform:none}
 .btn-fantasma{background:transparent;color:var(--texto);border:1px solid var(--linea-2)}
 .btn-fantasma:hover{border-color:var(--azul);color:var(--azul)}
 .btn-sm{padding:10px 20px;font-size:.88rem}
@@ -326,11 +324,6 @@ input:focus,select:focus{border-color:var(--azul);box-shadow:0 0 0 3px rgba(91,1
 .consent{display:flex;gap:10px;align-items:flex-start;margin:18px 0 22px}
 .consent input{width:auto;margin-top:4px;accent-color:var(--azul)}
 .consent span{font-size:.78rem;color:var(--texto-3);line-height:1.5}
-.form-err{
-  display:none;margin-bottom:16px;padding:11px 14px;border-radius:9px;
-  background:var(--fram-suave);border:1px solid rgba(240,102,143,.35);
-  color:var(--fram);font-size:.86rem;
-}
 .form-ok{display:none;text-align:center;padding:40px 10px}
 .form-ok .check{
   width:56px;height:56px;border-radius:50%;margin:0 auto 18px;
@@ -623,7 +616,6 @@ footer{border-top:1px solid var(--linea);padding:46px 0 54px;background:var(--fo
       <form id="waitlist" novalidate>
         <h3>Solicitud de acceso</h3>
         <p class="sub">Sin spam: solo tu invitación y las novedades de la beta.</p>
-        <div class="form-err" id="formerr" role="alert"></div>
         <div class="field"><label for="email">Email</label><input type="email" id="email" name="email" placeholder="tu@email.com" required autocomplete="email"></div>
         <div class="field"><label for="riotid">Riot ID</label><input type="text" id="riotid" name="riotid" placeholder="Nombre#TAG" required></div>
         <div class="field-row">
@@ -640,7 +632,7 @@ footer{border-top:1px solid var(--linea);padding:46px 0 54px;background:var(--fo
         </div>
         <div class="consent">
           <input type="checkbox" id="consent" required>
-          <span><label for="consent" style="display:inline;font-weight:400;color:var(--texto-3);text-transform:none;font-family:var(--body);letter-spacing:0">Acepto que DivisionUp consulte mis partidas públicas de TFT mediante la API oficial de Riot para generar mi informe de bienvenida, y la <a href="privacy.html" style="color:var(--texto-2)">política de privacidad</a>.</label></span>
+          <span><label for="consent" style="display:inline;font-weight:400;color:var(--texto-3);text-transform:none;font-family:var(--body);letter-spacing:0">Acepto que DivisionUp consulte mis partidas públicas de TFT mediante la API oficial de Riot para generar mi informe de bienvenida, y la <a href="#" style="color:var(--texto-2)">política de privacidad</a>.</label></span>
         </div>
         <button class="btn btn-azul" type="submit" style="width:100%">Pedir mi plaza</button>
       </form>
@@ -682,7 +674,7 @@ footer{border-top:1px solid var(--linea);padding:46px 0 54px;background:var(--fo
         <svg width="24" height="24" aria-hidden="true"><use href="#marca"/></svg>
         <span class="logotype" style="font-size:1.1rem">Division<b>Up</b></span>
       </a>
-      <nav class="foot-links" aria-label="Legal"><a href="privacy.html">Privacidad</a><a href="tos.html">Términos</a><a href="mailto:contacto@divisionup.gg">Contacto</a></nav>
+      <nav class="foot-links" aria-label="Legal"><a href="#">Privacidad</a><a href="#">Términos</a><a href="#">Contacto</a></nav>
     </div>
     <p class="disclaimer">DivisionUp no está afiliado, asociado, autorizado ni respaldado por Riot Games, Inc. ni por ninguna de sus filiales. Teamfight Tactics y Riot Games son marcas registradas de Riot Games, Inc. DivisionUp utiliza la API oficial de Riot Games conforme a sus políticas para desarrolladores. © 2026 DivisionUp.</p>
   </div>
@@ -710,45 +702,12 @@ const obsTerm = new IntersectionObserver(es => es.forEach(e => {
 }), {threshold:.35});
 obsTerm.observe(term);
 
-/* Formulario de waitlist → POST /api/waitlist (persistencia real) */
-document.getElementById('waitlist').addEventListener('submit', async function(e){
+/* Formulario mock: en producción, conectar a vuestro endpoint antes de mostrar #formok */
+document.getElementById('waitlist').addEventListener('submit', function(e){
   e.preventDefault();
   if(!this.checkValidity()){ this.reportValidity(); return; }
-  const err = document.getElementById('formerr');
-  err.style.display = 'none';
-  const riotId = this.riotid.value.trim();
-  if(!/^[^#]{3,16}#[^#\s]{2,5}$/.test(riotId)){
-    err.textContent = 'El Riot ID debe tener el formato Nombre#TAG (ej.: Kaelo#EUW).';
-    err.style.display = 'block';
-    return;
-  }
-  const btn = this.querySelector('button[type=submit]');
-  btn.disabled = true;
-  try{
-    const res = await fetch('/api/waitlist', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        email: this.email.value.trim(),
-        riot_id: riotId,
-        rango: this.rango.value,
-        partidas_semana: this.freq.value,
-        consentimiento: document.getElementById('consent').checked
-      })
-    });
-    if(!res.ok){
-      let detalle = 'No se pudo enviar la solicitud. Inténtalo de nuevo en un momento.';
-      try{ const j = await res.json(); if(typeof j.detail === 'string') detalle = j.detail; }catch{}
-      throw new Error(detalle);
-    }
-    this.style.display = 'none';
-    document.getElementById('formok').style.display = 'block';
-  }catch(ex){
-    err.textContent = ex.message;
-    err.style.display = 'block';
-  }finally{
-    btn.disabled = false;
-  }
+  this.style.display = 'none';
+  document.getElementById('formok').style.display = 'block';
 });
 </script>
 </body>

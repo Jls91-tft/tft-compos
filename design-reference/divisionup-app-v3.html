@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DivisionUp — Coaching IA · App</title>
-<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -38,7 +37,7 @@ body{background:var(--fondo);color:var(--texto);font-family:var(--body);font-siz
 ::selection{background:var(--azul);color:#06101E}
 a{color:inherit}
 button{font-family:inherit;cursor:pointer}
-a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--azul);outline-offset:2px;border-radius:4px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--azul);outline-offset:2px;border-radius:4px}
 h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
 .mono{font-family:var(--mono)}
 
@@ -114,7 +113,7 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
 .perfil-rango{font-size:.72rem;color:var(--oro);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-family:var(--display)}
 
 /* ============ objetivo activo ============ */
-.zona{padding:26px 30px 50px;display:grid;gap:22px;align-content:start}
+.zona{padding:26px 30px 50px;display:grid;gap:22px}
 @media (max-width:980px){.zona{padding:18px 16px 40px}}
 .objetivo{
   position:relative;overflow:hidden;
@@ -260,101 +259,6 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
 }
 .report-foot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--menta)}
 .nota-fb{margin-top:10px;font-size:.78rem;color:var(--texto-3)}
-
-/* ============ EXTENSIONES (vistas secundarias, mismos tokens) ============ */
-.cargando{color:var(--texto-3);font-family:var(--mono);font-size:.8rem;letter-spacing:.08em;padding:30px;text-align:center}
-.error-panel{
-  border:1px solid rgba(240,102,143,.35);background:var(--fram-suave);color:var(--fram);
-  border-radius:12px;padding:16px 20px;font-size:.9rem;
-}
-.vacio{
-  border:1px dashed var(--linea-2);border-radius:14px;padding:40px 24px;text-align:center;color:var(--texto-3);
-}
-.vacio a{color:var(--azul)}
-
-/* KPIs de estadísticas */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-@media (max-width:980px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-.kpi{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:18px 20px}
-.kpi .v{font-family:var(--display);font-weight:700;font-size:2rem;line-height:1.1}
-.kpi.good .v{color:var(--menta)}
-.kpi.warn .v{color:var(--fram)}
-.kpi .k{font-size:.82rem;color:var(--texto-2);margin-top:4px}
-.kpi .bench{font-family:var(--mono);font-size:.66rem;color:var(--texto-3);letter-spacing:.06em;margin-top:8px}
-
-/* barras de distribución */
-.dist{display:grid;gap:8px;padding:20px}
-.dist-row{display:grid;grid-template-columns:40px 1fr 34px;gap:10px;align-items:center;font-family:var(--mono);font-size:.72rem;color:var(--texto-3)}
-.dist-bar{height:10px;border-radius:99px;background:var(--panel-2);overflow:hidden}
-.dist-bar i{display:block;height:100%;border-radius:99px}
-
-/* tablas */
-.tabla{width:100%;border-collapse:collapse;font-size:.88rem}
-.tabla th{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;color:var(--texto-3);text-align:left;padding:12px 20px;border-bottom:1px solid var(--linea);text-transform:uppercase}
-.tabla td{padding:11px 20px;border-bottom:1px solid var(--linea);color:var(--texto-2)}
-.tabla tr:last-child td{border-bottom:0}
-.tabla td:first-child{color:var(--texto);font-weight:600}
-
-/* insights */
-.insight{display:flex;gap:12px;padding:16px 20px;border-bottom:1px solid var(--linea);font-size:.92rem}
-.insight:last-child{border-bottom:0}
-.insight .t{font-weight:600;color:var(--texto)}
-.insight .d{color:var(--texto-2);font-size:.88rem;margin-top:2px}
-
-/* meta del parche */
-.fuente-chip{
-  display:inline-flex;align-items:center;gap:8px;
-  font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;
-  border-radius:99px;padding:5px 14px;
-}
-.fuente-chip.real{background:var(--menta-suave);color:var(--menta);border:1px solid rgba(83,224,196,.3)}
-.fuente-chip.ejemplo{background:var(--fram-suave);color:var(--fram);border:1px solid rgba(240,102,143,.3)}
-.comp-fila{
-  display:grid;grid-template-columns:52px 1fr auto;gap:16px;align-items:center;
-  padding:16px 20px;border-bottom:1px solid var(--linea);
-}
-.comp-fila:last-child{border-bottom:0}
-.tier-badge{
-  width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;
-  font-family:var(--display);font-weight:700;font-size:1.3rem;border:1px solid transparent;
-}
-.tier-S{background:var(--oro-suave);color:var(--oro);border-color:rgba(255,201,92,.3)}
-.tier-A{background:var(--menta-suave);color:var(--menta);border-color:rgba(83,224,196,.25)}
-.tier-B{background:var(--azul-suave);color:var(--azul);border-color:rgba(91,168,255,.25)}
-.tier-C{background:var(--panel-2);color:var(--texto-3);border-color:var(--linea-2)}
-.comp-nombre{font-weight:600;font-size:.96rem}
-.comp-sub{font-family:var(--mono);font-size:.66rem;color:var(--texto-3);letter-spacing:.06em;margin-top:2px}
-.unidades{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
-.unidad{
-  display:inline-flex;align-items:center;gap:6px;
-  background:var(--panel-2);border:1px solid var(--linea);border-radius:7px;
-  padding:3px 9px 3px 4px;font-size:.78rem;color:var(--texto-2);
-}
-.unidad img{width:20px;height:20px;border-radius:4px;object-fit:cover}
-.unidad .coste{font-family:var(--mono);font-size:.64rem;color:var(--texto-3)}
-.comp-metricas{display:flex;gap:18px;font-family:var(--mono);font-size:.72rem;color:var(--texto-3);text-align:right}
-.comp-metricas b{display:block;font-size:.95rem;color:var(--texto);font-family:var(--display)}
-@media (max-width:860px){.comp-fila{grid-template-columns:52px 1fr}.comp-metricas{grid-column:1/-1;justify-content:space-between}}
-
-/* ajustes */
-.ajustes-card{background:var(--panel);border:1px solid var(--linea);border-radius:14px;padding:26px;max-width:560px}
-.ajustes-card h2{font-size:1.15rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px}
-.ajustes-card label{display:block;font-family:var(--display);font-size:.82rem;font-weight:600;color:var(--texto-2);margin-bottom:7px;letter-spacing:.03em;text-transform:uppercase}
-.ajustes-card input{
-  width:100%;background:var(--fondo);border:1px solid var(--linea-2);border-radius:9px;
-  color:var(--texto);font-family:var(--body);font-size:.97rem;padding:12px 15px;
-}
-.ajustes-card input:focus{border-color:var(--azul);box-shadow:0 0 0 3px rgba(91,168,255,.15)}
-.ajustes-card .nota{font-size:.82rem;color:var(--texto-3);margin-top:10px}
-.btn-app{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;
-  font-family:var(--display);font-weight:700;font-size:.95rem;letter-spacing:.07em;text-transform:uppercase;
-  padding:11px 24px;border-radius:8px;border:0;cursor:pointer;
-  background:var(--grad);color:#06101E;
-}
-.btn-app.secundario{background:transparent;color:var(--texto-2);border:1px solid var(--linea-2)}
-.btn-app.secundario:hover{border-color:var(--fram);color:var(--fram)}
-.guardado-ok{display:none;color:var(--menta);font-family:var(--mono);font-size:.74rem;margin-top:10px;letter-spacing:.06em}
 </style>
 </head>
 <body>
@@ -382,19 +286,19 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
 
   <!-- ============ SIDEBAR ============ -->
   <aside class="sidebar">
-    <a class="logo" href="index.html" aria-label="DivisionUp, inicio">
+    <a class="logo" href="#" aria-label="DivisionUp, inicio">
       <svg width="27" height="27" aria-hidden="true"><use href="#marca"/></svg>
       <span class="logotype">Division<b>Up</b></span>
     </a>
     <span class="nav-grupo">JUEGO</span>
-    <a class="navitem" href="#resumen" data-vista="resumen"><svg width="18" height="18" aria-hidden="true"><use href="#i-resumen"/></svg>Resumen</a>
-    <a class="navitem" href="#coaching" data-vista="coaching"><svg width="18" height="18" aria-hidden="true"><use href="#i-coach"/></svg>Coaching IA</a>
-    <a class="navitem" href="#plan" data-vista="plan"><svg width="18" height="18" aria-hidden="true"><use href="#i-plan"/></svg>Plan semanal</a>
+    <a class="navitem" href="#"><svg width="18" height="18" aria-hidden="true"><use href="#i-resumen"/></svg>Resumen</a>
+    <a class="navitem activo" href="#" aria-current="page"><svg width="18" height="18" aria-hidden="true"><use href="#i-coach"/></svg>Coaching IA</a>
+    <a class="navitem" href="#"><svg width="18" height="18" aria-hidden="true"><use href="#i-plan"/></svg>Plan semanal</a>
     <span class="nav-grupo">DATOS</span>
-    <a class="navitem" href="#stats" data-vista="stats"><svg width="18" height="18" aria-hidden="true"><use href="#i-stats"/></svg>Estadísticas</a>
-    <a class="navitem" href="#meta" data-vista="meta"><svg width="18" height="18" aria-hidden="true"><use href="#i-meta"/></svg>Meta del parche</a>
+    <a class="navitem" href="#"><svg width="18" height="18" aria-hidden="true"><use href="#i-stats"/></svg>Estadísticas</a>
+    <a class="navitem" href="#"><svg width="18" height="18" aria-hidden="true"><use href="#i-meta"/></svg>Meta del parche</a>
     <div class="resto">
-      <a class="navitem" href="#ajustes" data-vista="ajustes"><svg width="18" height="18" aria-hidden="true"><use href="#i-ajustes"/></svg>Ajustes</a>
+      <a class="navitem" href="#"><svg width="18" height="18" aria-hidden="true"><use href="#i-ajustes"/></svg>Ajustes</a>
       <span class="beta-chip"><i></i>BETA CERRADA · TFT</span>
     </div>
   </aside>
@@ -402,19 +306,19 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
   <!-- ============ CONTENIDO ============ -->
   <div class="contenido">
     <div class="topbar">
-      <h1 id="titulo">Coaching IA <span>/ TFT</span></h1>
+      <h1>Coaching IA <span>/ TFT</span></h1>
       <div class="perfil">
-        <div class="avatar" aria-hidden="true" id="avatar">·</div>
+        <div class="avatar" aria-hidden="true">K</div>
         <div>
-          <div class="perfil-id" id="perfil-id">Configura tu Riot ID</div>
-          <div class="perfil-rango" id="perfil-rango"></div>
+          <div class="perfil-id">Kaelo#EUW</div>
+          <div class="perfil-rango">Esmeralda II · 58 LP</div>
         </div>
       </div>
     </div>
 
-    <!-- ===== VISTA: COACHING (referencia v3; datos mock hasta FASE 4) ===== -->
-    <div class="zona" id="vista-coaching">
+    <div class="zona">
 
+      <!-- ===== objetivo activo ===== -->
       <section class="objetivo" aria-label="Objetivo de entrenamiento activo">
         <span class="obj-tag">OBJETIVO ACTIVO</span>
         <div>
@@ -430,6 +334,7 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
 
       <div class="panel-grid">
 
+        <!-- ===== columna izquierda ===== -->
         <div class="col-izq">
           <div class="bloque">
             <div class="bloque-head">
@@ -446,131 +351,16 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
           </div>
         </div>
 
+        <!-- ===== informe ===== -->
         <article class="report" id="report" aria-live="polite"></article>
 
       </div>
     </div>
-
-    <!-- ===== VISTA: RESUMEN (datos reales mínimos) ===== -->
-    <div class="zona" id="vista-resumen" hidden>
-      <div class="panel-grid">
-        <div class="col-izq">
-          <div class="bloque">
-            <div class="bloque-head"><h2>Tu rango</h2><span class="mono">RANKED TFT</span></div>
-            <div id="resumen-rango" class="cargando">CARGANDO…</div>
-          </div>
-        </div>
-        <div class="bloque">
-          <div class="bloque-head"><h2>Últimas partidas</h2><span class="mono" id="resumen-fuente">API OFICIAL DE RIOT</span></div>
-          <div id="resumen-partidas" class="cargando">CARGANDO…</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== VISTA: PLAN SEMANAL (objetivo activo; motor real en FASE 3) ===== -->
-    <div class="zona" id="vista-plan" hidden>
-      <section class="objetivo" aria-label="Objetivo de entrenamiento activo">
-        <span class="obj-tag">OBJETIVO ACTIVO</span>
-        <div>
-          <h2>Pivota <em>antes</em></h2>
-          <p>Si en 4-1 tu línea principal está contestada por <b>2 o más rivales</b> y no llevas ventaja, cambia de plan. Cada informe de esta semana te dice si lo has cumplido.</p>
-        </div>
-        <div class="obj-prog">
-          <div class="cifra">6<span>/10</span></div>
-          <div class="etiqueta">PARTIDAS CUMPLIENDO EL OBJETIVO</div>
-          <div class="barra"><i></i></div>
-        </div>
-      </section>
-      <div class="bloque patron">
-        <h3>Patrón recurrente</h3>
-        <p>En <b>4 de tus últimas 10 partidas</b> mantuviste unidades de 4 de coste contestadas por 3 o más rivales más allá del stage 4-1. Tu objetivo semanal sale de aquí: un único hábito medible cada semana.</p>
-        <span class="mono">MOTOR DE HECHOS · MUESTRA: 10 PARTIDAS</span>
-      </div>
-      <p class="nota-fb">El objetivo se recalcula cada semana a partir de tus patrones recurrentes. Cada informe lleva la marca ✓/✗ de si lo cumpliste en esa partida.</p>
-    </div>
-
-    <!-- ===== VISTA: ESTADÍSTICAS (endpoint real /stats) ===== -->
-    <div class="zona" id="vista-stats" hidden>
-      <div id="stats-cuerpo" class="cargando">CARGANDO…</div>
-    </div>
-
-    <!-- ===== VISTA: META DEL PARCHE (endpoint real /meta) ===== -->
-    <div class="zona" id="vista-meta" hidden>
-      <div id="meta-cuerpo" class="cargando">CARGANDO…</div>
-    </div>
-
-    <!-- ===== VISTA: AJUSTES ===== -->
-    <div class="zona" id="vista-ajustes" hidden>
-      <div class="ajustes-card">
-        <h2>Cuenta</h2>
-        <label for="riot-input">Riot ID</label>
-        <input type="text" id="riot-input" placeholder="Nombre#TAG" autocomplete="off">
-        <p class="nota">Con tu Riot ID leemos tus partidas públicas de TFT mediante la API oficial de Riot. Sin contraseñas, sin instalar nada.</p>
-        <button class="btn-app" id="guardar-riot">Guardar</button>
-        <p class="guardado-ok" id="guardado-ok">✓ GUARDADO</p>
-      </div>
-      <div class="ajustes-card">
-        <h2>Tus datos (RGPD)</h2>
-        <p class="nota">Puedes pedir el borrado completo de tu cuenta y tus datos en cualquier momento. Lo eliminamos todo en un máximo de 30 días.</p>
-        <a class="btn-app secundario" href="mailto:contacto@divisionup.gg?subject=Borrado%20de%20datos%20DivisionUp">Solicitar borrado de datos</a>
-      </div>
-    </div>
-
   </div>
 </div>
 
-<script src="assets/api.js"></script>
 <script>
-/* ===================================================================
-   Navegación entre vistas (hash routing)
-   =================================================================== */
-const TITULOS = {
-  resumen: 'Resumen', coaching: 'Coaching IA', plan: 'Plan semanal',
-  stats: 'Estadísticas', meta: 'Meta del parche', ajustes: 'Ajustes'
-};
-const cargadas = {};   // vistas remotas ya pedidas (no repetir fetch)
-
-function vistaActual(){
-  const h = (location.hash || '#coaching').slice(1);
-  return TITULOS[h] ? h : 'coaching';
-}
-function mostrarVista(){
-  const v = vistaActual();
-  document.querySelectorAll('[id^="vista-"]').forEach(z => { z.hidden = z.id !== 'vista-' + v; });
-  document.querySelectorAll('.navitem[data-vista]').forEach(n => {
-    const activo = n.dataset.vista === v;
-    n.classList.toggle('activo', activo);
-    if(activo) n.setAttribute('aria-current','page'); else n.removeAttribute('aria-current');
-  });
-  document.getElementById('titulo').innerHTML = `${TITULOS[v]} <span>/ TFT</span>`;
-  if(v === 'resumen' && !cargadas.resumen){ cargadas.resumen = true; cargarResumen(); }
-  if(v === 'stats' && !cargadas.stats){ cargadas.stats = true; cargarStats(); }
-  if(v === 'meta' && !cargadas.meta){ cargadas.meta = true; cargarMeta(); }
-}
-window.addEventListener('hashchange', mostrarVista);
-
-/* ===================================================================
-   Perfil (Riot ID en localStorage + rango real)
-   =================================================================== */
-function pintarPerfil(){
-  const rid = API.riotId();
-  const id = document.getElementById('perfil-id');
-  const rg = document.getElementById('perfil-rango');
-  const av = document.getElementById('avatar');
-  if(!rid){ id.textContent = 'Configura tu Riot ID'; rg.textContent = ''; av.textContent = '·'; return; }
-  id.textContent = rid;
-  av.textContent = rid[0].toUpperCase();
-  API.rank('tft').then(r => {
-    if(r && r.tier){ rg.textContent = `${r.tier} ${r.division || ''} · ${r.lp ?? 0} LP`; }
-    else { rg.textContent = ''; }
-  }).catch(() => { rg.textContent = ''; });
-}
-
-/* ===================================================================
-   VISTA COACHING — datos de ejemplo (mock) hasta FASE 4.
-   Arquetipos genéricos, sin unidades del set: decisión cerrada n.º 10.
-   En producción: GET /api/matches y /api/report/:id
-   =================================================================== */
+/* ===== Datos de ejemplo (mock). En producción: GET /api/matches y /api/report/:id ===== */
 const partidas = [
   {
     pos:8, clase:'bot', comp:'Flex de 4 costes', meta:'HACE 1 H · 32 MIN', obj:false,
@@ -705,179 +495,12 @@ function render(i){
       btn.addEventListener('click',()=>{
         g.querySelectorAll('.fb').forEach(x=>x.classList.remove('sel'));
         btn.classList.add('sel');
-        /* FASE 4: POST /api/feedback {informe, señal, voto} */
+        /* producción: POST /api/feedback {informe, señal, voto} */
       });
     });
   });
 }
 render(0);
-
-/* ===================================================================
-   VISTA RESUMEN — rango + últimas partidas reales (API oficial)
-   =================================================================== */
-function claseDePuesto(n){ return n === 1 ? '1' : (n <= 4 ? 'top' : 'bot'); }
-
-async function cargarResumen(){
-  const rangoEl = document.getElementById('resumen-rango');
-  const partidasEl = document.getElementById('resumen-partidas');
-  if(!API.riotId()){
-    rangoEl.innerHTML = `<div class="vacio" style="border:0">Configura tu <a href="#ajustes">Riot ID en Ajustes</a> para ver tus datos.</div>`;
-    partidasEl.innerHTML = `<div class="vacio" style="border:0">Sin Riot ID no hay partidas que mostrar.</div>`;
-    return;
-  }
-  API.rank('tft').then(r => {
-    if(r && r.tier){
-      rangoEl.className = '';
-      rangoEl.innerHTML = `
-        <div style="padding:20px">
-          <div style="font-family:var(--display);font-weight:700;font-size:1.8rem;color:var(--oro)">${r.tier} ${r.division || ''}</div>
-          <div class="mono" style="font-size:.74rem;color:var(--texto-3);margin-top:6px">${r.lp ?? 0} LP · ${r.victorias ?? 0}V / ${r.derrotas ?? 0}D${r.winrate_pct != null ? ' · ' + r.winrate_pct + '% WR' : ''}</div>
-        </div>`;
-    } else {
-      rangoEl.innerHTML = `<div class="vacio" style="border:0">Sin clasificar esta temporada.</div>`;
-    }
-  }).catch(e => { rangoEl.className=''; rangoEl.innerHTML = `<div class="error-panel" style="margin:16px">${e.message}</div>`; });
-
-  API.matches('tft').then(ms => {
-    partidasEl.className = '';
-    if(!ms || !ms.length){ partidasEl.innerHTML = `<div class="vacio" style="border:0">No hay partidas recientes.</div>`; return; }
-    partidasEl.innerHTML = ms.map(m => {
-      const n = parseInt(m.result, 10) || 8;
-      return `
-      <div class="match" style="cursor:default">
-        <span class="pos pos-${claseDePuesto(n)}">${n}.º</span>
-        <span>
-          <span class="match-comp">${m.title || 'Partida de TFT'}</span><br>
-          <span class="match-meta">${(m.meta && m.meta.nota) || ''} · ${(m.meta && m.meta.duracion) || ''} · NIVEL ${(m.meta && m.meta.nivel) || '—'}</span>
-        </span>
-        <span></span>
-      </div>`;
-    }).join('');
-  }).catch(e => { partidasEl.className=''; partidasEl.innerHTML = `<div class="error-panel" style="margin:16px">${e.message}</div>`; });
-}
-
-/* ===================================================================
-   VISTA ESTADÍSTICAS — endpoint real /stats (TFT)
-   =================================================================== */
-async function cargarStats(){
-  const cuerpo = document.getElementById('stats-cuerpo');
-  if(!API.riotId()){
-    cuerpo.className = '';
-    cuerpo.innerHTML = `<div class="vacio">Configura tu <a href="#ajustes">Riot ID en Ajustes</a> para ver tus estadísticas.</div>`;
-    return;
-  }
-  try{
-    const d = await API.stats('tft');
-    cuerpo.className = '';
-    const kpis = (d.kpis || []).map(k => `
-      <div class="kpi ${k.cls || ''}">
-        <div class="v">${k.v}</div>
-        <div class="k">${k.k}</div>
-        <div class="bench">${k.bench || ''}</div>
-      </div>`).join('');
-    const maxBar = Math.max(1, ...(d.dist?.bars || []).map(b => b.value));
-    const dist = (d.dist?.bars || []).map((b, i) => `
-      <div class="dist-row">
-        <span>${b.label}</span>
-        <span class="dist-bar"><i style="width:${Math.round(100 * b.value / maxBar)}%;background:${i < 4 ? 'var(--menta)' : 'var(--fram)'}"></i></span>
-        <span>${b.value}</span>
-      </div>`).join('');
-    const tabla = t => !t ? '' : `
-      <div class="bloque">
-        <div class="bloque-head"><h2>${t.title}</h2></div>
-        <table class="tabla">
-          <thead><tr>${t.cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
-          <tbody>${(t.rows || []).map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
-        </table>
-      </div>`;
-    const insights = (d.insights || []).map(i => `
-      <div class="insight"><span aria-hidden="true">${i.ic || '·'}</span><div><div class="t">${i.t}</div><div class="d">${i.d}</div></div></div>`).join('');
-    cuerpo.innerHTML = `
-      <div class="kpi-grid">${kpis}</div>
-      <div class="panel-grid" style="margin-top:22px">
-        <div class="col-izq">
-          <div class="bloque">
-            <div class="bloque-head"><h2>${d.dist?.label || 'Distribución'}</h2></div>
-            <div class="dist">${dist}</div>
-          </div>
-          <div class="bloque">
-            <div class="bloque-head"><h2>Lecturas</h2></div>
-            ${insights || '<div class="vacio" style="border:0">Sin lecturas aún.</div>'}
-          </div>
-        </div>
-        <div class="col-izq">
-          ${tabla(d.tableA)}
-          ${tabla(d.tableB)}
-        </div>
-      </div>`;
-  }catch(e){
-    cuerpo.className = '';
-    cuerpo.innerHTML = `<div class="error-panel">${e.message}</div>`;
-  }
-}
-
-/* ===================================================================
-   VISTA META DEL PARCHE — endpoint real /meta (TFT)
-   =================================================================== */
-async function cargarMeta(){
-  const cuerpo = document.getElementById('meta-cuerpo');
-  try{
-    const d = await API.meta('tft');
-    cuerpo.className = '';
-    const esReal = d.source === 'real';
-    const filas = (d.comps || []).map(c => {
-      const unidades = (c.units || []).map(u => `
-        <span class="unidad">${u.icon ? `<img src="${u.icon}" alt="" loading="lazy" onerror="this.remove()">` : ''}${u.n}<span class="coste">·${u.c}</span></span>`).join('');
-      const m = c.metrics || {};
-      return `
-      <div class="comp-fila">
-        <div class="tier-badge tier-${c.tier}">${c.tier}</div>
-        <div>
-          <div class="comp-nombre">${c.name}</div>
-          <div class="comp-sub">${c.style || ''}${c.difficulty ? ' · ' + c.difficulty.toUpperCase() : ''}${c.carry ? ' · CARRY: ' + c.carry.toUpperCase() : ''}</div>
-          <div class="unidades">${unidades}</div>
-        </div>
-        <div class="comp-metricas">
-          <span><b>${m.avg || '—'}</b>COLOC.</span>
-          <span><b>${m.top4 || '—'}</b>TOP 4</span>
-          <span><b>${m.win || '—'}</b>1.º</span>
-          <span><b>${m.pick || '—'}</b>PICK</span>
-        </div>
-      </div>`;
-    }).join('');
-    cuerpo.innerHTML = `
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <span class="fuente-chip ${esReal ? 'real' : 'ejemplo'}">${esReal ? '● DATOS REALES · LADDER CHALLENGER' : '○ DATOS DE EJEMPLO'}</span>
-        <span class="mono" style="font-size:.68rem;color:var(--texto-3);letter-spacing:.08em">${d.patch || ''}</span>
-      </div>
-      ${esReal ? '' : `<div class="error-panel" style="background:var(--oro-suave);border-color:rgba(255,201,92,.3);color:var(--oro)">Las métricas de esta lista son de ejemplo hasta que el agregador del ladder esté activo con la clave de producción de Riot.</div>`}
-      <div class="bloque">${filas || '<div class="vacio" style="border:0">Sin datos de meta.</div>'}</div>`;
-  }catch(e){
-    cuerpo.className = '';
-    cuerpo.innerHTML = `<div class="error-panel">${e.message}</div>`;
-  }
-}
-
-/* ===================================================================
-   VISTA AJUSTES
-   =================================================================== */
-document.getElementById('riot-input').value = API.riotId();
-document.getElementById('guardar-riot').addEventListener('click', () => {
-  const v = document.getElementById('riot-input').value.trim();
-  API.setRiotId(v);
-  const ok = document.getElementById('guardado-ok');
-  ok.style.display = 'block';
-  setTimeout(() => { ok.style.display = 'none'; }, 2200);
-  // Lo guardado afecta a las vistas remotas: se recargan en la próxima visita.
-  delete cargadas.resumen; delete cargadas.stats;
-  document.getElementById('resumen-rango').innerHTML = 'CARGANDO…';
-  document.getElementById('stats-cuerpo').innerHTML = 'CARGANDO…';
-  pintarPerfil();
-});
-
-/* arranque */
-pintarPerfil();
-mostrarVista();
 </script>
 </body>
 </html>
