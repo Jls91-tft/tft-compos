@@ -115,6 +115,7 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
 
 /* ============ objetivo activo ============ */
 .zona{padding:26px 30px 50px;display:grid;gap:22px;align-content:start}
+.zona[hidden]{display:none}   /* el display:grid pisaría al atributo hidden sin esto */
 @media (max-width:980px){.zona{padding:18px 16px 40px}}
 .objetivo{
   position:relative;overflow:hidden;
