@@ -1,11 +1,11 @@
-"""Jobs de análisis (FASE 2) — los ejecuta el worker de RQ (o inline sin Redis).
+"""Jobs de análisis — los ejecuta el worker de RQ (o inline sin Redis).
 
 ``analizar_partida(match_id, puuid)``:
   1. descarga el match si aún no está en BD (con limitador de rate)
   2. extrae los hechos con el motor determinista (CAPA 1)
   3. persiste el snapshot en ``hechos`` (idempotente por versión del motor)
-
-FASE 3 añadirá aquí la evaluación del catálogo y la generación del informe.
+  4. evalúa el catálogo (CAPA 2) y genera el informe template-first (CAPA 3),
+     cacheado por (partida, versión de catálogo) — NUNCA se regenera
 """
 import asyncio
 import json
@@ -13,9 +13,10 @@ from datetime import datetime, timezone
 
 from sqlalchemy import select
 
+from app.catalog import CATALOG_VERSION
 from app.db import sesion
-from app.models import Hechos, Partida
-from app.services import facts_engine
+from app.models import CatalogoVersion, Hechos, Informe, Partida
+from app.services import facts_engine, pattern_evaluator, report_builder
 from app.services.riot_client import riot_client
 
 
@@ -45,20 +46,45 @@ def analizar_partida(match_id: str, puuid: str) -> str:
         else:
             match = json.loads(partida.payload_json)
 
-        ya = s.scalar(select(Hechos).where(
+        fila_hechos = s.scalar(select(Hechos).where(
             Hechos.partida_id == partida.id,
             Hechos.engine_version == facts_engine.ENGINE_VERSION,
         ))
-        if ya is not None:
-            s.commit()
-            return f"{match_id}: hechos ya existentes (motor {facts_engine.ENGINE_VERSION})"
+        if fila_hechos is None:
+            hechos = facts_engine.extraer(match, puuid)
+            fila_hechos = Hechos(
+                partida_id=partida.id,
+                puuid=puuid,
+                engine_version=facts_engine.ENGINE_VERSION,
+                hechos_json=json.dumps(hechos, ensure_ascii=False),
+            )
+            s.add(fila_hechos)
+            s.flush()
+            estado_hechos = "hechos extraídos"
+        else:
+            hechos = json.loads(fila_hechos.hechos_json)
+            estado_hechos = "hechos ya existentes"
 
-        hechos = facts_engine.extraer(match, puuid)
-        s.add(Hechos(
-            partida_id=partida.id,
-            puuid=puuid,
-            engine_version=facts_engine.ENGINE_VERSION,
-            hechos_json=json.dumps(hechos, ensure_ascii=False),
+        # CAPA 2 + CAPA 3 — informe cacheado por versión de catálogo (nunca se regenera).
+        informe = s.scalar(select(Informe).where(
+            Informe.partida_id == partida.id,
+            Informe.catalogo_version == CATALOG_VERSION,
         ))
+        if informe is None:
+            evaluacion = pattern_evaluator.evaluar(hechos)
+            cuerpo = report_builder.construir(hechos, evaluacion)
+            s.add(Informe(
+                partida_id=partida.id,
+                puuid=puuid,
+                hechos_id=fila_hechos.id,
+                catalogo_version=CATALOG_VERSION,
+                informe_json=json.dumps(cuerpo, ensure_ascii=False),
+            ))
+            if s.get(CatalogoVersion, CATALOG_VERSION) is None:
+                s.add(CatalogoVersion(version=CATALOG_VERSION, descripcion="Catálogo inicial (10 patrones end-state)"))
+            estado_informe = f"informe generado (catálogo {CATALOG_VERSION})"
+        else:
+            estado_informe = "informe ya existente"
+
         s.commit()
-        return f"{match_id}: hechos extraídos y persistidos (motor {facts_engine.ENGINE_VERSION})"
+        return f"{match_id}: {estado_hechos} · {estado_informe}"

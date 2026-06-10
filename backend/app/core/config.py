@@ -79,5 +79,13 @@ class Settings(BaseSettings):
     riot_rate_rps: int = 15
     riot_rate_per_2min: int = 90
 
+    # --- FASE 3: catálogo de patrones + objetivo semanal ---
+    # Una señal se publica solo si confianza × severidad > este umbral.
+    senal_umbral: float = 0.9
+    # Objetivo semanal: patrón más recurrente en las últimas N partidas,
+    # con un mínimo de apariciones para no entrenar ruido.
+    objetivo_ventana: int = 10
+    objetivo_min_apariciones: int = 3
+
 
 settings = Settings()

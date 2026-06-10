@@ -23,13 +23,13 @@ def test_job_extrae_y_es_idempotente(match_sintetico):
         ))
         s.commit()
 
-    # Primera ejecución: extrae y persiste.
+    # Primera ejecución: extrae hechos y genera el informe.
     r1 = jobs.analizar_partida("EUW1_TEST0001", "puuid-7")
-    assert "persistidos" in r1
+    assert "hechos extraídos" in r1 and "informe generado" in r1
 
-    # Segunda ejecución: no duplica (idempotente por versión del motor).
+    # Segunda ejecución: no duplica ni regenera (cacheado por versión).
     r2 = jobs.analizar_partida("EUW1_TEST0001", "puuid-7")
-    assert "ya existentes" in r2
+    assert "hechos ya existentes" in r2 and "informe ya existente" in r2
 
     with sesion() as s:
         filas = list(s.scalars(select(Hechos).where(Hechos.puuid == "puuid-7")))
@@ -38,3 +38,10 @@ def test_job_extrae_y_es_idempotente(match_sintetico):
         assert snapshot["engine_version"] == facts_engine.ENGINE_VERSION
         assert snapshot["jugador"]["ronda_eliminacion"] == "6-2"
         assert snapshot["contestacion"]["max_rivales_compartiendo"] == 3
+
+        from app.models import Informe
+        informes = list(s.scalars(select(Informe).where(Informe.puuid == "puuid-7")))
+        assert len(informes) == 1
+        cuerpo = json.loads(informes[0].informe_json)
+        assert cuerpo["catalogo_version"] == informes[0].catalogo_version
+        assert cuerpo["titulo"]            # siempre hay titular, haya señales o no
