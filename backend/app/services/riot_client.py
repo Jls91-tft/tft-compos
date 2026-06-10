@@ -122,7 +122,8 @@ class RiotClient:
         rankeado o si falla: el rango es CONTEXTO, nunca debe romper el informe."""
         base = self._platform_base(platform)
         if game == "tft":
-            url = f"{base}/tft/league/v1/entries/by-puuid/{puuid}"
+            # OJO: tft-league-v1 NO tiene 'entries/' en la ruta by-puuid (eso es league-v4 de LoL).
+            url = f"{base}/tft/league/v1/by-puuid/{puuid}"
             preferidas = ("RANKED_TFT",)
         else:
             url = f"{base}/lol/league/v4/entries/by-puuid/{puuid}"
@@ -143,9 +144,13 @@ class RiotClient:
         losses = entry.get("losses", 0) or 0
         total = w + losses
         colas = {"RANKED_SOLO_5x5": "Solo/Dúo", "RANKED_FLEX_SR": "Flexible", "RANKED_TFT": "TFT"}
+        tiers_es = {"IRON": "Hierro", "BRONZE": "Bronce", "SILVER": "Plata", "GOLD": "Oro",
+                    "PLATINUM": "Platino", "EMERALD": "Esmeralda", "DIAMOND": "Diamante",
+                    "MASTER": "Master", "GRANDMASTER": "Grandmaster", "CHALLENGER": "Challenger"}
         return {
             "cola": colas.get(entry.get("queueType"), entry.get("queueType")),
             "tier": entry.get("tier"),
+            "tier_es": tiers_es.get(entry.get("tier"), entry.get("tier")),
             "division": entry.get("rank"),
             "lp": entry.get("leaguePoints"),
             "victorias": w,

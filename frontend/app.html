@@ -536,7 +536,7 @@ function pintarPerfil(){
   id.textContent = rid;
   av.textContent = rid[0].toUpperCase();
   API.rank('tft').then(r => {
-    if(r && r.tier){ rg.textContent = `${r.tier} ${r.division || ''} · ${r.lp ?? 0} LP`; }
+    if(r && r.tier){ rg.textContent = `${r.tier_es || r.tier} ${r.division || ''} · ${r.lp ?? 0} LP`; }
     else { rg.textContent = ''; }
   }).catch(() => { rg.textContent = ''; });
 }
@@ -744,7 +744,7 @@ async function cargarResumen(){
       rangoEl.className = '';
       rangoEl.innerHTML = `
         <div style="padding:20px">
-          <div style="font-family:var(--display);font-weight:700;font-size:1.8rem;color:var(--oro)">${r.tier} ${r.division || ''}</div>
+          <div style="font-family:var(--display);font-weight:700;font-size:1.8rem;color:var(--oro)">${r.tier_es || r.tier} ${r.division || ''}</div>
           <div class="mono" style="font-size:.74rem;color:var(--texto-3);margin-top:6px">${r.lp ?? 0} LP · ${r.victorias ?? 0}V / ${r.derrotas ?? 0}D${r.winrate_pct != null ? ' · ' + r.winrate_pct + '% WR' : ''}</div>
         </div>`;
     } else {
