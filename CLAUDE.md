@@ -59,10 +59,21 @@ docs/               Documentación (DEPLOY, DATOS, RIOT_APPLICATION…)
 synapse-prototipo/  Prototipo Etapa 1 (cerrado, no tocar)
 ```
 
-## Estado actual (junio 2026)
-- **FASE 1 (interfaz v3 "Hielo")**: landing + app nuevas, waitlist real (`POST /api/waitlist`, SQLite). La vista Coaching usa datos de ejemplo hasta FASE 4.
-- **Pipelines de meta reales** (reutilizados): `meta_pipeline`/`comps_pipeline`/`cdragon_client` + worker (`--profile meta`) alimentan `/meta` y `/lab/explorer` con ladder Challenger.
-- **Pendiente**: FASE 2 (modelos+migraciones, rate limiter central, motor de hechos, polling), FASE 3 (catálogo 10 patrones + generador + objetivo semanal), FASE 4 (endpoints reales, /debug, golden tests, desconexión del motor LLM antiguo).
+## Estado actual (junio 2026) — FASES 1-4 COMPLETAS
+- **Interfaz v3 "Hielo"**: landing (waitlist real) + app conectada a datos reales.
+- **Núcleo**: Postgres + Redis/RQ + poller (cada 5 min) → motor de hechos v0.1.0 →
+  catálogo v1.0.0 (10 patrones) → informes template-first cacheados. 34 tests verdes
+  (golden dataset incluido) — se ejecutan en la VM: `docker compose -f docker-compose.prod.yml run --rm --no-deps api pytest`.
+- **API**: `/matches`, `/report/:id`, `/feedback`, `/objective`, `/rank`, `DELETE /account`
+  (RGPD), `/debug` (DEBUG_TOKEN). El motor LLM antiguo (coaching/chat) está DESCONECTADO
+  de main.py; sus módulos siguen en el repo a la espera de OK para borrado físico.
+- **Pipelines de meta reales**: `meta_pipeline`/`comps_pipeline`/`cdragon_client` + worker
+  (`--profile meta`) alimentan `/meta` y `/lab/explorer` con ladder Challenger.
+- **Gotcha operativo**: al recrear el contenedor `api`, nginx (web) puede quedarse con la
+  IP vieja cacheada → 502. Arreglo rápido: `docker restart tft-compos-web-1`.
+- **Pendiente/ideas**: borrado físico del código LLM antiguo (pedir OK) · resolver dinámico
+  en nginx (resolver 127.0.0.11) para evitar el gotcha · dominio fijo + Cloudflare Access ·
+  solicitud de Production Key de Riot (`docs/RIOT_APPLICATION.md`).
 
 ## Convenciones clave
 - Contrato API↔frontend = schemas Pydantic en `backend/app/schemas/models.py`.
