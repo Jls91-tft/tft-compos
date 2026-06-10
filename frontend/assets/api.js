@@ -33,22 +33,28 @@ const API = {
     if (!res.ok) throw await this._err(res);
     return res.json();
   },
-  async _post(path, body) {
+  async _send(method, path, body) {
     const res = await fetch(this.base + path, {
-      method: "POST",
+      method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: body === undefined ? undefined : JSON.stringify(body),
     });
     if (!res.ok) throw await this._err(res);
     return res.json();
   },
 
-  /* --- beta TFT --- */
-  matches(game = "tft") { return this._get(`/coaching/matches?${this._q({ game })}`); },
-  rank(game = "tft") { return this._get(`/coaching/rank/${game}?${this._q({})}`); },
+  /* --- núcleo de análisis (FASE 4) --- */
+  matches() { return this._get(`/matches?${this._q({})}`); },
+  report(matchId) { return this._get(`/report/${encodeURIComponent(matchId)}?${this._q({})}`); },
+  feedback(matchId, patronId, voto) {
+    return this._send("POST", `/feedback?${this._q({})}`, { match_id: matchId, patron_id: patronId, voto });
+  },
+  objective() { return this._get(`/objective?${this._q({})}`); },
+  rank() { return this._get(`/rank?${this._q({})}`); },
+  deleteAccount() { return this._send("DELETE", `/account?${this._q({})}`); },
+
+  /* --- complementos --- */
   stats(game = "tft") { return this._get(`/stats?${this._q({ game })}`); },
   meta(game = "tft") { return this._get(`/meta?game=${game}`); },
-  waitlist(datos) { return this._post(`/waitlist`, datos); },
-  /* FASE 4: feedback de señales (telemetría por patrón) */
-  feedback(datos) { return this._post(`/feedback`, datos); },
+  waitlist(datos) { return this._send("POST", `/waitlist`, datos); },
 };

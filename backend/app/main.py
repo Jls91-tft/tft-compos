@@ -10,7 +10,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import health, riot, coaching, stats, meta, chat, lab, waitlist
+# FASE 4: el motor LLM antiguo (coaching, chat) queda DESCONECTADO del producto.
+# Los módulos siguen en el repo hasta el OK de borrado físico, pero no se sirven.
+from app.routers import analisis, debug, health, lab, meta, riot, stats, waitlist
 
 app = FastAPI(
     title="DivisionUp API",
@@ -29,10 +31,10 @@ app.add_middleware(
 # Routers de la API
 app.include_router(health.router)
 app.include_router(riot.router)
-app.include_router(coaching.router)
+app.include_router(analisis.router)   # núcleo: matches, report, feedback, objective, rank, account
+app.include_router(debug.router)      # visor interno protegido por DEBUG_TOKEN
 app.include_router(stats.router)
 app.include_router(meta.router)
-app.include_router(chat.router)
 app.include_router(lab.router)
 app.include_router(waitlist.router)
 

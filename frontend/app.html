@@ -412,21 +412,10 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
       </div>
     </div>
 
-    <!-- ===== VISTA: COACHING (referencia v3; datos mock hasta FASE 4) ===== -->
+    <!-- ===== VISTA: COACHING (datos reales: /api/matches + /api/report) ===== -->
     <div class="zona" id="vista-coaching">
 
-      <section class="objetivo" aria-label="Objetivo de entrenamiento activo">
-        <span class="obj-tag">OBJETIVO ACTIVO</span>
-        <div>
-          <h2>Pivota <em>antes</em></h2>
-          <p>Si en 4-1 tu línea principal está contestada por <b>2 o más rivales</b> y no llevas ventaja, cambia de plan. Cada informe de esta semana te dice si lo has cumplido.</p>
-        </div>
-        <div class="obj-prog">
-          <div class="cifra">6<span>/10</span></div>
-          <div class="etiqueta">PARTIDAS CUMPLIENDO EL OBJETIVO</div>
-          <div class="barra"><i></i></div>
-        </div>
-      </section>
+      <section class="objetivo" id="objetivo-coaching" aria-label="Objetivo de entrenamiento activo"></section>
 
       <div class="panel-grid">
 
@@ -434,16 +423,12 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
           <div class="bloque">
             <div class="bloque-head">
               <h2>Últimas partidas</h2>
-              <span class="mono">RANKED · EUW</span>
+              <span class="mono">RANKED · TFT</span>
             </div>
-            <div id="matchlist"></div>
+            <div id="matchlist" class="cargando">CARGANDO…</div>
           </div>
 
-          <div class="bloque patron">
-            <h3>Patrón recurrente</h3>
-            <p>En <b>4 de tus últimas 10 partidas</b> mantuviste unidades de 4 de coste contestadas por 3 o más rivales más allá del stage 4-1.</p>
-            <span class="mono">MOTOR DE HECHOS · MUESTRA: 10 PARTIDAS</span>
-          </div>
+          <div class="bloque patron" id="patron-recurrente" hidden></div>
         </div>
 
         <article class="report" id="report" aria-live="polite"></article>
@@ -467,26 +452,11 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
       </div>
     </div>
 
-    <!-- ===== VISTA: PLAN SEMANAL (objetivo activo; motor real en FASE 3) ===== -->
+    <!-- ===== VISTA: PLAN SEMANAL (objetivo real desde /api/objective) ===== -->
     <div class="zona" id="vista-plan" hidden>
-      <section class="objetivo" aria-label="Objetivo de entrenamiento activo">
-        <span class="obj-tag">OBJETIVO ACTIVO</span>
-        <div>
-          <h2>Pivota <em>antes</em></h2>
-          <p>Si en 4-1 tu línea principal está contestada por <b>2 o más rivales</b> y no llevas ventaja, cambia de plan. Cada informe de esta semana te dice si lo has cumplido.</p>
-        </div>
-        <div class="obj-prog">
-          <div class="cifra">6<span>/10</span></div>
-          <div class="etiqueta">PARTIDAS CUMPLIENDO EL OBJETIVO</div>
-          <div class="barra"><i></i></div>
-        </div>
-      </section>
-      <div class="bloque patron">
-        <h3>Patrón recurrente</h3>
-        <p>En <b>4 de tus últimas 10 partidas</b> mantuviste unidades de 4 de coste contestadas por 3 o más rivales más allá del stage 4-1. Tu objetivo semanal sale de aquí: un único hábito medible cada semana.</p>
-        <span class="mono">MOTOR DE HECHOS · MUESTRA: 10 PARTIDAS</span>
-      </div>
-      <p class="nota-fb">El objetivo se recalcula cada semana a partir de tus patrones recurrentes. Cada informe lleva la marca ✓/✗ de si lo cumpliste en esa partida.</p>
+      <section class="objetivo" id="objetivo-plan" aria-label="Objetivo de entrenamiento activo"></section>
+      <div class="bloque patron" id="patron-plan" hidden></div>
+      <p class="nota-fb">El objetivo se recalcula con tus últimas partidas a partir de tus patrones recurrentes. Cada informe lleva la marca ✓/✗ de si lo cumpliste en esa partida.</p>
     </div>
 
     <!-- ===== VISTA: ESTADÍSTICAS (endpoint real /stats) ===== -->
@@ -511,8 +481,10 @@ h1,h2,h3,.logotype,.navitem{font-family:var(--display)}
       </div>
       <div class="ajustes-card">
         <h2>Tus datos (RGPD)</h2>
-        <p class="nota">Puedes pedir el borrado completo de tu cuenta y tus datos en cualquier momento. Lo eliminamos todo en un máximo de 30 días.</p>
-        <a class="btn-app secundario" href="mailto:contacto@divisionup.gg?subject=Borrado%20de%20datos%20DivisionUp">Solicitar borrado de datos</a>
+        <p class="nota">Borra tu cuenta y TODOS tus datos (partidas, hechos, informes y votos) al instante. Es irreversible: si vuelves a la beta, el análisis empieza de cero.</p>
+        <button class="btn-app secundario" id="borrar-cuenta">Borrar mi cuenta y mis datos</button>
+        <p class="guardado-ok" id="borrado-ok">✓ DATOS ELIMINADOS</p>
+        <p class="nota">¿Dudas? Escríbenos: <a href="mailto:contacto@divisionup.gg" style="color:var(--texto-2)">contacto@divisionup.gg</a></p>
       </div>
     </div>
 
@@ -543,6 +515,8 @@ function mostrarVista(){
     if(activo) n.setAttribute('aria-current','page'); else n.removeAttribute('aria-current');
   });
   document.getElementById('titulo').innerHTML = `${TITULOS[v]} <span>/ TFT</span>`;
+  if(v === 'coaching' && !cargadas.coaching){ cargadas.coaching = true; cargarCoaching(); }
+  if(v === 'plan' && !cargadas.plan){ cargadas.plan = true; cargarPlan(); }
   if(v === 'resumen' && !cargadas.resumen){ cargadas.resumen = true; cargarResumen(); }
   if(v === 'stats' && !cargadas.stats){ cargadas.stats = true; cargarStats(); }
   if(v === 'meta' && !cargadas.meta){ cargadas.meta = true; cargarMeta(); }
@@ -567,150 +541,189 @@ function pintarPerfil(){
 }
 
 /* ===================================================================
-   VISTA COACHING — datos de ejemplo (mock) hasta FASE 4.
-   Arquetipos genéricos, sin unidades del set: decisión cerrada n.º 10.
-   En producción: GET /api/matches y /api/report/:id
+   VISTA COACHING — datos REALES (GET /api/objective, /api/matches,
+   /api/report/:id; POST /api/feedback). Generados por el motor de hechos
+   + catálogo de patrones, sin LLM.
    =================================================================== */
-const partidas = [
-  {
-    pos:8, clase:'bot', comp:'Flex de 4 costes', meta:'HACE 1 H · 32 MIN', obj:false,
-    titulo:'Pico de poder tardío',
-    verdict:'llegaste tarde a tu pico de poder y el tablero no aguantó la transición a late.',
-    vs:[{l:'NIVEL',tu:80,top:100,vTu:'8',vTop:'9.7'},{l:'UNID. 2★+',tu:62,top:100,vTu:'6',vTop:'9.3'},{l:'ÍTEMS CARRY',tu:100,top:100,vTu:'3',vTop:'3'}],
-    senales:[
-      {sev:'SEV 4',texto:'Mantuviste <b>2 tanques de 4 de coste contestados por 3 rivales</b>: bloqueó tu economía sin darte densidad para sobrevivir.',pregunta:'¿Qué te ofrecía la tienda en 4-1?'},
-      {sev:'SEV 2',texto:'Subiste a nivel 8 con <b>12 de oro</b> tras racha de derrotas: el roll posterior llegó sin margen para estabilizar.'}
-    ],
-    bien:'Tu carry quedó <b>itemizada al completo</b> y colocaste 6 unidades a 2★ pese al nivel bajo.',
-    hechos:['nivel_final=<b>8</b> · oro_al_morir=<b>2</b> · eliminado en <b>6-2</b>','contestación: <b>3 rivales</b> comparten tu línea principal','densidad 2★+: <b>6</b> · media del podio: <b>9.3</b>','ítems en carry: <b>3/3</b> óptimos según meta del parche','[DESCARTADO] P-007 greed de economía → contraevidencia: racha de derrotas'],
-    num:'0147'
-  },
-  {
-    pos:2, clase:'top', comp:'Reroll de 1 coste', meta:'HACE 2 H · 36 MIN', obj:true,
-    titulo:'Cierre sólido',
-    verdict:'partida muy bien ejecutada: economía estable y pico de poder a tiempo. El 1.º se decidió por detalles de tablero final.',
-    vs:[{l:'NIVEL',tu:100,top:100,vTu:'9',vTop:'9'},{l:'UNID. 3★',tu:67,top:100,vTu:'2',vTop:'3'},{l:'ÍTEMS CARRY',tu:100,top:100,vTu:'3',vTop:'3'}],
-    senales:[
-      {sev:'SEV 1',texto:'Tu segunda carry quedó <b>expuesta en primera línea</b> en los dos últimos combates: cayó antes de completar su tercer ciclo.'}
-    ],
-    bien:'Mantuviste <b>más de 50 de oro</b> hasta el roll definitivo y completaste tu 3★ clave antes que el resto del lobby.',
-    hechos:['nivel_final=<b>9</b> · oro_al_morir=<b>4</b> · top <b>2</b>','3★ completadas: <b>2</b> · la primera antes que todo el lobby','sin contestación relevante: línea libre desde el stage 3'],
-    num:'0146'
-  },
-  {
-    pos:5, clase:'bot', comp:'Vertical de rasgo', meta:'AYER · 29 MIN', obj:true,
-    titulo:'Transición sin puente',
-    verdict:'vendiste tu tablero intermedio antes de tener el final: dos rondas de tablero débil te costaron la vida que faltó al cierre.',
-    vs:[{l:'NIVEL',tu:89,top:100,vTu:'8',vTop:'9'},{l:'UNID. 2★+',tu:78,top:100,vTu:'7',vTop:'9'},{l:'ÍTEMS CARRY',tu:67,top:100,vTu:'2',vTop:'3'}],
-    senales:[
-      {sev:'SEV 3',texto:'Transición de comp <b>vendiendo 4 unidades a la vez</b> en 4-2: perdiste 14 de vida en las dos rondas siguientes.',pregunta:'¿Podías escalonar la venta en dos rondas?'},
-      {sev:'SEV 2',texto:'Tu carry final jugó <b>con 2 de sus 3 ítems</b> hasta el 5-3: el componente sobrante llevaba 3 stages en banco.'}
-    ],
-    bien:'Lectura correcta del lobby: <b>pivotaste fuera de una línea contestada</b> por 3 rivales a tiempo — objetivo de la semana cumplido.',
-    hechos:['nivel_final=<b>8</b> · oro_al_morir=<b>11</b> · eliminado en <b>6-5</b>','pivote detectado en 4-1: línea inicial contestada por <b>3 rivales</b>','caída de vida en 4-2/4-3: <b>−14</b> · mayor del lobby en ese tramo'],
-    num:'0143'
-  },
-  {
-    pos:1, clase:'oro', comp:'Tempo estándar', meta:'AYER · 38 MIN', obj:true,
-    titulo:'Partida de referencia',
-    verdict:'top 1 con ejecución limpia. Esta partida entra en tu biblioteca de referencia para comparar próximos análisis.',
-    vs:[{l:'NIVEL',tu:100,top:96,vTu:'10',vTop:'9.7'},{l:'UNID. 2★+',tu:100,top:92,vTu:'10',vTop:'9.2'},{l:'ÍTEMS CARRY',tu:100,top:100,vTu:'3',vTop:'3'}],
-    senales:[],
-    bien:'Pico de poder <b>antes que todo el lobby</b>, carry itemizada en 4-1 y cierre a nivel 10 con tablero completo a 2★.',
-    hechos:['nivel_final=<b>10</b> · top <b>1</b> · sin señales por encima del umbral','pico de poder estimado: <b>4-5</b> · primero del lobby','vida al entrar en stage 5: <b>74</b> · máxima del lobby'],
-    num:'0141'
-  },
-  {
-    pos:4, clase:'top', comp:'Fast 8', meta:'AYER · 31 MIN', obj:true,
-    titulo:'Top 4 asegurado, 1.º regalado',
-    verdict:'aseguraste el top 4 jugando conservador, pero renunciaste a pelear el 1.º con una economía que sí lo permitía.',
-    vs:[{l:'NIVEL',tu:89,top:100,vTu:'8',vTop:'9'},{l:'UNID. 2★+',tu:89,top:100,vTu:'8',vTop:'9'},{l:'ÍTEMS CARRY',tu:100,top:100,vTu:'3',vTop:'3'}],
-    senales:[
-      {sev:'SEV 2',texto:'Terminaste con <b>43 de oro sin usar</b>: ese oro era un nivel 9 y un roll que no llegaste a jugar.',pregunta:'¿Qué te frenó a gastarlo en el 5-5?'}
-    ],
-    bien:'Gestión de vida excelente: llegaste al stage 5 <b>por encima de 60 de vida</b>, segundo mejor del lobby.',
-    hechos:['nivel_final=<b>8</b> · oro_final=<b>43</b> · top <b>4</b>','vida al entrar en stage 5: <b>62</b> · segunda del lobby','sin contestación: línea libre desde el stage 2'],
-    num:'0140'
+function fechaRel(iso){
+  if(!iso) return '';
+  const ms = Date.now() - new Date(iso).getTime();
+  const h = Math.floor(ms / 3600000);
+  if(h < 1) return 'HACE ' + Math.max(1, Math.floor(ms / 60000)) + ' MIN';
+  if(h < 24) return 'HACE ' + h + ' H';
+  const dias = Math.floor(h / 24);
+  return dias === 1 ? 'AYER' : 'HACE ' + dias + ' DÍAS';
+}
+
+function renderObjetivo(el, obj){
+  if(!el) return;
+  if(!obj){
+    el.innerHTML = `<span class="obj-tag">OBJETIVO ACTIVO</span>
+      <div><h2>Aún <em>sin objetivo</em></h2>
+      <p>Tu objetivo semanal sale de tus <b>patrones recurrentes</b>: cuando uno se repita lo
+      suficiente en tus partidas analizadas, aparecerá aquí con su regla y su progreso.</p></div>
+      <div class="obj-prog"><div class="cifra">—</div>
+      <div class="etiqueta">SIN DATOS SUFICIENTES TODAVÍA</div>
+      <div class="barra"><i style="width:0"></i></div></div>`;
+    return;
   }
-];
+  const pct = obj.ventana ? Math.round(100 * obj.cumplidas / obj.ventana) : 0;
+  el.innerHTML = `<span class="obj-tag">OBJETIVO ACTIVO</span>
+    <div><h2><em>${obj.nombre}</em></h2>
+    <p>${obj.regla} Cada informe de la ventana te dice si lo has cumplido.</p></div>
+    <div class="obj-prog"><div class="cifra">${obj.cumplidas}<span>/${obj.ventana}</span></div>
+    <div class="etiqueta">PARTIDAS CUMPLIENDO EL OBJETIVO</div>
+    <div class="barra"><i style="width:${pct}%"></i></div></div>`;
+}
 
-/* ===== render lista ===== */
-const lista = document.getElementById('matchlist');
-partidas.forEach((p,i)=>{
-  const b = document.createElement('button');
-  b.className = 'match' + (i===0?' activo':'');
-  b.setAttribute('aria-label', `Ver informe: ${p.comp}, puesto ${p.pos}`);
-  b.innerHTML = `
-    <span class="pos pos-${p.clase==='oro'?'1':p.clase}">${p.pos}.º</span>
-    <span>
-      <span class="match-comp">${p.comp}</span><br>
-      <span class="match-meta">${p.meta}</span>
-    </span>
-    <span class="match-obj">OBJETIVO<b class="${p.obj?'obj-si':'obj-no'}">${p.obj?'✓':'✗'}</b></span>`;
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('.match').forEach(m=>m.classList.remove('activo'));
-    b.classList.add('activo');
-    render(i);
-  });
-  lista.appendChild(b);
-});
+function renderPatron(el, obj){
+  if(!el) return;
+  if(!obj){ el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<h3>Patrón recurrente</h3>
+    <p>En <b>${obj.apariciones} de tus últimas ${obj.ventana} partidas</b> disparó
+    «${obj.nombre}». Tu objetivo semanal sale de aquí: un único hábito medible.</p>
+    <span class="mono">MOTOR DE HECHOS · MUESTRA: ${obj.ventana} PARTIDAS · CATÁLOGO ${obj.catalogo_version}</span>`;
+}
 
-/* ===== render informe ===== */
-function render(i){
-  const p = partidas[i];
-  const cPos = p.clase==='oro'?'bueno':(p.clase==='top'?'medio':'malo');
-  const vs = p.vs.map(v=>`
-    <div class="vsrow"><span>${v.l}</span><span class="bar"><i class="tu" style="width:${v.tu}%"></i></span><span>${v.vTu}</span></div>
-    <div class="vsrow"><span></span><span class="bar"><i class="top" style="width:${v.top}%"></i></span><span>${v.vTop}</span></div>`).join('');
-  const sen = p.senales.map((e,j)=>`
+async function cargarCoaching(){
+  const lista = document.getElementById('matchlist');
+  const report = document.getElementById('report');
+  const objEl = document.getElementById('objetivo-coaching');
+  if(!API.riotId()){
+    renderObjetivo(objEl, null);
+    lista.className = '';
+    lista.innerHTML = `<div class="vacio" style="border:0">Configura tu <a href="#ajustes">Riot ID en Ajustes</a>.</div>`;
+    report.innerHTML = `<div class="vacio" style="border:0">Sin Riot ID no hay informes que mostrar.</div>`;
+    return;
+  }
+  try{
+    const [objRes, partidas] = await Promise.all([API.objective(), API.matches()]);
+    const obj = objRes.objetivo;
+    renderObjetivo(objEl, obj);
+    renderPatron(document.getElementById('patron-recurrente'), obj);
+    lista.className = '';
+    if(!partidas.length){
+      lista.innerHTML = `<div class="vacio" style="border:0">Aún no hay partidas analizadas.
+        El análisis corre solo: juega y vuelve en unos minutos.</div>`;
+      report.innerHTML = `<div class="vacio" style="border:0">Tu primer informe aparecerá aquí.</div>`;
+      return;
+    }
+    lista.innerHTML = '';
+    partidas.forEach((p, i) => {
+      const clase = p.puesto === 1 ? '1' : (p.puesto <= 4 ? 'top' : 'bot');
+      const b = document.createElement('button');
+      b.className = 'match' + (i === 0 ? ' activo' : '');
+      b.setAttribute('aria-label', `Ver informe: ${p.titulo}, puesto ${p.puesto}`);
+      const marca = (p.objetivo === null || p.objetivo === undefined) ? '' :
+        `<span class="match-obj">OBJETIVO<b class="${p.objetivo ? 'obj-si' : 'obj-no'}">${p.objetivo ? '✓' : '✗'}</b></span>`;
+      b.innerHTML = `
+        <span class="pos pos-${clase}">${p.puesto}.º</span>
+        <span>
+          <span class="match-comp">${p.titulo}</span><br>
+          <span class="match-meta">${fechaRel(p.fecha)} · ${p.senales} SEÑAL${p.senales === 1 ? '' : 'ES'}</span>
+        </span>
+        ${marca || '<span></span>'}`;
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.match').forEach(m => m.classList.remove('activo'));
+        b.classList.add('activo');
+        cargarInforme(p.match_id);
+      });
+      lista.appendChild(b);
+    });
+    cargarInforme(partidas[0].match_id);
+  }catch(e){
+    renderObjetivo(objEl, null);
+    lista.className = '';
+    lista.innerHTML = `<div class="error-panel" style="margin:16px">${e.message}</div>`;
+    report.innerHTML = '';
+  }
+}
+
+async function cargarInforme(matchId){
+  const report = document.getElementById('report');
+  report.innerHTML = `<div class="cargando">CARGANDO INFORME…</div>`;
+  let inf;
+  try{ inf = await API.report(matchId); }
+  catch(e){ report.innerHTML = `<div class="error-panel">${e.message}</div>`; return; }
+
+  const cPos = inf.puesto === 1 ? 'bueno' : (inf.puesto <= 4 ? 'medio' : 'malo');
+  const vs = (inf.vs_podio || []).map(v => {
+    const maxv = Math.max(Number(v.tu) || 0, Number(v.podio) || 0, 1);
+    return `
+    <div class="vsrow"><span>${v.l}</span><span class="bar"><i class="tu" style="width:${Math.round(100 * (Number(v.tu) || 0) / maxv)}%"></i></span><span>${v.tu}</span></div>
+    <div class="vsrow"><span></span><span class="bar"><i class="top" style="width:${Math.round(100 * (Number(v.podio) || 0) / maxv)}%"></i></span><span>${v.podio}</span></div>`;
+  }).join('');
+  const votos = inf.votos || {};
+  const sen = (inf.senales || []).map(s => `
     <div class="rblock">
       <div class="rblock-head">
-        <span class="rtag rtag-err">SEÑAL DE DECISIÓN · ${e.sev}</span>
-        <span class="feedback" role="group" aria-label="¿Es correcta esta señal?">
-          <button class="fb si" aria-label="La señal es correcta">✓ Acierta</button>
-          <button class="fb no" aria-label="La señal es incorrecta">✗ Falla</button>
+        <span class="rtag rtag-err">SEÑAL DE DECISIÓN · SEV ${s.severidad}</span>
+        <span class="feedback" role="group" aria-label="¿Es correcta esta señal?" data-patron="${s.patron_id}">
+          <button class="fb si${votos[s.patron_id] === 'acierta' ? ' sel' : ''}" aria-label="La señal es correcta">✓ Acierta</button>
+          <button class="fb no${votos[s.patron_id] === 'falla' ? ' sel' : ''}" aria-label="La señal es incorrecta">✗ Falla</button>
         </span>
       </div>
-      <p>${e.texto}</p>
-      ${e.pregunta?`<p class="pregunta">${e.pregunta}</p>`:''}
+      <p>${s.texto}</p>
+      ${s.pregunta ? `<p class="pregunta">${s.pregunta}</p>` : ''}
     </div>`).join('');
-  const hechos = p.hechos.map(h=>`<div>· ${h}</div>`).join('');
-  document.getElementById('report').innerHTML = `
+  const bien = (inf.bien || []).map(b => `<p>${b}</p>`).join('');
+  const hechos = (inf.hechos_verificados || []).map(h => `<div>· ${h}</div>`).join('');
+  const chip = (inf.objetivo_cumplido === null || inf.objetivo_cumplido === undefined) ? '' :
+    `<span class="obj-chip">OBJETIVO DE LA SEMANA <b class="${inf.objetivo_cumplido ? 'obj-si' : 'obj-no'}">${inf.objetivo_cumplido ? '✓ CUMPLIDO' : '✗ NO CUMPLIDO'}</b></span>`;
+
+  report.innerHTML = `
     <div class="report-head">
       <div>
-        <div class="placement ${cPos}">${p.pos}.º</div>
-        <div class="report-titulo">${p.titulo}</div>
+        <div class="placement ${cPos}">${inf.puesto}.º</div>
+        <div class="report-titulo">${inf.titulo}</div>
       </div>
-      <div class="report-meta">TFT · RANKED<br>INFORME #${p.num}</div>
+      <div class="report-meta">TFT · RANKED<br>${inf.match_id}</div>
     </div>
-    <span class="obj-chip">OBJETIVO DE LA SEMANA <b class="${p.obj?'obj-si':'obj-no'}">${p.obj?'✓ CUMPLIDO':'✗ NO CUMPLIDO'}</b></span>
-    <p class="verdict"><strong>Hipótesis principal:</strong> ${p.verdict}</p>
+    ${chip}
+    <p class="verdict"><strong>Hipótesis principal:</strong> ${inf.hipotesis}</p>
     <div class="rblock">
       <span class="rtag rtag-vs">VS · PODIO DE TU LOBBY</span>
       <div class="vsbars">${vs}</div>
     </div>
     ${sen}
-    <div class="rblock">
-      <span class="rtag rtag-ok">LO QUE HICISTE BIEN</span>
-      <p>${p.bien}</p>
-    </div>
+    ${bien ? `<div class="rblock"><span class="rtag rtag-ok">LO QUE HICISTE BIEN</span>${bien}</div>` : ''}
     <details class="hechos">
-      <summary>HECHOS VERIFICADOS · ${p.hechos.length} REGISTROS</summary>
+      <summary>HECHOS VERIFICADOS · ${(inf.hechos_verificados || []).length} REGISTROS</summary>
       <div class="hechos-body">${hechos}</div>
     </details>
-    <p class="report-foot">Generado sobre hechos verificados · API oficial de Riot · catálogo v1.0</p>
-    ${p.senales.length?'<p class="nota-fb">Marca cada señal como acierto o fallo: tu feedback corrige el catálogo de patrones.</p>':''}`;
-  document.querySelectorAll('.feedback').forEach(g=>{
-    g.querySelectorAll('.fb').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        g.querySelectorAll('.fb').forEach(x=>x.classList.remove('sel'));
+    <p class="report-foot">${inf.fuente} · catálogo v${inf.catalogo_version}</p>
+    ${(inf.senales || []).length ? '<p class="nota-fb">Marca cada señal como acierto o fallo: tu feedback corrige el catálogo de patrones.</p>' : ''}`;
+
+  report.querySelectorAll('.feedback').forEach(g => {
+    const patronId = g.dataset.patron;
+    g.querySelectorAll('.fb').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const voto = btn.classList.contains('si') ? 'acierta' : 'falla';
+        g.querySelectorAll('.fb').forEach(x => x.classList.remove('sel'));
         btn.classList.add('sel');
-        /* FASE 4: POST /api/feedback {informe, señal, voto} */
+        try{ await API.feedback(matchId, patronId, voto); }
+        catch(e){ btn.classList.remove('sel'); }
       });
     });
   });
 }
-render(0);
+
+async function cargarPlan(){
+  if(!API.riotId()){
+    renderObjetivo(document.getElementById('objetivo-plan'), null);
+    return;
+  }
+  try{
+    const objRes = await API.objective();
+    renderObjetivo(document.getElementById('objetivo-plan'), objRes.objetivo);
+    renderPatron(document.getElementById('patron-plan'), objRes.objetivo);
+  }catch(e){
+    renderObjetivo(document.getElementById('objetivo-plan'), null);
+  }
+}
+
+/* (datos de ejemplo retirados: la vista consume la API real) */
 
 /* ===================================================================
    VISTA RESUMEN — rango + últimas partidas reales (API oficial)
@@ -738,21 +751,18 @@ async function cargarResumen(){
     }
   }).catch(e => { rangoEl.className=''; rangoEl.innerHTML = `<div class="error-panel" style="margin:16px">${e.message}</div>`; });
 
-  API.matches('tft').then(ms => {
+  API.matches().then(ms => {
     partidasEl.className = '';
-    if(!ms || !ms.length){ partidasEl.innerHTML = `<div class="vacio" style="border:0">No hay partidas recientes.</div>`; return; }
-    partidasEl.innerHTML = ms.map(m => {
-      const n = parseInt(m.result, 10) || 8;
-      return `
+    if(!ms || !ms.length){ partidasEl.innerHTML = `<div class="vacio" style="border:0">Aún no hay partidas analizadas. El análisis corre solo: juega y vuelve en unos minutos.</div>`; return; }
+    partidasEl.innerHTML = ms.map(m => `
       <div class="match" style="cursor:default">
-        <span class="pos pos-${claseDePuesto(n)}">${n}.º</span>
+        <span class="pos pos-${claseDePuesto(m.puesto)}">${m.puesto}.º</span>
         <span>
-          <span class="match-comp">${m.title || 'Partida de TFT'}</span><br>
-          <span class="match-meta">${(m.meta && m.meta.nota) || ''} · ${(m.meta && m.meta.duracion) || ''} · NIVEL ${(m.meta && m.meta.nivel) || '—'}</span>
+          <span class="match-comp">${m.titulo}</span><br>
+          <span class="match-meta">${fechaRel(m.fecha)} · ${m.senales} SEÑAL${m.senales === 1 ? '' : 'ES'}</span>
         </span>
         <span></span>
-      </div>`;
-    }).join('');
+      </div>`).join('');
   }).catch(e => { partidasEl.className=''; partidasEl.innerHTML = `<div class="error-panel" style="margin:16px">${e.message}</div>`; });
 }
 
@@ -869,10 +879,28 @@ document.getElementById('guardar-riot').addEventListener('click', () => {
   ok.style.display = 'block';
   setTimeout(() => { ok.style.display = 'none'; }, 2200);
   // Lo guardado afecta a las vistas remotas: se recargan en la próxima visita.
-  delete cargadas.resumen; delete cargadas.stats;
+  delete cargadas.resumen; delete cargadas.stats; delete cargadas.coaching; delete cargadas.plan;
   document.getElementById('resumen-rango').innerHTML = 'CARGANDO…';
   document.getElementById('stats-cuerpo').innerHTML = 'CARGANDO…';
   pintarPerfil();
+});
+
+/* Borrado RGPD: DELETE /api/account, con confirmación explícita. */
+document.getElementById('borrar-cuenta').addEventListener('click', async () => {
+  if(!API.riotId()){ alert('No hay ningún Riot ID configurado.'); return; }
+  const seguro = confirm(`Vas a borrar la cuenta ${API.riotId()} y TODOS sus datos de DivisionUp.\n\nEsto es irreversible. ¿Continuar?`);
+  if(!seguro) return;
+  try{
+    await API.deleteAccount();
+    API.setRiotId('');
+    document.getElementById('riot-input').value = '';
+    const ok = document.getElementById('borrado-ok');
+    ok.style.display = 'block';
+    delete cargadas.resumen; delete cargadas.stats; delete cargadas.coaching; delete cargadas.plan;
+    pintarPerfil();
+  }catch(e){
+    alert('No se pudo borrar: ' + e.message);
+  }
 });
 
 /* arranque */

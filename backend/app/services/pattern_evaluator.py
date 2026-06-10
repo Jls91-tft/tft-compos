@@ -58,8 +58,26 @@ def aplanar(hechos: dict) -> dict:
     }
 
 
-def evaluar(hechos: dict) -> dict:
+def _retirado_por_telemetria(patron_id: str, telemetria: dict | None) -> str | None:
+    """Retirada automática: si un patrón acumula demasiados votos '✗ Falla',
+    deja de publicarse (promesa de la FAQ). Devuelve el motivo o None."""
+    if not telemetria:
+        return None
+    t = telemetria.get(patron_id) or {}
+    total = (t.get("acierta", 0) or 0) + (t.get("falla", 0) or 0)
+    if total < settings.telemetria_min_votos:
+        return None
+    pct_falla = 100 * (t.get("falla", 0) or 0) / total
+    if pct_falla >= settings.telemetria_falla_pct:
+        return f"retirado por telemetría ({pct_falla:.0f}% de votos '✗ Falla' sobre {total})"
+    return None
+
+
+def evaluar(hechos: dict, telemetria: dict | None = None) -> dict:
     """Evalúa el catálogo completo sobre unos hechos.
+
+    `telemetria` (opcional): {patron_id: {"acierta": n, "falla": n}} acumulado
+    de la tabla feedback — activa la retirada automática de patrones que fallan.
 
     Devuelve:
       {"senales": [...], "descartadas": [...], "catalogo_version": "x.y.z"}
@@ -71,7 +89,7 @@ def evaluar(hechos: dict) -> dict:
     for p in PATRONES:
         if not p.disparador(h):
             continue
-        motivo = p.contraevidencia(h)
+        motivo = _retirado_por_telemetria(p.id, telemetria) or p.contraevidencia(h)
         if motivo:
             descartadas.append({"patron_id": p.id, "nombre": p.nombre, "motivo": motivo})
             continue
@@ -95,3 +113,30 @@ def evaluar(hechos: dict) -> dict:
 
     senales.sort(key=lambda s: (-s["severidad"] * s["confianza"], s["patron_id"]))
     return {"senales": senales, "descartadas": descartadas, "catalogo_version": CATALOG_VERSION}
+
+
+def evaluar_debug(hechos: dict) -> dict:
+    """Evaluación VERBOSA para el visor /debug: cada patrón con su estado
+    (disparó / anulado / bajo umbral / publicado) y los valores que lo explican."""
+    h = aplanar(hechos)
+    filas = []
+    for p in PATRONES:
+        fila = {"patron_id": p.id, "nombre": p.nombre, "severidad": p.severidad,
+                "disparo": False, "contraevidencia": None, "confianza": None,
+                "publicada": False}
+        if p.disparador(h):
+            fila["disparo"] = True
+            motivo = p.contraevidencia(h)
+            if motivo:
+                fila["contraevidencia"] = motivo
+            else:
+                conf = p.confianza(h)
+                fila["confianza"] = conf
+                fila["publicada"] = conf * p.severidad > settings.senal_umbral
+        filas.append(fila)
+    return {
+        "hechos_planos": h,
+        "patrones": filas,
+        "umbral": settings.senal_umbral,
+        "catalogo_version": CATALOG_VERSION,
+    }

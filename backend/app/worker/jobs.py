@@ -15,9 +15,21 @@ from sqlalchemy import select
 
 from app.catalog import CATALOG_VERSION
 from app.db import sesion
-from app.models import CatalogoVersion, Hechos, Informe, Partida
+from app.models import CatalogoVersion, Feedback, Hechos, Informe, Partida
 from app.services import facts_engine, pattern_evaluator, report_builder
 from app.services.riot_client import riot_client
+
+
+def _telemetria(s) -> dict:
+    """Votos acumulados por patrón ({patron_id: {acierta, falla}}) para la
+    retirada automática de patrones que fallan demasiado."""
+    filas = s.execute(select(Feedback.patron_id, Feedback.voto)).all()
+    out: dict[str, dict] = {}
+    for patron_id, voto in filas:
+        out.setdefault(patron_id, {"acierta": 0, "falla": 0})
+        if voto in ("acierta", "falla"):
+            out[patron_id][voto] += 1
+    return out
 
 
 def _game_datetime(match: dict) -> datetime | None:
@@ -71,7 +83,7 @@ def analizar_partida(match_id: str, puuid: str) -> str:
             Informe.catalogo_version == CATALOG_VERSION,
         ))
         if informe is None:
-            evaluacion = pattern_evaluator.evaluar(hechos)
+            evaluacion = pattern_evaluator.evaluar(hechos, telemetria=_telemetria(s))
             cuerpo = report_builder.construir(hechos, evaluacion)
             s.add(Informe(
                 partida_id=partida.id,

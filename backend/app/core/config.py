@@ -87,5 +87,10 @@ class Settings(BaseSettings):
     objetivo_ventana: int = 10
     objetivo_min_apariciones: int = 3
 
+    # --- FASE 4: visor /debug y retirada de patrones por telemetría ---
+    debug_token: str = ""                # vacío = visor /debug desactivado (404)
+    telemetria_min_votos: int = 10       # votos mínimos antes de poder retirar un patrón
+    telemetria_falla_pct: int = 60       # % de '✗ Falla' a partir del cual se retira
+
 
 settings = Settings()
